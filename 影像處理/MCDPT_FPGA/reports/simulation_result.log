@@ -1,0 +1,8 @@
+Simulation PASS
+tracked_x=70
+tracked_y=45
+expected_x=70
+expected_y=45
+completion_time=858415 ns
+language=Verilog-2001
+MCDPT FPGA TRACKING TEST PASSED

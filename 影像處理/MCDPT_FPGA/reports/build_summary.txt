@@ -1,0 +1,16 @@
+Language: Verilog-2001
+Simulation: PASS
+tracked_x/tracked_y: 70/45
+expected_x/expected_y: 70/45
+Synthesis: PASS
+Implementation: PASS
+Slice LUTs: 386 / 20800 (1.86%)
+Slice Registers: 419 / 41600 (1.01%)
+Block RAM Tile: 8 / 50 (16.00%) [8 RAMB36E1 = 16 BRAM_18K equivalents]
+DSPs: 0 / 90 (0.00%)
+WNS: +1.822 ns
+TNS: 0.000 ns
+WHS: +0.157 ns
+DRC violations: 0
+Unrouted nets: 0
+Bitstream: C:\MCDPT_FPGA\vivado_project\mcdpt_fpga_top.bit

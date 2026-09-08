@@ -1,31 +1,30 @@
 `timescale 1ns / 1ps
 
 module feature_distance #(
-    parameter FEATURE_W = 8,
-    parameter FEATURE_COUNT = 8,
-    parameter DIST_W = 16
+    parameter FW = 8,
+    parameter FN = 8,
+    parameter DW = 16
 )(
-    input  [FEATURE_COUNT*FEATURE_W-1:0] feature_a,
-    input  [FEATURE_COUNT*FEATURE_W-1:0] feature_b,
-    output reg [DIST_W-1:0] distance
+    input  [FN*FW-1:0] fa,
+    input  [FN*FW-1:0] fb,
+    output reg [DW-1:0] dist
 );
 
     integer i;
-    reg [FEATURE_W-1:0] a_value;
-    reg [FEATURE_W-1:0] b_value;
-    reg [FEATURE_W:0] diff;
-    reg [DIST_W-1:0] running_sum;
+    reg [FW-1:0] a;
+    reg [FW-1:0] b;
+    reg [FW:0] d;
+
 
     always @* begin
-        running_sum = {DIST_W{1'b0}};
+        dist = {DW{1'b0}};
 
-        for (i = 0; i < FEATURE_COUNT; i = i + 1) begin
-            a_value = feature_a[i*FEATURE_W +: FEATURE_W];
-            b_value = feature_b[i*FEATURE_W +: FEATURE_W];
-            diff = (a_value >= b_value) ? (a_value - b_value) : (b_value - a_value);
-            running_sum = running_sum + diff;
+        for (i = 0; i < FN; i = i + 1) begin
+            a = fa[i*FW +: FW];
+            b = fb[i*FW +: FW];
+
+            d = (a >= b) ? (a - b) : (b - a);
+            dist = dist + d;
         end
-
-        distance = running_sum;
     end
 endmodule

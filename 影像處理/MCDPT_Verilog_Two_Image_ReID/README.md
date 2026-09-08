@@ -1,54 +1,51 @@
-# Brightness-Only Verilog Testbench
+# 亮度版兩張影像比對
 
-This is a small testbench-stage Verilog prototype inspired by the MCDPT project idea:
+這份是目前先做到 testbench 的陽春版 Verilog。
 
-`image -> feature -> distance -> threshold`
+原本專題的方向可以想成：
 
-The code does not implement a full MCDPT system. It only shows how two small RGB images can be converted into brightness features and compared in simulation.
+`影像 -> 抓特徵 -> 算距離 -> 判斷是不是同一個人`
 
-## Current Scope
+現在沒有做到完整辨識，也沒有接螢幕顯示。這裡只用兩張很小的 RGB 測試影像，先模擬「亮度特徵可不可以拿來比較」。
 
-- RGB input is still used because normal image pixels are RGB.
-- The comparison uses brightness only.
-- There is no video timing.
-- There is no average feature memory.
-- There is no top display module.
-- There is no FPGA board output.
+## 目前檔案
 
-## Main Files
-
-| File | Purpose |
+| 檔案 | 功能 |
 | --- | --- |
-| `brightness_feature_extractor.v` | Converts RGB pixels to brightness and builds a feature vector |
-| `feature_distance.v` | Adds up absolute differences between two feature vectors |
-| `brightness_matcher.v` | Compares the distance with a threshold |
-| `tb_brightness_matcher.v` | Creates two test cases and checks the result |
+| `brightness_feature_extractor.v` | 把 RGB 像素轉成亮度，抓出簡單特徵 |
+| `feature_distance.v` | 計算兩組特徵差多少 |
+| `brightness_matcher.v` | 距離小於門檻就當作同一個 |
+| `tb_brightness_matcher.v` | 放兩組測試圖片進去跑模擬 |
 
-## Brightness Formula
+## 亮度公式
 
-The extractor uses the weighted luminance formula:
+不是直接 `(R+G+B)/3`。
+
+這裡使用比較常見的亮度權重：
 
 `Y = 0.299R + 0.587G + 0.114B`
 
-In Verilog, it becomes:
+Verilog 裡面不能方便用小數，所以改成整數：
 
-`gray = (77R + 150G + 29B) >> 8`
+`gray = (77R + 150G + 29B) / 256`
 
-The weights are scaled by 256 so Verilog can use integers and a right shift instead of floating point numbers.
+程式用 `tmp[15:8]` 來取高 8 bits，效果就接近除以 256。
 
-## Extracted Features
+## 特徵內容
 
-The feature vector keeps only simple brightness information:
+目前 feature 裡面放的是：
 
-- average foreground brightness
-- bright pixel count
-- dark pixel count
-- brightness edge count
-- foreground area
-- foreground center x position
-- foreground center y position
+- 前景平均亮度
+- 比較亮的點有幾個
+- 比較暗的點有幾個
+- 旁邊亮度差很大的邊界數量
+- 前景面積
+- 前景大概的 x 位置
+- 前景大概的 y 位置
 
-## How To Simulate
+這些都只是簡化概念，重點是先把資料變成一串數字，然後用距離比較。
+
+## 模擬方式
 
 ```tcl
 xvlog brightness_feature_extractor.v feature_distance.v brightness_matcher.v tb_brightness_matcher.v
@@ -56,8 +53,7 @@ xelab tb_brightness_matcher
 xsim tb_brightness_matcher -runall
 ```
 
-Expected result:
+預期結果：
 
-- Similar brightness blocks match.
-- Very different brightness blocks do not match.
-
+- 兩張亮度接近的圖，`same = 1`
+- 兩張亮度差很多的圖，`same = 0`

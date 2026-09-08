@@ -1,140 +1,138 @@
 `timescale 1ns / 1ps
 
 module brightness_feature_extractor #(
-    parameter IMG_W = 8,
-    parameter IMG_H = 8,
-    parameter PIXELS = IMG_W * IMG_H,
-    parameter RGB_W = 24,
-    parameter FEATURE_W = 8,
-    parameter FEATURE_COUNT = 8,
-    parameter FG_THRESHOLD = 8'd30,
-    parameter EDGE_THRESHOLD = 8'd35
+    parameter W = 8,
+    parameter H = 8,
+    parameter N = W * H,
+    parameter RGB = 24,
+    parameter FW = 8,
+    parameter FN = 8,
+    parameter TH = 8'd30,
+    parameter EDGE_TH = 8'd35
 )(
-    input  [PIXELS*RGB_W-1:0] image_rgb,
-    output reg [FEATURE_COUNT*FEATURE_W-1:0] feature_vec,
-    output reg object_present
+    input  [N*RGB-1:0] img,
+    output reg [FN*FW-1:0] feat,
+    output reg has_obj
 );
 
-    integer x;
-    integer y;
-    integer idx;
+    integer x,y,k;
 
     reg [7:0] gray;
-    reg [7:0] right_gray;
-    reg [7:0] down_gray;
+    reg [7:0] gray_r;
+    reg [7:0] gray_d;
 
-    reg [15:0] fg_count;
-    reg [15:0] bright_count;
-    reg [15:0] dark_count;
-    reg [15:0] gray_sum;
-    reg [15:0] edge_count;
-    reg [15:0] x_sum;
-    reg [15:0] y_sum;
+    reg [15:0] cnt;
+    reg [15:0] hi_cnt;
+    reg [15:0] low_cnt;
+    reg [15:0] gray_total;
+    reg [15:0] edge_cnt;
+    reg [15:0] sx;
+    reg [15:0] sy;
 
-    function [7:0] get_r;
-        input integer pixel_index;
+
+    function [7:0] rr;
+        input integer p;
         begin
-            get_r = image_rgb[pixel_index*RGB_W+16 +: 8];
+            rr = img[p*RGB+16 +: 8];
         end
     endfunction
 
-    function [7:0] get_g;
-        input integer pixel_index;
+    function [7:0] gg;
+        input integer p;
         begin
-            get_g = image_rgb[pixel_index*RGB_W+8 +: 8];
+            gg = img[p*RGB+8 +: 8];
         end
     endfunction
 
-    function [7:0] get_b;
-        input integer pixel_index;
+    function [7:0] bb;
+        input integer p;
         begin
-            get_b = image_rgb[pixel_index*RGB_W +: 8];
+            bb = img[p*RGB +: 8];
         end
     endfunction
 
-    function [7:0] rgb_to_brightness;
-        input [7:0] in_r;
-        input [7:0] in_g;
-        input [7:0] in_b;
-        reg [15:0] y_value;
+    function [7:0] lum;
+        input [7:0] r;
+        input [7:0] g;
+        input [7:0] b;
+        reg [15:0] tmp;
         begin
-            y_value = (in_r * 8'd77) + (in_g * 8'd150) + (in_b * 8'd29);
-            rgb_to_brightness = y_value[15:8];
+            tmp = (r * 8'd77) + (g * 8'd150) + (b * 8'd29);
+            lum = tmp[15:8];
         end
     endfunction
 
-    function [7:0] abs_diff;
+    function [7:0] diff;
         input [7:0] a;
         input [7:0] b;
         begin
-            abs_diff = (a >= b) ? (a - b) : (b - a);
+            diff = (a >= b) ? (a - b) : (b - a);
         end
     endfunction
 
-    function [7:0] limit_to_byte;
-        input [15:0] value;
+    function [7:0] byte_lim;
+        input [15:0] v;
         begin
-            limit_to_byte = (value[15:8] != 8'd0) ? 8'hff : value[7:0];
+            byte_lim = (v[15:8] != 8'd0) ? 8'hff : v[7:0];
         end
     endfunction
 
-    always @(image_rgb) begin
-        fg_count = 16'd0;
-        bright_count = 16'd0;
-        dark_count = 16'd0;
-        gray_sum = 16'd0;
-        edge_count = 16'd0;
-        x_sum = 16'd0;
-        y_sum = 16'd0;
-        feature_vec = {FEATURE_COUNT*FEATURE_W{1'b0}};
-        object_present = 1'b0;
 
-        for (y = 0; y < IMG_H; y = y + 1) begin
-            for (x = 0; x < IMG_W; x = x + 1) begin
-                idx = y * IMG_W + x;
-                gray = rgb_to_brightness(get_r(idx), get_g(idx), get_b(idx));
+    always @(img) begin
+        cnt = 16'd0;
+        hi_cnt = 16'd0;
+        low_cnt = 16'd0;
+        gray_total = 16'd0;
+        edge_cnt = 16'd0;
+        sx = 16'd0;
+        sy = 16'd0;
+        feat = {FN*FW{1'b0}};
+        has_obj = 1'b0;
 
-                if (gray >= FG_THRESHOLD) begin
-                    fg_count = fg_count + 16'd1;
-                    gray_sum = gray_sum + gray;
-                    x_sum = x_sum + x[15:0];
-                    y_sum = y_sum + y[15:0];
+        for (y = 0; y < H; y = y + 1) begin
+            for (x = 0; x < W; x = x + 1) begin
+                k = y * W + x;
+                gray = lum(rr(k), gg(k), bb(k));
 
-                    if (gray > 8'd170) begin
-                        bright_count = bright_count + 16'd1;
+                if (gray >= TH) begin
+                    cnt = cnt + 16'd1;
+                    gray_total = gray_total + gray;
+                    sx = sx + x[15:0];
+                    sy = sy + y[15:0];
+
+                    if (gray > 8'd170)
+                        hi_cnt = hi_cnt + 16'd1;
+
+                    if (gray < 8'd80)
+                        low_cnt = low_cnt + 16'd1;
+
+
+                    if (x < W - 1) begin
+                        gray_r = lum(rr(k + 1), gg(k + 1), bb(k + 1));
+                        if (diff(gray, gray_r) > EDGE_TH)
+                            edge_cnt = edge_cnt + 16'd1;
                     end
 
-                    if (gray < 8'd80) begin
-                        dark_count = dark_count + 16'd1;
-                    end
-
-                    if (x < IMG_W - 1) begin
-                        right_gray = rgb_to_brightness(get_r(idx + 1), get_g(idx + 1), get_b(idx + 1));
-                        if (abs_diff(gray, right_gray) > EDGE_THRESHOLD) begin
-                            edge_count = edge_count + 16'd1;
-                        end
-                    end
-
-                    if (y < IMG_H - 1) begin
-                        down_gray = rgb_to_brightness(get_r(idx + IMG_W), get_g(idx + IMG_W), get_b(idx + IMG_W));
-                        if (abs_diff(gray, down_gray) > EDGE_THRESHOLD) begin
-                            edge_count = edge_count + 16'd1;
-                        end
+                    if (y < H - 1) begin
+                        gray_d = lum(rr(k + W), gg(k + W), bb(k + W));
+                        if (diff(gray, gray_d) > EDGE_TH)
+                            edge_cnt = edge_cnt + 16'd1;
                     end
                 end
             end
         end
 
-        object_present = (fg_count > 16'd6);
+        has_obj = (cnt > 16'd6);
 
-        if (fg_count != 16'd0) begin
-            feature_vec[0*FEATURE_W +: FEATURE_W] = limit_to_byte(gray_sum / fg_count);
-            feature_vec[1*FEATURE_W +: FEATURE_W] = limit_to_byte(bright_count * 16'd4);
-            feature_vec[2*FEATURE_W +: FEATURE_W] = limit_to_byte(dark_count * 16'd4);
-            feature_vec[3*FEATURE_W +: FEATURE_W] = limit_to_byte(edge_count * 16'd2);
-            feature_vec[4*FEATURE_W +: FEATURE_W] = limit_to_byte(fg_count * 16'd4);
-            feature_vec[5*FEATURE_W +: FEATURE_W] = limit_to_byte((x_sum * 16'd32) / fg_count);
-            feature_vec[6*FEATURE_W +: FEATURE_W] = limit_to_byte((y_sum * 16'd32) / fg_count);
+        if (cnt != 16'd0) begin
+            feat[0*FW +: FW] = byte_lim(gray_total / cnt);
+            feat[1*FW +: FW] = byte_lim(hi_cnt * 16'd4);
+            feat[2*FW +: FW] = byte_lim(low_cnt * 16'd4);
+            feat[3*FW +: FW] = byte_lim(edge_cnt * 16'd2);
+
+            feat[4*FW +: FW] = byte_lim(cnt * 16'd4);
+            feat[5*FW +: FW] = byte_lim((sx * 16'd32) / cnt);
+            feat[6*FW +: FW] = byte_lim((sy * 16'd32) / cnt);
         end
     end
 endmodule

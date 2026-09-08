@@ -1,28 +1,28 @@
 `timescale 1ns / 1ps
 
 module brightness_matcher #(
-    parameter FEATURE_W = 8,
-    parameter FEATURE_COUNT = 8,
-    parameter DIST_W = 16,
-    parameter MATCH_THRESHOLD = 16'd190
+    parameter FW = 8,
+    parameter FN = 8,
+    parameter DW = 16,
+    parameter MATCH_TH = 16'd190
 )(
-    input [FEATURE_COUNT*FEATURE_W-1:0] feature_a,
-    input feature_a_valid,
-    input [FEATURE_COUNT*FEATURE_W-1:0] feature_b,
-    input feature_b_valid,
-    output [DIST_W-1:0] distance,
-    output same_object
+    input [FN*FW-1:0] fa,
+    input ok_a,
+    input [FN*FW-1:0] fb,
+    input ok_b,
+    output [DW-1:0] dist,
+    output same
 );
 
     feature_distance #(
-        .FEATURE_W(FEATURE_W),
-        .FEATURE_COUNT(FEATURE_COUNT),
-        .DIST_W(DIST_W)
-    ) distance_unit (
-        .feature_a(feature_a),
-        .feature_b(feature_b),
-        .distance(distance)
+        .FW(FW),
+        .FN(FN),
+        .DW(DW)
+    ) u_dist (
+        .fa(fa),
+        .fb(fb),
+        .dist(dist)
     );
 
-    assign same_object = feature_a_valid && feature_b_valid && (distance <= MATCH_THRESHOLD);
+    assign same = ok_a && ok_b && (dist <= MATCH_TH);
 endmodule

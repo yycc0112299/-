@@ -1,122 +1,123 @@
 `timescale 1ns / 1ps
 
 module tb_brightness_matcher;
-    localparam IMG_W = 8;
-    localparam IMG_H = 8;
-    localparam PIXELS = IMG_W * IMG_H;
-    localparam RGB_W = 24;
-    localparam FEATURE_W = 8;
-    localparam FEATURE_COUNT = 8;
+    localparam W = 8;
+    localparam H = 8;
+    localparam N = W * H;
+    localparam RGB = 24;
+    localparam FW = 8;
+    localparam FN = 8;
 
-    reg [PIXELS*RGB_W-1:0] image_a_rgb;
-    reg [PIXELS*RGB_W-1:0] image_b_rgb;
+    reg [N*RGB-1:0] img_a;
+    reg [N*RGB-1:0] img_b;
 
-    wire image_a_valid;
-    wire image_b_valid;
-    wire [FEATURE_COUNT*FEATURE_W-1:0] image_a_feature;
-    wire [FEATURE_COUNT*FEATURE_W-1:0] image_b_feature;
-    wire [15:0] match_distance;
-    wire same_object;
+    wire ok_a;
+    wire ok_b;
+    wire [FN*FW-1:0] feat_a;
+    wire [FN*FW-1:0] feat_b;
+    wire [15:0] dist;
+    wire same;
 
     brightness_feature_extractor #(
-        .IMG_W(IMG_W),
-        .IMG_H(IMG_H),
-        .PIXELS(PIXELS),
-        .RGB_W(RGB_W),
-        .FEATURE_W(FEATURE_W),
-        .FEATURE_COUNT(FEATURE_COUNT)
-    ) extractor_a (
-        .image_rgb(image_a_rgb),
-        .feature_vec(image_a_feature),
-        .object_present(image_a_valid)
+        .W(W),
+        .H(H),
+        .N(N),
+        .RGB(RGB),
+        .FW(FW),
+        .FN(FN)
+    ) ext_a (
+        .img(img_a),
+        .feat(feat_a),
+        .has_obj(ok_a)
     );
 
     brightness_feature_extractor #(
-        .IMG_W(IMG_W),
-        .IMG_H(IMG_H),
-        .PIXELS(PIXELS),
-        .RGB_W(RGB_W),
-        .FEATURE_W(FEATURE_W),
-        .FEATURE_COUNT(FEATURE_COUNT)
-    ) extractor_b (
-        .image_rgb(image_b_rgb),
-        .feature_vec(image_b_feature),
-        .object_present(image_b_valid)
+        .W(W),
+        .H(H),
+        .N(N),
+        .RGB(RGB),
+        .FW(FW),
+        .FN(FN)
+    ) ext_b (
+        .img(img_b),
+        .feat(feat_b),
+        .has_obj(ok_b)
     );
 
     brightness_matcher #(
-        .FEATURE_W(FEATURE_W),
-        .FEATURE_COUNT(FEATURE_COUNT),
-        .MATCH_THRESHOLD(16'd190)
-    ) matcher (
-        .feature_a(image_a_feature),
-        .feature_a_valid(image_a_valid),
-        .feature_b(image_b_feature),
-        .feature_b_valid(image_b_valid),
-        .distance(match_distance),
-        .same_object(same_object)
+        .FW(FW),
+        .FN(FN),
+        .MATCH_TH(16'd190)
+    ) cmp (
+        .fa(feat_a),
+        .ok_a(ok_a),
+        .fb(feat_b),
+        .ok_b(ok_b),
+        .dist(dist),
+        .same(same)
     );
 
-    function [RGB_W-1:0] rgb_pixel;
+    function [RGB-1:0] pix;
         input [7:0] r;
         input [7:0] g;
         input [7:0] b;
         begin
-            rgb_pixel = {r, g, b};
+            pix = {r,g,b};
         end
     endfunction
 
     integer i;
 
     initial begin
-        image_a_rgb = {PIXELS*RGB_W{1'b0}};
-        image_b_rgb = {PIXELS*RGB_W{1'b0}};
+        img_a = {N*RGB{1'b0}};
+        img_b = {N*RGB{1'b0}};
 
-        for (i = 0; i < PIXELS; i = i + 1) begin
-            image_a_rgb[i*RGB_W +: RGB_W] = rgb_pixel(8'd10, 8'd10, 8'd10);
-            image_b_rgb[i*RGB_W +: RGB_W] = rgb_pixel(8'd10, 8'd10, 8'd10);
+        for (i = 0; i < N; i = i + 1) begin
+            img_a[i*RGB +: RGB] = pix(8'd10,8'd10,8'd10);
+            img_b[i*RGB +: RGB] = pix(8'd10,8'd10,8'd10);
         end
 
         for (i = 18; i < 46; i = i + 1) begin
-            image_a_rgb[i*RGB_W +: RGB_W] = rgb_pixel(8'd120, 8'd120, 8'd120);
-            image_b_rgb[i*RGB_W +: RGB_W] = rgb_pixel(8'd125, 8'd125, 8'd125);
+            img_a[i*RGB +: RGB] = pix(8'd120,8'd120,8'd120);
+            img_b[i*RGB +: RGB] = pix(8'd125,8'd125,8'd125);
         end
 
         #10;
-        $display("case 1, similar brightness");
-        $display("image_a_feature = %h", image_a_feature);
-        $display("image_b_feature = %h", image_b_feature);
-        $display("match_distance = %0d", match_distance);
-        $display("same_object = %0d", same_object);
+        $display("case 1: close brightness");
+        $display("feat_a = %h", feat_a);
+        $display("feat_b = %h", feat_b);
+        $display("dist = %0d", dist);
+        $display("same = %0d", same);
 
-        if (same_object !== 1'b1) begin
-            $display("ERROR: similar brightness images should match");
+        if (same !== 1'b1) begin
+            $display("ERROR case 1");
             $finish;
         end
 
-        for (i = 0; i < PIXELS; i = i + 1) begin
-            image_a_rgb[i*RGB_W +: RGB_W] = rgb_pixel(8'd10, 8'd10, 8'd10);
-            image_b_rgb[i*RGB_W +: RGB_W] = rgb_pixel(8'd10, 8'd10, 8'd10);
+
+        for (i = 0; i < N; i = i + 1) begin
+            img_a[i*RGB +: RGB] = pix(8'd10,8'd10,8'd10);
+            img_b[i*RGB +: RGB] = pix(8'd10,8'd10,8'd10);
         end
 
         for (i = 18; i < 46; i = i + 1) begin
-            image_a_rgb[i*RGB_W +: RGB_W] = rgb_pixel(8'd120, 8'd120, 8'd120);
-            image_b_rgb[i*RGB_W +: RGB_W] = rgb_pixel(8'd220, 8'd220, 8'd220);
+            img_a[i*RGB +: RGB] = pix(8'd120,8'd120,8'd120);
+            img_b[i*RGB +: RGB] = pix(8'd220,8'd220,8'd220);
         end
 
         #10;
-        $display("case 2, different brightness");
-        $display("image_a_feature = %h", image_a_feature);
-        $display("image_b_feature = %h", image_b_feature);
-        $display("match_distance = %0d", match_distance);
-        $display("same_object = %0d", same_object);
+        $display("case 2: far brightness");
+        $display("feat_a = %h", feat_a);
+        $display("feat_b = %h", feat_b);
+        $display("dist = %0d", dist);
+        $display("same = %0d", same);
 
-        if (same_object !== 1'b0) begin
-            $display("ERROR: different brightness images should not match");
+        if (same !== 1'b0) begin
+            $display("ERROR case 2");
             $finish;
         end
 
-        $display("Brightness matcher test passed.");
+        $display("brightness test ok");
         $finish;
     end
 endmodule

@@ -1,35 +1,44 @@
-# Algorithm Mapping
+# 演算法概念對照
 
-## Original Reference Idea
+## 原本專題的大方向
 
-The reference MCDPT project uses this broad structure:
+原本參考的影像辨識專題，不是直接拿整張圖硬比。
 
-1. Detect a person.
-2. Convert the person image into a feature vector.
-3. Compare feature vectors.
-4. Use a threshold to decide whether the target is the same person.
+它比較像是：
 
-## Current Simplified Verilog Idea
+1. 從畫面中找到可能的人或物體。
+2. 把這個區域轉成一組特徵數字。
+3. 拿兩組特徵去算距離。
+4. 距離很小，就比較像同一個目標。
+5. 距離很大，就比較不像同一個目標。
 
-This version keeps only the smallest testbench-friendly part:
+## 這版 Verilog 簡化成什麼
 
-1. The testbench creates two 8x8 RGB images.
-2. `brightness_feature_extractor.v` converts RGB pixels into brightness.
-3. It builds a simple brightness feature vector.
-4. `feature_distance.v` compares both feature vectors.
-5. `brightness_matcher.v` checks whether the distance is below the threshold.
+因為目前只做到 testbench 階段，所以先簡化成：
 
-## Why Average Was Removed
+1. testbench 自己產生兩張 8x8 RGB 小圖。
+2. `brightness_feature_extractor.v` 把每個 RGB 像素算成亮度。
+3. 用亮度門檻找出比較像前景的像素。
+4. 抓出幾個簡單特徵。
+5. `feature_distance.v` 算兩組特徵的差距。
+6. `brightness_matcher.v` 用門檻判斷是不是同一個。
 
-Average feature memory is useful for video because the same person appears across many frames. This version only compares two still images, so there is no time sequence to average. Removing the average block makes the first testbench easier to explain.
+## 為什麼先不做影片追蹤
 
-## Why The Top Wrapper Was Removed
+目前輸入只有兩張圖片，不是連續影片。
 
-The previous top module only connected submodules together. Since the current goal is to show testbench-level code, the testbench now connects the extractor and matcher directly. This removes one extra layer that did not add new behavior.
+所以這版沒有做時間上的追蹤，也沒有保留前幾張影像的資料。這樣比較符合目前上課進度，也比較好回答教授問題。
 
-## Current Limitation
+## 目前最核心的公式
 
-This is not a complete recognition system. It is a small simulation that proves a basic idea:
+RGB 轉亮度：
 
-`RGB pixels -> brightness features -> distance -> match result`
+`gray = (77R + 150G + 29B) / 256`
 
+兩個特徵向量的距離：
+
+`dist = |fa0-fb0| + |fa1-fb1| + ...`
+
+最後判斷：
+
+`same = 兩張圖都有物體 && dist <= MATCH_TH`

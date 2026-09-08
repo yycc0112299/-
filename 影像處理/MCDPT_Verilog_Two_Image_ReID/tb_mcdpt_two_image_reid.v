@@ -70,8 +70,8 @@ module tb_mcdpt_two_image_reid;
         end
 
         for (i = 18; i < 46; i = i + 1) begin
-            image_a_rgb[i*RGB_W +: RGB_W] = {8'd150, 8'd70, 8'd55};
-            image_b_rgb[i*RGB_W +: RGB_W] = {8'd142, 8'd75, 8'd62};
+            image_a_rgb[i*RGB_W +: RGB_W] = {8'd120, 8'd120, 8'd120};
+            image_b_rgb[i*RGB_W +: RGB_W] = {8'd125, 8'd125, 8'd125};
         end
 
         load_image_a = 1'b1;
@@ -81,14 +81,14 @@ module tb_mcdpt_two_image_reid;
         load_image_b = 1'b0;
         #20;
 
-        $display("case 1, similar person");
+        $display("case 1, similar brightness");
         $display("image_a_feature = %h", image_a_feature);
         $display("image_b_feature = %h", image_b_feature);
         $display("global_distance = %0d", global_distance);
         $display("same_person = %0d", same_person);
 
         if (same_person !== 1'b1) begin
-            $display("ERROR: similar images should match");
+            $display("ERROR: similar brightness images should match");
             $finish;
         end
 
@@ -101,8 +101,8 @@ module tb_mcdpt_two_image_reid;
         end
 
         for (i = 18; i < 46; i = i + 1) begin
-            image_a_rgb[i*RGB_W +: RGB_W] = {8'd150, 8'd70, 8'd55};
-            image_b_rgb[i*RGB_W +: RGB_W] = {8'd30, 8'd60, 8'd190};
+            image_a_rgb[i*RGB_W +: RGB_W] = {8'd120, 8'd120, 8'd120};
+            image_b_rgb[i*RGB_W +: RGB_W] = {8'd220, 8'd220, 8'd220};
         end
 
         load_image_a = 1'b1;
@@ -112,18 +112,18 @@ module tb_mcdpt_two_image_reid;
         load_image_b = 1'b0;
         #20;
 
-        $display("case 2, different person");
+        $display("case 2, different brightness");
         $display("image_a_feature = %h", image_a_feature);
         $display("image_b_feature = %h", image_b_feature);
         $display("global_distance = %0d", global_distance);
         $display("same_person = %0d", same_person);
 
         if (same_person !== 1'b0) begin
-            $display("ERROR: different images should not match");
+            $display("ERROR: different brightness images should not match");
             $finish;
         end
 
-        $display("MCDPT simplified Verilog test passed.");
+        $display("Brightness-only simplified Verilog test passed.");
         $finish;
     end
 endmodule

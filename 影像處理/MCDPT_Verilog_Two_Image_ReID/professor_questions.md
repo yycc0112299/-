@@ -6,7 +6,7 @@
 
 ## 2. 你們現在做到哪裡？
 
-目前只做到 Verilog module 加 testbench。testbench 裡手動建立兩張 8x8 RGB 圖，驗證相似顏色人物會輸出 `same_person = 1`，不同顏色人物會輸出 `same_person = 0`。
+目前只做到 Verilog module 加 testbench。testbench 裡手動建立兩張 8x8 RGB 圖，但判斷時先轉成灰階亮度。亮度相近會輸出 `same_person = 1`，亮度差很多會輸出 `same_person = 0`。
 
 ## 3. 為什麼不用完整 OpenVINO 或 CNN？
 
@@ -14,7 +14,7 @@
 
 ## 4. 你們的 feature vector 是什麼？
 
-我們用 RGB 統計特徵模擬 re-ID feature vector。包含上半身 RGB、下半身 RGB、亮暗像素數、紅綠藍 dominant 像素數、飽和度、邊緣數量、前景面積和中心位置。
+我們先用純亮度特徵模擬 re-ID feature vector。每個 RGB pixel 會先轉成灰階亮度，接著統計平均亮度、上半部亮度、下半部亮度、亮暗像素數、亮度邊緣、前景面積和中心位置。
 
 ## 5. 為什麼不用 cosine distance？
 
@@ -22,7 +22,7 @@ cosine distance 需要正規化、乘法和除法，Verilog 初版會比較難�
 
 ## 6. 這版的限制是什麼？
 
-目前沒有自動偵測人物框，沒有真實圖片輸入流程，沒有多攝影機通訊，也沒有上板。它只能證明最基本的 re-ID matching 流程可以用 Verilog testbench 表示。
+目前沒有自動偵測人物框，沒有真實圖片輸入流程，沒有多攝影機通訊，也沒有上板，而且目前只看亮度，不看真正的衣服顏色。它只能證明最基本的 re-ID matching 流程可以用 Verilog testbench 表示。
 
 ## 7. 下一步可以做什麼？
 

@@ -9,13 +9,14 @@
 
 ## 新版 MCDPT 簡化 Verilog Testbench
 
-新版目前只做到 Verilog 模組與 testbench 模擬，重點放在 MCDPT 的 re-ID 核心概念：
+新版目前只做到 Verilog 模組與 testbench 模擬，重點放在 MCDPT 的 re-ID 核心概念，但特徵擷取先降成純亮度版本：
 
-1. 兩張 RGB 圖片輸入。
-2. 各自抽出 16 維簡化 feature vector。
-3. 用 track average 保存人物特徵。
-4. 計算兩個 feature vector 的距離。
-5. 距離小於門檻時輸出 `same_person = 1`。
+1. 兩張 8x8 RGB 測試圖片輸入。
+2. 每個 pixel 先轉成灰階亮度。
+3. 各自抽出簡化亮度 feature vector。
+4. 用 track average 保存人物特徵。
+5. 計算兩個 feature vector 的距離。
+6. 距離小於門檻時輸出 `same_person = 1`。
 
 主要入口檔案：
 

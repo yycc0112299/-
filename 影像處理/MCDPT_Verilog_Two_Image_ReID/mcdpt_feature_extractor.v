@@ -8,7 +8,7 @@ module mcdpt_feature_extractor #(
     parameter FEATURE_W = 8,
     parameter FEATURE_COUNT = 16,
     parameter FG_THRESHOLD = 8'd30,
-    parameter EDGE_THRESHOLD = 8'd45
+    parameter EDGE_THRESHOLD = 8'd35
 )(
     input  [PIXELS*RGB_W-1:0] image_rgb,
     output reg [FEATURE_COUNT*FEATURE_W-1:0] feature_vec,
@@ -18,34 +18,21 @@ module mcdpt_feature_extractor #(
     integer x;
     integer y;
     integer idx;
-    integer out_idx;
 
     reg [7:0] r;
     reg [7:0] g;
     reg [7:0] b;
-    reg [7:0] max_ch;
-    reg [7:0] min_ch;
-    reg [7:0] right_r;
-    reg [7:0] right_g;
-    reg [7:0] right_b;
-    reg [7:0] down_r;
-    reg [7:0] down_g;
-    reg [7:0] down_b;
+    reg [7:0] gray;
+    reg [7:0] right_gray;
+    reg [7:0] down_gray;
 
-    reg [15:0] upper_r;
-    reg [15:0] upper_g;
-    reg [15:0] upper_b;
-    reg [15:0] lower_r;
-    reg [15:0] lower_g;
-    reg [15:0] lower_b;
-    reg [15:0] dark_count;
-    reg [15:0] bright_count;
-    reg [15:0] red_dom_count;
-    reg [15:0] green_dom_count;
-    reg [15:0] blue_dom_count;
-    reg [15:0] sat_sum;
-    reg [15:0] edge_count;
     reg [15:0] fg_count;
+    reg [15:0] bright_count;
+    reg [15:0] dark_count;
+    reg [15:0] upper_gray_sum;
+    reg [15:0] lower_gray_sum;
+    reg [15:0] all_gray_sum;
+    reg [15:0] edge_count;
     reg [15:0] x_sum;
     reg [15:0] y_sum;
 
@@ -70,21 +57,12 @@ module mcdpt_feature_extractor #(
         end
     endfunction
 
-    function [7:0] max3;
-        input [7:0] a;
-        input [7:0] c;
-        input [7:0] d;
+    function [7:0] to_gray;
+        input [7:0] in_r;
+        input [7:0] in_g;
+        input [7:0] in_b;
         begin
-            max3 = (a >= c && a >= d) ? a : ((c >= d) ? c : d);
-        end
-    endfunction
-
-    function [7:0] min3;
-        input [7:0] a;
-        input [7:0] c;
-        input [7:0] d;
-        begin
-            min3 = (a <= c && a <= d) ? a : ((c <= d) ? c : d);
+            to_gray = (in_r + in_g + in_b) / 3;
         end
     endfunction
 
@@ -106,20 +84,13 @@ module mcdpt_feature_extractor #(
     endtask
 
     always @(image_rgb) begin
-        upper_r = 16'd0;
-        upper_g = 16'd0;
-        upper_b = 16'd0;
-        lower_r = 16'd0;
-        lower_g = 16'd0;
-        lower_b = 16'd0;
-        dark_count = 16'd0;
-        bright_count = 16'd0;
-        red_dom_count = 16'd0;
-        green_dom_count = 16'd0;
-        blue_dom_count = 16'd0;
-        sat_sum = 16'd0;
-        edge_count = 16'd0;
         fg_count = 16'd0;
+        bright_count = 16'd0;
+        dark_count = 16'd0;
+        upper_gray_sum = 16'd0;
+        lower_gray_sum = 16'd0;
+        all_gray_sum = 16'd0;
+        edge_count = 16'd0;
         x_sum = 16'd0;
         y_sum = 16'd0;
         feature_vec = {FEATURE_COUNT*FEATURE_W{1'b0}};
@@ -131,55 +102,38 @@ module mcdpt_feature_extractor #(
                 r = get_r(idx);
                 g = get_g(idx);
                 b = get_b(idx);
-                max_ch = max3(r, g, b);
-                min_ch = min3(r, g, b);
+                gray = to_gray(r, g, b);
 
-                if (max_ch >= FG_THRESHOLD) begin
+                if (gray >= FG_THRESHOLD) begin
                     fg_count = fg_count + 16'd1;
+                    all_gray_sum = all_gray_sum + gray;
                     x_sum = x_sum + x[15:0];
                     y_sum = y_sum + y[15:0];
-                    sat_sum = sat_sum + (max_ch - min_ch);
 
                     if (y < (IMG_H / 2)) begin
-                        upper_r = upper_r + r;
-                        upper_g = upper_g + g;
-                        upper_b = upper_b + b;
+                        upper_gray_sum = upper_gray_sum + gray;
                     end else begin
-                        lower_r = lower_r + r;
-                        lower_g = lower_g + g;
-                        lower_b = lower_b + b;
+                        lower_gray_sum = lower_gray_sum + gray;
                     end
 
-                    if (max_ch < 8'd80) begin
-                        dark_count = dark_count + 16'd1;
-                    end
-                    if (max_ch > 8'd170) begin
+                    if (gray > 8'd170) begin
                         bright_count = bright_count + 16'd1;
                     end
-                    if (r > g + 8'd20 && r > b + 8'd20) begin
-                        red_dom_count = red_dom_count + 16'd1;
-                    end
-                    if (g > r + 8'd20 && g > b + 8'd20) begin
-                        green_dom_count = green_dom_count + 16'd1;
-                    end
-                    if (b > r + 8'd20 && b > g + 8'd20) begin
-                        blue_dom_count = blue_dom_count + 16'd1;
+
+                    if (gray < 8'd80) begin
+                        dark_count = dark_count + 16'd1;
                     end
 
                     if (x < IMG_W - 1) begin
-                        right_r = get_r(idx + 1);
-                        right_g = get_g(idx + 1);
-                        right_b = get_b(idx + 1);
-                        if (abs_diff(r, right_r) + abs_diff(g, right_g) + abs_diff(b, right_b) > EDGE_THRESHOLD) begin
+                        right_gray = to_gray(get_r(idx + 1), get_g(idx + 1), get_b(idx + 1));
+                        if (abs_diff(gray, right_gray) > EDGE_THRESHOLD) begin
                             edge_count = edge_count + 16'd1;
                         end
                     end
 
                     if (y < IMG_H - 1) begin
-                        down_r = get_r(idx + IMG_W);
-                        down_g = get_g(idx + IMG_W);
-                        down_b = get_b(idx + IMG_W);
-                        if (abs_diff(r, down_r) + abs_diff(g, down_g) + abs_diff(b, down_b) > EDGE_THRESHOLD) begin
+                        down_gray = to_gray(get_r(idx + IMG_W), get_g(idx + IMG_W), get_b(idx + IMG_W));
+                        if (abs_diff(gray, down_gray) > EDGE_THRESHOLD) begin
                             edge_count = edge_count + 16'd1;
                         end
                     end
@@ -190,22 +144,15 @@ module mcdpt_feature_extractor #(
         person_present = (fg_count > 16'd6);
 
         if (fg_count != 16'd0) begin
-            put_feature(0,  upper_r / 16'd32);
-            put_feature(1,  upper_g / 16'd32);
-            put_feature(2,  upper_b / 16'd32);
-            put_feature(3,  lower_r / 16'd32);
-            put_feature(4,  lower_g / 16'd32);
-            put_feature(5,  lower_b / 16'd32);
-            put_feature(6,  dark_count * 16'd4);
-            put_feature(7,  bright_count * 16'd4);
-            put_feature(8,  red_dom_count * 16'd4);
-            put_feature(9,  green_dom_count * 16'd4);
-            put_feature(10, blue_dom_count * 16'd4);
-            put_feature(11, sat_sum / fg_count);
-            put_feature(12, edge_count * 16'd2);
-            put_feature(13, fg_count * 16'd4);
-            put_feature(14, (x_sum * 16'd32) / fg_count);
-            put_feature(15, (y_sum * 16'd32) / fg_count);
+            put_feature(0, all_gray_sum / fg_count);
+            put_feature(1, upper_gray_sum / 16'd32);
+            put_feature(2, lower_gray_sum / 16'd32);
+            put_feature(3, bright_count * 16'd4);
+            put_feature(4, dark_count * 16'd4);
+            put_feature(5, edge_count * 16'd2);
+            put_feature(6, fg_count * 16'd4);
+            put_feature(7, (x_sum * 16'd32) / fg_count);
+            put_feature(8, (y_sum * 16'd32) / fg_count);
         end
     end
 endmodule

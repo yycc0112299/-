@@ -7,22 +7,21 @@ module brightness_matcher #(
     parameter MATCH_TH = 16'd190
 )(
     input [FN*FW-1:0] fa,
-    input ok_a,
+    input ok1,
     input [FN*FW-1:0] fb,
-    input ok_b,
+    input ok2,
     output [DW-1:0] dist,
     output same
 );
 
+
     feature_distance #(
-        .FW(FW),
-        .FN(FN),
+        .FW(FW), .FN(FN),
         .DW(DW)
     ) u_dist (
         .fa(fa),
-        .fb(fb),
-        .dist(dist)
+        .fb(fb), .dist(dist)
     );
 
-    assign same = ok_a && ok_b && (dist <= MATCH_TH);
+    assign same = ok1 && ok2 && (dist <= MATCH_TH);
 endmodule

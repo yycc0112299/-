@@ -11,51 +11,45 @@ module tb_brightness_matcher;
     reg [N*RGB-1:0] img_a;
     reg [N*RGB-1:0] img_b;
 
-    wire ok_a;
-    wire ok_b;
+    wire ok1;
+    wire ok2;
     wire [FN*FW-1:0] feat_a;
     wire [FN*FW-1:0] feat_b;
     wire [15:0] dist;
     wire same;
 
-    brightness_feature_extractor #(
-        .W(W),
-        .H(H),
-        .N(N),
-        .RGB(RGB),
-        .FW(FW),
-        .FN(FN)
-    ) ext_a (
-        .img(img_a),
-        .feat(feat_a),
-        .has_obj(ok_a)
-    );
 
     brightness_feature_extractor #(
-        .W(W),
-        .H(H),
-        .N(N),
-        .RGB(RGB),
-        .FW(FW),
-        .FN(FN)
-    ) ext_b (
-        .img(img_b),
-        .feat(feat_b),
-        .has_obj(ok_b)
+        .W(W), .H(H), .N(N),
+        .RGB(RGB), .FW(FW), .FN(FN)
+    ) get_a (
+        .img(img_a),
+        .feat(feat_a),
+        .has_obj(ok1)
+    );
+
+
+    brightness_feature_extractor #(
+        .W(W), .H(H),
+        .N(N), .RGB(RGB),
+        .FW(FW), .FN(FN)
+    ) get_b (
+        .img(img_b), .feat(feat_b),
+        .has_obj(ok2)
     );
 
     brightness_matcher #(
-        .FW(FW),
-        .FN(FN),
+        .FW(FW), .FN(FN),
         .MATCH_TH(16'd190)
     ) cmp (
         .fa(feat_a),
-        .ok_a(ok_a),
+        .ok1(ok1),
         .fb(feat_b),
-        .ok_b(ok_b),
+        .ok2(ok2),
         .dist(dist),
         .same(same)
     );
+
 
     function [RGB-1:0] pix;
         input [7:0] r;
@@ -70,6 +64,7 @@ module tb_brightness_matcher;
 
     initial begin
         img_a = {N*RGB{1'b0}};
+
         img_b = {N*RGB{1'b0}};
 
         for (i = 0; i < N; i = i + 1) begin
@@ -79,6 +74,7 @@ module tb_brightness_matcher;
 
         for (i = 18; i < 46; i = i + 1) begin
             img_a[i*RGB +: RGB] = pix(8'd120,8'd120,8'd120);
+
             img_b[i*RGB +: RGB] = pix(8'd125,8'd125,8'd125);
         end
 
@@ -102,6 +98,7 @@ module tb_brightness_matcher;
 
         for (i = 18; i < 46; i = i + 1) begin
             img_a[i*RGB +: RGB] = pix(8'd120,8'd120,8'd120);
+
             img_b[i*RGB +: RGB] = pix(8'd220,8'd220,8'd220);
         end
 

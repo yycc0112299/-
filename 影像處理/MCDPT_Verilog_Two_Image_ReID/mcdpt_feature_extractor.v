@@ -61,8 +61,10 @@ module mcdpt_feature_extractor #(
         input [7:0] in_r;
         input [7:0] in_g;
         input [7:0] in_b;
+        reg [15:0] y_value;
         begin
-            to_gray = (in_r + in_g + in_b) / 3;
+            y_value = (in_r * 8'd77) + (in_g * 8'd150) + (in_b * 8'd29);
+            to_gray = y_value[15:8];
         end
     endfunction
 

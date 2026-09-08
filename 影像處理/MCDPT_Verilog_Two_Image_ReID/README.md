@@ -32,9 +32,13 @@ The current goal is just to prove the simplest flow:
 
 ## Brightness Features
 
-`mcdpt_feature_extractor.v` converts each RGB pixel to grayscale:
+`mcdpt_feature_extractor.v` converts each RGB pixel to luminance:
 
-`gray = (R + G + B) / 3`
+`Y = 0.299R + 0.587G + 0.114B`
+
+The Verilog implementation uses an integer approximation:
+
+`gray = (77R + 150G + 29B) >> 8`
 
 Then it extracts only simple brightness-related features:
 
@@ -61,4 +65,3 @@ Expected result:
 
 - Similar brightness blocks match.
 - Very different brightness blocks do not match.
-

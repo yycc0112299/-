@@ -6,7 +6,7 @@
 
 ## 2. 你們現在做到哪裡？
 
-目前只做到 Verilog module 加 testbench。testbench 裡手動建立兩張 8x8 RGB 圖，但判斷時先轉成灰階亮度。亮度相近會輸出 `same_person = 1`，亮度差很多會輸出 `same_person = 0`。
+目前只做到 Verilog module 加 testbench。testbench 裡手動建立兩張 8x8 RGB 圖，但判斷時先用 `Y = 0.299R + 0.587G + 0.114B` 的整數近似轉成灰階亮度。亮度相近會輸出 `same_person = 1`，亮度差很多會輸出 `same_person = 0`。
 
 ## 3. 為什麼不用完整 OpenVINO 或 CNN？
 
@@ -14,7 +14,7 @@
 
 ## 4. 你們的 feature vector 是什麼？
 
-我們先用純亮度特徵模擬 re-ID feature vector。每個 RGB pixel 會先轉成灰階亮度，接著統計平均亮度、上半部亮度、下半部亮度、亮暗像素數、亮度邊緣、前景面積和中心位置。
+我們先用純亮度特徵模擬 re-ID feature vector。每個 RGB pixel 會用整數公式 `gray = (77R + 150G + 29B) >> 8` 轉成灰階亮度，接著統計平均亮度、上半部亮度、下半部亮度、亮暗像素數、亮度邊緣、前景面積和中心位置。
 
 ## 5. 為什麼不用 cosine distance？
 

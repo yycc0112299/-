@@ -16,7 +16,7 @@ The uploaded MCDPT GitHub project works roughly like this:
 This version is intentionally much simpler:
 
 1. The testbench creates two small 8x8 RGB images.
-2. The feature extractor converts RGB pixels to grayscale brightness.
+2. The feature extractor converts RGB pixels to luminance brightness.
 3. It builds a small brightness feature vector.
 4. Track modules save the feature vector.
 5. A distance module compares the two vectors.
@@ -28,9 +28,9 @@ This is the first testbench-stage version. The purpose is not accuracy. The purp
 
 `image -> feature vector -> distance -> threshold`
 
-So the feature vector uses only easy brightness information:
+So the feature vector uses only luminance brightness information:
 
-- average brightness
+- average luminance
 - upper and lower brightness
 - bright and dark pixel counts
 - brightness edge count
@@ -49,4 +49,3 @@ Vivado simulation checks two cases:
 | --- | --- |
 | Similar brightness blocks | `same_person = 1` |
 | Very different brightness blocks | `same_person = 0` |
-

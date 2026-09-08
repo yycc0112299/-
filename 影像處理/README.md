@@ -12,7 +12,7 @@
 新版目前只做到 Verilog 模組與 testbench 模擬，重點放在 MCDPT 的 re-ID 核心概念，但特徵擷取先降成純亮度版本：
 
 1. 兩張 8x8 RGB 測試圖片輸入。
-2. 每個 pixel 先轉成灰階亮度。
+2. 每個 pixel 先用亮度公式轉成灰階亮度。
 3. 各自抽出簡化亮度 feature vector。
 4. 用 track average 保存人物特徵。
 5. 計算兩個 feature vector 的距離。

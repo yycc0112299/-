@@ -1,0 +1,3 @@
+xvlog mcdpt_feature_extractor.v mcdpt_feature_distance.v mcdpt_track_average.v mcdpt_global_matcher.v mcdpt_two_image_reid_top.v tb_mcdpt_two_image_reid.v
+xelab tb_mcdpt_two_image_reid
+xsim tb_mcdpt_two_image_reid -runall

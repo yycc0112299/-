@@ -1,29 +1,38 @@
 # Professor Questions
 
-## 1. 原始 MCDPT 用什麼方法？
+## 1. 原始專題大概在做什麼？
 
-原始 MCDPT 先偵測人物，再用 person re-identification model 把人物影像轉成 feature vector。不同 camera 的人物會用 feature distance 比較，距離小於門檻就判斷為同一個人。
+原始 MCDPT 是先偵測人物，再把人物影像轉成 feature vector，最後用距離判斷不同影像中的目標是不是同一個人。
 
-## 2. 你們現在做到哪裡？
+## 2. 目前做到哪裡？
 
-目前只做到 Verilog module 加 testbench。testbench 裡手動建立兩張 8x8 RGB 圖，但判斷時先用 `Y = 0.299R + 0.587G + 0.114B` 的整數近似轉成灰階亮度。亮度相近會輸出 `same_person = 1`，亮度差很多會輸出 `same_person = 0`。
+目前只做到 Verilog module 加 testbench。testbench 會建立兩張 8x8 RGB 圖，轉成亮度特徵後比較距離。
 
-## 3. 為什麼不用完整 OpenVINO 或 CNN？
+## 3. 為什麼只看亮度？
 
-完整 re-ID model 太大，不適合在一開始直接用 Verilog 手寫。我們先保留 MCDPT 的演算法骨架，也就是 feature vector、track average、distance matching 和 threshold decision。
+因為目前是第一版 testbench。先用最小方法確認資料流程跑得通：RGB 轉亮度、抽特徵、算距離、用門檻判斷。之後才會考慮加入顏色或更完整的特徵。
 
-## 4. 你們的 feature vector 是什麼？
+## 4. RGB 怎麼轉亮度？
 
-我們先用純亮度特徵模擬 re-ID feature vector。每個 RGB pixel 會用整數公式 `gray = (77R + 150G + 29B) >> 8` 轉成灰階亮度，接著統計平均亮度、上半部亮度、下半部亮度、亮暗像素數、亮度邊緣、前景面積和中心位置。
+不是直接平均，而是使用亮度加權公式：
 
-## 5. 為什麼不用 cosine distance？
+`Y = 0.299R + 0.587G + 0.114B`
 
-cosine distance 需要正規化、乘法和除法，Verilog 初版會比較難。我們先用 sum of absolute differences 當成硬體友善的距離公式。概念一樣是距離小代表比較像。
+Verilog 版寫成：
 
-## 6. 這版的限制是什麼？
+`gray = (77R + 150G + 29B) >> 8`
 
-目前沒有自動偵測人物框，沒有真實圖片輸入流程，沒有多攝影機通訊，也沒有上板，而且目前只看亮度，不看真正的衣服顏色。它只能證明最基本的 re-ID matching 流程可以用 Verilog testbench 表示。
+這樣可以避免小數運算，也比 `(R+G+B)/3` 更合理。
 
-## 7. 下一步可以做什麼？
+## 5. 為什麼刪掉 average？
 
-下一步可以把 testbench 的人工色塊改成 `.mem` 圖片輸入，再調整 feature threshold。之後才考慮更完整的 FPGA pipeline 或 VGA 顯示。
+average 主要用在影片或連續 frame，因為同一個人會出現在很多張畫面中。目前只比較兩張靜態測試圖，沒有時間序列，所以先刪掉 average，讓 testbench 更單純。
+
+## 6. 為什麼刪掉 two image re-id top？
+
+原本 top module 只是把 extractor、average、matcher 接起來。現在 average 已經移除，testbench 可以直接接 extractor 和 matcher，所以先刪掉這層包裝，讓教授看 code 時更直接。
+
+## 7. 這版的限制是什麼？
+
+它不是完整辨識系統，沒有真實圖片讀取、沒有自動偵測、沒有影片追蹤，也沒有 FPGA 顯示。它只是最小 testbench 原型，用來證明亮度特徵比對流程可以用 Verilog 寫出來。
+

@@ -1,3 +1,3 @@
-xvlog mcdpt_feature_extractor.v mcdpt_feature_distance.v mcdpt_track_average.v mcdpt_global_matcher.v mcdpt_two_image_reid_top.v tb_mcdpt_two_image_reid.v
-xelab tb_mcdpt_two_image_reid
-xsim tb_mcdpt_two_image_reid -runall
+xvlog brightness_feature_extractor.v feature_distance.v brightness_matcher.v tb_brightness_matcher.v
+xelab tb_brightness_matcher
+xsim tb_brightness_matcher -runall

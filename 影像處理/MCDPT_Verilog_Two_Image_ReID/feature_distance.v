@@ -1,8 +1,8 @@
 `timescale 1ns / 1ps
 
-module mcdpt_feature_distance #(
+module feature_distance #(
     parameter FEATURE_W = 8,
-    parameter FEATURE_COUNT = 16,
+    parameter FEATURE_COUNT = 8,
     parameter DIST_W = 16
 )(
     input  [FEATURE_COUNT*FEATURE_W-1:0] feature_a,

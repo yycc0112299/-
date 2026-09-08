@@ -1,67 +1,63 @@
-# Simplified MCDPT Brightness-Only Verilog Testbench
+# Brightness-Only Verilog Testbench
 
-This folder is a very small Verilog testbench prototype based on the idea of the uploaded MCDPT project:
+This is a small testbench-stage Verilog prototype inspired by the MCDPT project idea:
 
-`https://github.com/ChienHsuan/MCDPT`
+`image -> feature -> distance -> threshold`
 
-The original MCDPT project uses a trained person re-identification model to turn each person image into a feature vector, then compares feature distance across cameras. This version only keeps that basic framework and makes the feature extractor much simpler.
+The code does not implement a full MCDPT system. It only shows how two small RGB images can be converted into brightness features and compared in simulation.
 
 ## Current Scope
 
-This is only a testbench-stage prototype:
+- RGB input is still used because normal image pixels are RGB.
+- The comparison uses brightness only.
+- There is no video timing.
+- There is no average feature memory.
+- There is no top display module.
+- There is no FPGA board output.
 
-- no real camera input
-- no neural network
-- no true person detector
-- no FPGA board output
-- no multi-camera communication
+## Main Files
 
-The current goal is just to prove the simplest flow:
-
-`two images -> brightness features -> distance -> threshold -> same_person`
-
-## Mapping To MCDPT
-
-| MCDPT idea | Verilog simplification |
+| File | Purpose |
 | --- | --- |
-| Re-ID feature vector | A small brightness-only feature vector |
-| Average feature in a track | `mcdpt_track_average.v` keeps a running average |
-| Cosine distance | `mcdpt_feature_distance.v` uses sum of absolute differences |
-| Global match threshold | `GLOBAL_MATCH_THRESH` decides same or different person |
-| Cross-camera match | `mcdpt_global_matcher.v` outputs `same_person` |
+| `brightness_feature_extractor.v` | Converts RGB pixels to brightness and builds a feature vector |
+| `feature_distance.v` | Adds up absolute differences between two feature vectors |
+| `brightness_matcher.v` | Compares the distance with a threshold |
+| `tb_brightness_matcher.v` | Creates two test cases and checks the result |
 
-## Brightness Features
+## Brightness Formula
 
-`mcdpt_feature_extractor.v` converts each RGB pixel to luminance:
+The extractor uses the weighted luminance formula:
 
 `Y = 0.299R + 0.587G + 0.114B`
 
-The Verilog implementation uses an integer approximation:
+In Verilog, it becomes:
 
 `gray = (77R + 150G + 29B) >> 8`
 
-Then it extracts only simple brightness-related features:
+The weights are scaled by 256 so Verilog can use integers and a right shift instead of floating point numbers.
+
+## Extracted Features
+
+The feature vector keeps only simple brightness information:
 
 - average foreground brightness
-- upper-half average brightness
-- lower-half average brightness
 - bright pixel count
 - dark pixel count
 - brightness edge count
 - foreground area
-- foreground center x/y position
-
-The rest of the 16-value feature vector is left as zero.
+- foreground center x position
+- foreground center y position
 
 ## How To Simulate
 
 ```tcl
-xvlog mcdpt_feature_extractor.v mcdpt_feature_distance.v mcdpt_track_average.v mcdpt_global_matcher.v mcdpt_two_image_reid_top.v tb_mcdpt_two_image_reid.v
-xelab tb_mcdpt_two_image_reid
-xsim tb_mcdpt_two_image_reid -runall
+xvlog brightness_feature_extractor.v feature_distance.v brightness_matcher.v tb_brightness_matcher.v
+xelab tb_brightness_matcher
+xsim tb_brightness_matcher -runall
 ```
 
 Expected result:
 
 - Similar brightness blocks match.
 - Very different brightness blocks do not match.
+

@@ -6,7 +6,7 @@
 
 `影像 -> 抓特徵 -> 算距離 -> 判斷是不是同一個人`
 
-現在沒有做到完整辨識，也沒有接螢幕顯示。這裡只用兩張很小的 RGB 測試影像，先模擬「亮度特徵可不可以拿來比較」。
+現在沒有做到完整辨識，也沒有接螢幕顯示。這裡只用兩張很小的 8x8 RGB 人臉圖案，先模擬「亮度特徵可不可以拿來比較」。
 
 ## 目前檔案
 
@@ -15,7 +15,7 @@
 | `brightness_feature_extractor.v` | 把 RGB 像素轉成亮度，抓出簡單特徵 |
 | `feature_distance.v` | 計算兩組特徵差多少 |
 | `brightness_matcher.v` | 距離小於門檻就當作同一個 |
-| `tb_brightness_matcher.v` | 放兩組測試圖片進去跑模擬 |
+| `tb_brightness_matcher.v` | 用 function 畫出 8x8 人臉，放進去跑模擬 |
 
 ## 亮度公式
 
@@ -55,5 +55,5 @@ xsim tb_brightness_matcher -runall
 
 預期結果：
 
-- 兩張亮度接近的圖，`same = 1`
-- 兩張亮度差很多的圖，`same = 0`
+- 兩張亮度接近的人臉，`same = 1`
+- 兩張亮度差很多的人臉，`same = 0`

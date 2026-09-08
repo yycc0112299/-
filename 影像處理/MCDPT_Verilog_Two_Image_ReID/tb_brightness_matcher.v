@@ -60,6 +60,54 @@ module tb_brightness_matcher;
         end
     endfunction
 
+    function [RGB-1:0] face_a;
+        input integer p;
+        begin
+            case (p)
+                9,10,11,12,13,14: face_a = pix(8'd35,8'd25,8'd20);
+                17,18,19,20,21,22: face_a = pix(8'd160,8'd110,8'd80);
+                25,28: face_a = pix(8'd5,8'd5,8'd5);
+                26,27,29,30: face_a = pix(8'd165,8'd115,8'd82);
+                33,34,35,36,37,38: face_a = pix(8'd158,8'd108,8'd78);
+                42,43,44,45: face_a = pix(8'd95,8'd25,8'd25);
+                51,52,53,54: face_a = pix(8'd150,8'd100,8'd72);
+                default: face_a = pix(8'd10,8'd10,8'd18);
+            endcase
+        end
+    endfunction
+
+    function [RGB-1:0] face_b;
+        input integer p;
+        begin
+            case (p)
+                9,10,11,12,13,14: face_b = pix(8'd38,8'd28,8'd21);
+                17,18,19,20,21,22: face_b = pix(8'd166,8'd116,8'd86);
+                25,28: face_b = pix(8'd6,8'd6,8'd6);
+                26,27,29,30: face_b = pix(8'd170,8'd120,8'd88);
+                33,34,35,36,37,38: face_b = pix(8'd162,8'd112,8'd82);
+                42,43,44,45: face_b = pix(8'd98,8'd28,8'd28);
+                51,52,53,54: face_b = pix(8'd154,8'd104,8'd75);
+                default: face_b = pix(8'd10,8'd10,8'd18);
+            endcase
+        end
+    endfunction
+
+    function [RGB-1:0] face_c;
+        input integer p;
+        begin
+            case (p)
+                9,10,11,12,13,14: face_c = pix(8'd230,8'd220,8'd200);
+                17,18,19,20,21,22: face_c = pix(8'd235,8'd225,8'd210);
+                25,28: face_c = pix(8'd20,8'd20,8'd20);
+                26,27,29,30: face_c = pix(8'd235,8'd225,8'd210);
+                33,34,35,36,37,38: face_c = pix(8'd235,8'd225,8'd210);
+                42,43,44,45: face_c = pix(8'd180,8'd60,8'd60);
+                51,52,53,54: face_c = pix(8'd230,8'd220,8'd200);
+                default: face_c = pix(8'd10,8'd10,8'd18);
+            endcase
+        end
+    endfunction
+
     integer i;
 
     initial begin
@@ -68,18 +116,21 @@ module tb_brightness_matcher;
         img_b = {N*RGB{1'b0}};
 
         for (i = 0; i < N; i = i + 1) begin
-            img_a[i*RGB +: RGB] = pix(8'd10,8'd10,8'd10);
-            img_b[i*RGB +: RGB] = pix(8'd10,8'd10,8'd10);
-        end
-
-        for (i = 18; i < 46; i = i + 1) begin
-            img_a[i*RGB +: RGB] = pix(8'd120,8'd120,8'd120);
-
-            img_b[i*RGB +: RGB] = pix(8'd125,8'd125,8'd125);
+            img_a[i*RGB +: RGB] = face_a(i);
+            img_b[i*RGB +: RGB] = face_b(i);
         end
 
         #10;
-        $display("case 1: close brightness");
+        $display("case 1: two similar 8x8 faces");
+        $display("  ......      ......");
+        $display(" .HHHHHH.    .HHHHHH.");
+        $display(" .FFFFFF.    .FFFFFF.");
+        $display(" .EFEFFE.    .EFEFFE.");
+        $display(" .FFFFFF.    .FFFFFF.");
+        $display(" ..MMMM..    ..MMMM..");
+        $display(" ...FFFF.    ...FFFF.");
+        $display(" ........    ........");
+
         $display("feat_a = %h", feat_a);
         $display("feat_b = %h", feat_b);
         $display("dist = %0d", dist);
@@ -92,18 +143,21 @@ module tb_brightness_matcher;
 
 
         for (i = 0; i < N; i = i + 1) begin
-            img_a[i*RGB +: RGB] = pix(8'd10,8'd10,8'd10);
-            img_b[i*RGB +: RGB] = pix(8'd10,8'd10,8'd10);
-        end
-
-        for (i = 18; i < 46; i = i + 1) begin
-            img_a[i*RGB +: RGB] = pix(8'd120,8'd120,8'd120);
-
-            img_b[i*RGB +: RGB] = pix(8'd220,8'd220,8'd220);
+            img_a[i*RGB +: RGB] = face_a(i);
+            img_b[i*RGB +: RGB] = face_c(i);
         end
 
         #10;
-        $display("case 2: far brightness");
+        $display("case 2: two different 8x8 faces");
+        $display("  ......      ......");
+        $display(" .HHHHHH.    .HHHHHH.");
+        $display(" .FFFFFF.    .FFFFFF.");
+        $display(" .EFEFFE.    .EFEFFE.");
+        $display(" .FFFFFF.    .FFFFFF.");
+        $display(" ..MMMM..    ..MMMM..");
+        $display(" ...FFFF.    ...FFFF.");
+        $display(" ........    ........");
+
         $display("feat_a = %h", feat_a);
         $display("feat_b = %h", feat_b);
         $display("dist = %0d", dist);

@@ -16,7 +16,7 @@
 
 因為目前只做到 testbench 階段，所以先簡化成：
 
-1. testbench 自己產生兩張 8x8 RGB 小圖。
+1. testbench 自己產生兩張 8x8 RGB 小人臉。
 2. `brightness_feature_extractor.v` 把每個 RGB 像素算成亮度。
 3. 用亮度門檻找出比較像前景的像素。
 4. 抓出幾個簡單特徵。
@@ -42,3 +42,11 @@ RGB 轉亮度：
 最後判斷：
 
 `same = 兩張圖都有物體 && dist <= MATCH_TH`
+
+## testbench 怎麼畫人臉
+
+testbench 沒有讀 jpg 或 png。
+
+它是用 `face_a()`、`face_b()`、`face_c()` 這幾個 function，依照 pixel 編號回傳不同 RGB。
+
+例如某些格子當頭髮、某些格子當皮膚、某些格子當眼睛和嘴巴。這樣 64 個 pixel 排起來就會像一個非常簡化的人臉。

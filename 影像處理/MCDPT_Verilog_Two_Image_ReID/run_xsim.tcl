@@ -1,3 +1,3 @@
-xvlog brightness_feature_extractor.v feature_distance.v brightness_matcher.v tb_brightness_matcher.v
-xelab tb_brightness_matcher
-xsim tb_brightness_matcher -runall
+xvlog person_color_feature.v person_matcher.v tb_two_camera_color.v
+xelab tb_two_camera_color
+xsim tb_two_camera_color -runall

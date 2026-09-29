@@ -1,64 +1,60 @@
 # 專題狀態與交接記錄（供 Codex）
 
-最後整理：2026-09-29
+最後核對：2026-09-30
 
-## 接手前先看
+## 重要：目前最新版本在哪裡
 
-1. 閱讀本文件及 `AGENTS.md`。
-2. 確認 `git status --short --branch`、目前分支與 `origin`；修改前先理解既有 RTL 和 testbench。
-3. 本倉庫是專題共享倉庫，任何程式碼變更完成後，必須更新本文件與 `PROGRESS_FOR_HUMANS.md`，並推送 GitHub `main`。
-4. 明確標示「由原始碼檢閱可確認」與「模擬/上板已執行驗證」兩種證據，不可把前者寫成後者。
+使用者確認的最新工作方向，以及本機檔案/執行記錄所支持的最新整合版，是 `C:\Users\USER\Desktop\codex\專題\modelsim_draft\`，不是本 GitHub 倉庫裡的 8×8 合成色彩 testbench。
 
-## 倉庫結構與專題範圍
+截至本次核對，`github_shared_repo` 的 `origin/main` 已 fetch 到 `3245cdc Add shared project progress handoff docs`；其中只有較早的 `影像處理/MCDPT_Verilog_Two_Image_ReID/` 小型合成 RGB 原型與 `影像處理/MCDPT_FPGA/` 展示工程，沒有 `modelsim_draft/person_tracking/` 的 YOLOX + 自製追蹤 + 640×480 ModelSim 整合程式。`modelsim_draft` 本身不是 Git checkout，故目前最新整合碼與 GitHub 共享副本沒有版本提交關係。修改/搬移程式前必須先逐檔比較兩邊，不可用舊倉庫檔案覆蓋 ModelSim 最新工作區，也不可聲稱 GitHub 已含整合版。
 
-目前共享倉庫內影像處理相關內容位於 `影像處理/`：
+## 接手與同步規則
 
-- `影像處理/MCDPT_FPGA/`：EGo1 / Artix-7 的低資源 FPGA 追蹤展示設計，使用合成測試影格、特徵擷取與 SAD 搜尋追蹤。詳細設定見該目錄 `README.md`。
-- `影像處理/MCDPT_Verilog_Two_Image_ReID/`：兩攝影機人物色彩特徵比對的 Verilog 原型。此路徑在整理日的最新提交 `2fb30f7` 已切換至色彩特徵 testbench；先前亮度版檔案已從目前版本移除，查看舊版需使用 Git 歷史。
+1. 每次工作先檢查共享倉庫 `git fetch origin`、目前本機/遠端分支與狀態，再檢查 `modelsim_draft` 最新檔案和結果時間；先判斷哪裡有較新的程式/紀錄。
+2. 進行程式修改前，先明確選定最新源碼基線並檢視差異；不確定時保留兩邊，不做整批覆蓋。
+3. 程式碼改動要同步至共享 GitHub `main`，同一變更更新本文件及 `PROGRESS_FOR_HUMANS.md`，提交並推送。
+4. 分享最新整合版之前，先確認所需來源、模型授權/檔案大小及輸出資料範圍；文件要指出本機整合版尚未鏡像到 GitHub，直到實際上傳/提交成功。
+5. 區分原始碼檢閱、已有 ModelSim/測試紀錄、USB 實拍，以及雙實體鏡頭驗證；不可互相代替。
 
-這兩個資料夾是不同層級/版本的展示，不應假設它們已整合成單一系統。MCDPT 是概念參考；本倉庫不代表完成 CNN/OpenVINO 深度 Re-ID，也不代表多攝影機部署產品。
+## 最新整合版的組成（本機 `modelsim_draft`）
 
-## 兩攝影機色彩特徵原型：目前程式行為
+### 單鏡頭人物偵測、追蹤與 ModelSim RTL
 
-主要檔案：
+使用說明：`modelsim_draft/person_tracking/README.md`；驗證摘要：`person_tracking/verification_report.json` 與 `person_tracking/verification_report.html`。
 
-- `影像處理/MCDPT_Verilog_Two_Image_ReID/person_color_feature.v`
-- `影像處理/MCDPT_Verilog_Two_Image_ReID/person_matcher.v`
-- `影像處理/MCDPT_Verilog_Two_Image_ReID/tb_two_camera_color.v`
-- `影像處理/MCDPT_Verilog_Two_Image_ReID/run_xsim.tcl`
+- `person_tracking/pipeline.py`：使用 OpenCV Zoo 的 YOLOX ONNX 模型在 CPU 偵測人物；專題自寫 `Tracker` 依位置與 HSV 外觀做短期關聯、確認/維持/超時管理，輸出暫時性的 track ID。這不是 YOLOX 自帶的跨鏡頭 Re-ID。
+- `person_tracking/person_roi_stream.v`：接收 640×480 完整 RGB888 影格（307,200 pixels/frame）及人物框座標，逐像素累積框內上/下兩區 8 色統計。這是 ModelSim RTL 特徵處理，外部偵測框由 CPU YOLOX 提供。
+- `person_tracking/person_feature_compare.v`：比較同一 track ID 前次與本次的上下區域主色/比例特徵；最多 35 個百分點差異。
+- `person_tracking/tb_person_roi.v`：將完整 RGB 與框座標交給 RTL。驗證報告記載每幀處理完 307,200 pixels；RTL testbench 暫存各 ID 歷史特徵供比較，範圍 ID 1–4095。
+- `person_tracking/run_*` 與 `modelsim_draft/run_person_tracking.ps1`：拍攝/影像序列轉換、ModelSim 批次執行與輸出結果。
 
-### 資料流程
+### 雙 USB 鏡頭候選配對
 
-1. Testbench 以兩個扁平化向量 `cam_a`、`cam_b` 提供兩張 8×8、每像素 RGB888 的合成影像；像素索引使用 `img[p*24 +: 24]`。
-2. `person_color_feature` 對每個像素依 `r=img[k*24+16+:8]`、`g=img[k*24+8+:8]`、`b=img[k*24+:8]` 取 RGB，經 `color8` 量化成 0..7 色彩碼。0 是低亮度背景（最大通道 <35）；其餘規則依序分類近灰白、高紅、高綠、高藍、黃、橘棕條件，剩餘歸類為 7。
-3. 模組逐像素計數上下半部各色數（`y < H/2` 為上半部）。色碼 0 不計入有效像素。`big_color` 選每半部計數最多的非背景色碼，產生 `top_c` / `bot_c`；`top_p` / `bot_p` 是該主色佔該半部有效色像素的整數百分比，分母為半部有效像素數，分母為 0 時輸出 0。
-4. `has_person` 僅在上下半部各至少有一個有效色像素且總有效色像素數大於 10 時為 1。這是色彩像素數量啟發式，不是人體偵測器。`fmap={top_c,bot_c,top_p,bot_p}`，寬度為 24 位元。
-5. `person_matcher` 將 24-bit 特徵拆成兩個 4-bit 顏色碼及兩個 8-bit比例值。僅在兩端都偵測到人、兩個顏色碼完全相同且兩個比例值的絕對差都小於 35 時輸出 `same=1`，其他情況輸出 0。門檻採嚴格小於 35。
-4. Testbench 依序提供外觀近似的同一人跨攝影機樣本（要求判定相同），再提供綠/白衣著差異樣本（要求判定不同）。
+操作文件：`modelsim_draft/person_tracking/DUAL_CAMERA.md`；入口 `modelsim_draft/run_dual_camera.ps1`；主要邏輯 `person_tracking/dual_camera.py`、`person_tracking/cross_camera.py`。
 
-### 解讀限制
+- `dual_camera.py` 使用兩個不同 USB 裝置索引，各自擷取 640×480 影格、呼叫相同 YOLOX detector、維護兩個互相獨立的本地 tracker；可用 `-Rtl` 對 A/B 各自執行 ModelSim ROI 特徵驗證。
+- `cross_camera.py` 是自寫 Python 外觀候選配對：人物框中央 60% 寬度、上下區 HSV 直方圖；兩區相似度至少 0.72、雙方互為最佳候選且與次佳差至少 0.08，連續三次確認才分配 P 候選標籤。
+- A:track_id 與 B:track_id 是鏡頭內局部 ID；P 標籤只代表同時觀測時衣著外觀相似候選，不是身份判定。
+- 不是 YOLOX/CNN Re-ID，不含離開 A 後再於 B 出現的歷史資料庫；相機 `grab/retrieve` 只縮小主機讀取間隔，沒有硬體同步保證。整批先擷取再處理，沒有即時雙鏡頭 FPS 聲明。
 
-- 這是由人工設計 8×8 RGB 圖案構成的合成資料測試，不是攝影機輸入或真實人物資料集。
-- 人形區域與特徵是簡化色彩/區塊規則；相同特徵只表示符合這組閾值規則，不是可靠身份識別。
-- RTL 的組合判定沒有跨影格 track 管理、身份資料庫、CNN/embedding、遮擋處理、攝影機同步或實際攝影機介面。
-- `top_p` / `bot_p` 的確切計算語意請以 `person_color_feature.v` 原始碼為準；不要僅憑輸出名稱推論成真實人體比例或百分比準確度。
-- 目前 `person_color_feature` 是 `always @(img)` 組合程序，以參數 `W/H/N/RGB` 描述影像尺寸，預設為 8×8/RGB888；修改參數時要同時確認向量位寬、索引及模擬器對函式/迴圈的支援。
-- 整理時只檢閱了原始碼與 Git 歷史，沒有在本次工作執行 Vivado/XSim 或 FPGA 上板；因此不能在本文件聲稱最新版本模擬已由本次重新驗證。
+## 已有驗證紀錄及其邊界
 
-## FPGA 追蹤展示：摘要與既有驗證聲明
+以下是本機保存的 2026-09-25 記錄，不是本次重新執行：
 
-`影像處理/MCDPT_FPGA/README.md` 描述此設計為 MCDPT 概念簡化版，而非完整深度 Re-ID。其文件所述架構包含 160×120、4-bit 合成 ROM 影格、4×4 區塊平均特徵、multi-cycle SAD 搜尋、VGA 4 倍放大至 640×480，以及以顏色方框呈現參考/搜尋/追蹤框。README 亦記載曾沿用 EGo1 Artix-7 板卡腳位資料，並提供 Vivado batch 模擬與建置命令。
+- ModelSim RTL `PERSON_RTL_PASS`：5 個人物/空景 ROI 手算案例，transcript 為零 compile error/warning。
+- USB 單鏡頭實拍兩輪，共 240 幀，均為原生 640×480；報告記載 YOLOX 每輪 120/120 偵測，track ID 1 連續，ModelSim 每輪 120/120 特徵逐筆核對通過，完整 RGB 每幀 307,200 像素。
+- 網路照片序列：兩張人物照片、三個亮度層級、每組七個位置；主要人工標記 105 次全匹配、無 ID 切換。三組黑/白/水果無人負例沒有誤報。追蹤單元邏輯 6 項 PASS。
+- 已知漏抓：bus 圖中左側大幅裁切的人物，在 21 張變換影格只偵測到 4 張；這些未計入 105 次主要標記，因此不可宣稱任意畫面零漏抓。
+- 雙鏡頭整合只看到兩個 `dual_runs` replay 紀錄，各 8 幀，來源是同一 USB 單鏡頭兩輪的已保存影格。兩組 A/B ModelSim RTL 都各核對 8 個 ROI PASS；其中一組有 1 幀出現確認的 P 候選。`dual_camera_capture_completed=false`，沒有接兩台實體攝影機的驗證結果。
 
-上述是倉庫既有 README 的描述；接手時仍需查看 `src/`、`sim/`、`scripts/` 中實際內容及最新執行紀錄。此整理工作沒有重新執行 Vivado，也沒有重新確認板卡或 VGA 輸出。
+## 共享倉庫內其他原型（不是最新整合版）
 
-## Git 歷史線索
+- `影像處理/MCDPT_Verilog_Two_Image_ReID/` 是 8×8 合成 RGB 色彩分類/閾值原型，最新倉庫提交歷史曾切換至 `person_color_feature.v`、`person_matcher.v` 與 `tb_two_camera_color.v`。它沒有 CPU 偵測器、短期 tracker、完整解析度串流或本機雙 USB 流程。
+- `影像處理/MCDPT_FPGA/` 是另一個 EGo1/Artix-7 合成影格、區塊特徵與 SAD 搜尋/VGA 展示設計，依該目錄 README 描述；不能與 ModelSim 整合版混成同一實作。
+- MCDPT 為概念參考；兩個舊展示均不等於 CNN/OpenVINO 深度 Re-ID。
 
-截至 2026-09-29，本機 `main` 與 `origin/main` 同步，最新程式碼提交為 `2fb30f7 Switch to two camera color feature testbench`。該提交將亮度版抽取/比對與 testbench 替換為 `person_color_feature.v`、`person_matcher.v` 及 `tb_two_camera_color.v`。更早的亮度原型提交仍可由 Git 歷史查閱，不要在描述目前功能時混用舊版行為。
+## 2026-09-30 變更紀錄：校正「最新進度」
 
-## 變更紀錄
-
-### 2026-09-29：建立共享協作與狀態文件
-
-- 新增 `AGENTS.md`，要求後續程式碼變更直接同步共享倉庫，且更新機器版與人類版進度文件。
-- 新增本文件與 `PROGRESS_FOR_HUMANS.md`，記錄兩攝影機色彩原型的目前資料流程、比對門檻、限制，以及 FPGA 展示目錄的文件摘要。
-- 本次沒有修改 RTL，也沒有執行模擬或上板驗證。
+- 核對共享遠端分支、本機 `modelsim_draft` README、RTL、單鏡頭驗證 JSON/HTML、ModelSim transcript、雙鏡頭程式及兩組 replay summary。
+- 確認最新實作方向是第三方 YOLOX CPU 偵測 + 專題自寫短期追蹤 + 完整 640×480 ModelSim ROI RTL + 雙 USB 候選配對流程。
+- 確認該整合程式尚未存在於本 GitHub 共享倉庫；本次只修正狀態文件，沒有複製整合程式或重跑硬體/攝影機驗證。

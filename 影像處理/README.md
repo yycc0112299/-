@@ -4,9 +4,10 @@
 
 ## 目前內容
 
-- `MCDPT_FPGA/`：既有 EGo1 / FPGA 影像處理展示架構。
 - `MCDPT_Verilog_Two_Image_ReID/`：依照 MCDPT GitHub 專案概念簡化的兩張圖人物再辨識 Verilog testbench 原型。
 - `ModelSim_YOLOX_PersonTracking/`：最新整合版本，包含 YOLOX 人物偵測、自寫短期追蹤、完整 640×480 ROI ModelSim RTL、雙 USB 鏡頭外觀候選流程與本機即時追蹤網站。進入該目錄讀取 README；模型權重及影像輸出需自行在本機取得/產生，不納入 Git。
+
+舊 EGo1 / FPGA（Vivado）展示原型已依專案範圍從目前共享檔案樹移除；較早 Git 提交仍保留其歷史版本。它不是最新 ModelSim/YOLOX 整合版。
 
 ## 亮度版 Verilog Testbench
 

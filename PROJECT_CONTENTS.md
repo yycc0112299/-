@@ -8,7 +8,7 @@
 
 - `影像處理/ModelSim_YOLOX_PersonTracking/`：YOLOX 人物偵測、自寫短期追蹤、ModelSim 640×480 ROI 色彩特徵、雙 USB 鏡頭外觀候選配對及 localhost 即時網站。
 - `影像處理/MCDPT_Verilog_Two_Image_ReID/`：早期兩張 8×8 合成影像特徵/比對 RTL 原型，非最新整合版。
-- `tools/`：本機專題中整理 PDF 頁面、摘要、逐行說明及程式碼截圖的輔助工具。
+- `tools/`：本機專題中整理 PDF 頁面、摘要、逐行說明及程式碼截圖的輔助工具。`build_line_explanations.py` 依賴未共享的舊 Vivado 範例 RTL，只作歷史工具參考；其他腳本依傳入的本機來源檔使用。
 - `references/MCDPT/`：MCDPT 開源專案的參考程式子集；僅供閱讀，執行主流程不依賴此目錄。授權與引用資訊見其中 README。
 - `deliverables/presentations/`：四份舊原型簡報成品，方便協作者了解早期設計與報告成果；不是目前功能規格。
 - `deliverables/synthetic-test-patterns/`：四張 8×8 合成色塊/人形圖案，作為早期 testbench 測試素材；不是相機拍到的真人影像。

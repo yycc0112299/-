@@ -4,16 +4,16 @@
 
 ## 重要：目前最新版本在哪裡
 
-使用者確認的最新工作方向，以及本機檔案/執行記錄所支持的最新整合版，是 `C:\Users\USER\Desktop\codex\專題\modelsim_draft\`，不是本 GitHub 倉庫裡的 8×8 合成色彩 testbench。
+使用者確認的最新工作方向，以及本機檔案/執行記錄所支持的最新整合版，源自 `C:\Users\USER\Desktop\codex\專題\modelsim_draft\`；已同步至本倉庫 `影像處理/ModelSim_YOLOX_PersonTracking/`。後續應以該路徑為共享程式碼基線，較早的 8×8 合成 testbench 不得覆蓋它。
 
-截至本次核對，`github_shared_repo` 的 `origin/main` 已 fetch 到 `3245cdc Add shared project progress handoff docs`；其中只有較早的 `影像處理/MCDPT_Verilog_Two_Image_ReID/` 小型合成 RGB 原型與 `影像處理/MCDPT_FPGA/` 展示工程，沒有 `modelsim_draft/person_tracking/` 的 YOLOX + 自製追蹤 + 640×480 ModelSim 整合程式。`modelsim_draft` 本身不是 Git checkout，故目前最新整合碼與 GitHub 共享副本沒有版本提交關係。修改/搬移程式前必須先逐檔比較兩邊，不可用舊倉庫檔案覆蓋 ModelSim 最新工作區，也不可聲稱 GitHub 已含整合版。
+2026-09-30 已把單鏡頭、雙鏡頭、RTL 與即時網站的必要原始碼同步進共享路徑。YOLOX 35 MB 權重、公開測試圖片、相機實拍圖、生成報告畫廊、ModelSim WLF/transcript 和本機 OpenCV binaries 均排除；以 `person_tracking/setup_assets.ps1` 下載模型及公開測試圖片，模型 SHA-256 會核對。`modelsim_draft` 本身不是 Git checkout；原始執行紀錄仍只存在本機，本次只同步程式/文件並整理可重建安裝方式，沒有上傳相機影像。
 
 ## 接手與同步規則
 
 1. 每次工作先檢查共享倉庫 `git fetch origin`、目前本機/遠端分支與狀態，再檢查 `modelsim_draft` 最新檔案和結果時間；先判斷哪裡有較新的程式/紀錄。
 2. 進行程式修改前，先明確選定最新源碼基線並檢視差異；不確定時保留兩邊，不做整批覆蓋。
 3. 程式碼改動要同步至共享 GitHub `main`，同一變更更新本文件及 `PROGRESS_FOR_HUMANS.md`，提交並推送。
-4. 分享最新整合版之前，先確認所需來源、模型授權/檔案大小及輸出資料範圍；文件要指出本機整合版尚未鏡像到 GitHub，直到實際上傳/提交成功。
+4. 模型權重和生成的個人相機/人物影像不要加入 Git；使用 `.gitignore` 與 `setup_assets.ps1` 的 hash 驗證下載模型。
 5. 區分原始碼檢閱、已有 ModelSim/測試紀錄、USB 實拍，以及雙實體鏡頭驗證；不可互相代替。
 
 ## 最新整合版的組成（本機 `modelsim_draft`）
@@ -30,12 +30,24 @@
 
 ### 雙 USB 鏡頭候選配對
 
-操作文件：`modelsim_draft/person_tracking/DUAL_CAMERA.md`；入口 `modelsim_draft/run_dual_camera.ps1`；主要邏輯 `person_tracking/dual_camera.py`、`person_tracking/cross_camera.py`。
+共享程式路徑：`影像處理/ModelSim_YOLOX_PersonTracking/`。操作文件 `person_tracking/DUAL_CAMERA.md`；入口 `run_dual_camera.ps1`；主要邏輯 `person_tracking/dual_camera.py`、`person_tracking/cross_camera.py`。
 
 - `dual_camera.py` 使用兩個不同 USB 裝置索引，各自擷取 640×480 影格、呼叫相同 YOLOX detector、維護兩個互相獨立的本地 tracker；可用 `-Rtl` 對 A/B 各自執行 ModelSim ROI 特徵驗證。
 - `cross_camera.py` 是自寫 Python 外觀候選配對：人物框中央 60% 寬度、上下區 HSV 直方圖；兩區相似度至少 0.72、雙方互為最佳候選且與次佳差至少 0.08，連續三次確認才分配 P 候選標籤。
 - A:track_id 與 B:track_id 是鏡頭內局部 ID；P 標籤只代表同時觀測時衣著外觀相似候選，不是身份判定。
 - 不是 YOLOX/CNN Re-ID，不含離開 A 後再於 B 出現的歷史資料庫；相機 `grab/retrieve` 只縮小主機讀取間隔，沒有硬體同步保證。整批先擷取再處理，沒有即時雙鏡頭 FPS 聲明。
+
+### 單鏡頭即時網站
+
+- `live_site/server.py` 直接匯入 `person_tracking/pipeline.py` 的 `Detector` 與 `Tracker`。它是既有偵測/追蹤器的 localhost 顯示介面，不另寫第二份推論器，也不在即時迴圈呼叫 ModelSim。
+- `GET /api/health` 回報服務名稱/版本；`GET /api/live` 回傳狀態、人物框/ID、影格、FPS 與延遲；`POST /api/start`、`POST /api/stop` 控制相機。Host/Origin 僅允許 localhost/127.0.0.1；約 10 秒無頁面 heartbeat 後釋放相機。
+- `live_site/README.md`、`start.ps1`、`index.html` 是說明、啟動器與 UI。歷史 `verification.json` 記錄 health、origin guard、停止、閒置釋放及 live frame integration check 通過；本次沒有重新連 USB 相機或啟動服務。
+
+### 共享包的執行環境
+
+- `requirements.txt` 宣告 NumPy/OpenCV Python 套件；`assets/yolox.py` 是 OpenCV Zoo 模型前處理/推論包裝；`setup_assets.ps1` 取得 YOLOX ONNX 及公開測試圖片並校驗模型 SHA-256。
+- 檔案最初在使用者 Codex runtime 環境完成；`run_person_tracking.ps1`、`run_dual_camera.ps1`、`live_site/start.ps1` 現可用 `PROJECT_PYTHON` 或 PATH 的 `python`，並保留 Codex runtime 後備位置。ModelSim executable 可設 `MODELSIM_VSIM`，亦可從 PATH 解析，否則保留原安裝路徑後備。
+- 本次只檢閱和同步程式碼，未安裝 dependencies、下載模型或執行腳本；以上安裝/可攜式 fallback 在本次未重新驗證。
 
 ## 已有驗證紀錄及其邊界
 
@@ -53,8 +65,9 @@
 - `影像處理/MCDPT_FPGA/` 是另一個 EGo1/Artix-7 合成影格、區塊特徵與 SAD 搜尋/VGA 展示設計，依該目錄 README 描述；不能與 ModelSim 整合版混成同一實作。
 - MCDPT 為概念參考；兩個舊展示均不等於 CNN/OpenVINO 深度 Re-ID。
 
-## 2026-09-30 變更紀錄：校正「最新進度」
+## 2026-09-30 變更紀錄：同步最新整合版本
 
-- 核對共享遠端分支、本機 `modelsim_draft` README、RTL、單鏡頭驗證 JSON/HTML、ModelSim transcript、雙鏡頭程式及兩組 replay summary。
-- 確認最新實作方向是第三方 YOLOX CPU 偵測 + 專題自寫短期追蹤 + 完整 640×480 ModelSim ROI RTL + 雙 USB 候選配對流程。
-- 確認該整合程式尚未存在於本 GitHub 共享倉庫；本次只修正狀態文件，沒有複製整合程式或重跑硬體/攝影機驗證。
+- 核對共享遠端分支、本機 `modelsim_draft` README、RTL、單鏡頭驗證 JSON/HTML、ModelSim transcript、雙鏡頭程式/兩組 replay summary，以及即時網站狀態。
+- 同步單鏡頭 YOLOX + 自寫短期追蹤 + 完整 640×480 ModelSim ROI RTL、雙 USB 外觀候選配對、本機即時網站及早期 RTL 基準原始碼。
+- 增加可攜式 Python/ModelSim 執行路徑選擇、requirements 與模型/公開測試圖片下載腳本。該程式碼包尚未在本次重新執行模擬、相機或網站驗證。
+- 排除大型模型權重、公開/私有圖片、相機輸出、生成報告畫廊、WLF 與本機 OpenCV 執行二進位；細節見專案 `.gitignore`。

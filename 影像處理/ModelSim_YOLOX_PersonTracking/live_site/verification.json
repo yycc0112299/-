@@ -1,0 +1,16 @@
+{
+  "health": "PASS",
+  "origin_guard": "PASS",
+  "stop": "PASS",
+  "idle_release": "PASS",
+  "live_frames": "PASS",
+  "frame_ids": [
+    1,
+    22,
+    30
+  ],
+  "status": "live",
+  "message": "目前沒有偵測到人物",
+  "people": [],
+  "fps": 7.1
+}

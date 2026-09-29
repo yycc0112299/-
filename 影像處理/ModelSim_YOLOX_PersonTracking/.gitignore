@@ -1,0 +1,20 @@
+# Locally downloaded model weights and public validation photos
+/person_tracking/assets/*.onnx
+/person_tracking/assets/*.jpg
+
+# Camera captures, validation galleries, dual-camera replays and simulator data
+/camera_deps/
+/camera_runs/
+/work/
+/results/
+/person_tracking/runs/
+/person_tracking/dual_runs/
+/person_tracking/tests/*/
+/person_tracking/verification_report.html
+/modelsim.ini
+/transcript
+/live_site/server.log
+/live_site/server-error.log
+**/*.wlf
+**/__pycache__/
+**/*.pyc

@@ -1,0 +1,279 @@
+{
+  "camera": [
+    {
+      "source": "live USB camera trial 1",
+      "frames": 120,
+      "frames_with_person": 120,
+      "detection_count": 120,
+      "track_ids": [
+        1
+      ],
+      "detection_seconds": 52.43,
+      "resolution": [
+        640,
+        480
+      ],
+      "rtl": {
+        "status": "PASS",
+        "checked_regions": 120,
+        "frame_pixels": 307200
+      },
+      "longest_observed_track": 120,
+      "needs_visual_review": false,
+      "visual_review": {
+        "sampled_frames": [
+          0,
+          30,
+          60,
+          90,
+          119
+        ],
+        "scope": "Sampled annotated frames reviewed; one visible person correctly boxed with ID 1. Automated ID/count checks cover all 120 frames.",
+        "status": "PASS"
+      },
+      "color_similar_pairs": 102,
+      "color_changed_pairs": 17
+    },
+    {
+      "source": "live USB camera trial 2",
+      "frames": 120,
+      "frames_with_person": 120,
+      "detection_count": 120,
+      "track_ids": [
+        1
+      ],
+      "detection_seconds": 31.31,
+      "resolution": [
+        640,
+        480
+      ],
+      "rtl": {
+        "status": "PASS",
+        "checked_regions": 120,
+        "frame_pixels": 307200
+      },
+      "longest_observed_track": 120,
+      "needs_visual_review": false,
+      "visual_review": {
+        "sampled_frames": [
+          0,
+          30,
+          60,
+          90,
+          119
+        ],
+        "scope": "Sampled annotated frames reviewed; one visible person correctly boxed with ID 1. Automated ID/count checks cover all 120 frames.",
+        "status": "PASS"
+      },
+      "color_similar_pairs": 119,
+      "color_changed_pairs": 0
+    }
+  ],
+  "web": [
+    {
+      "source": "web bus, brightness 1.0",
+      "frames": 7,
+      "frames_with_person": 7,
+      "detection_count": 23,
+      "track_ids": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "detection_seconds": 1.69,
+      "resolution": [
+        640,
+        480
+      ],
+      "rtl": {
+        "status": "PASS",
+        "checked_regions": 23,
+        "frame_pixels": 307200
+      },
+      "detection_tracking_validation": {
+        "expected": 21,
+        "matches": 21,
+        "misses": [],
+        "id_switches": [],
+        "minimum_matched_iou": 0.864,
+        "partial_edge_person_frames": 2,
+        "status": "PASS"
+      }
+    },
+    {
+      "source": "web zidane, brightness 1.0",
+      "frames": 7,
+      "frames_with_person": 7,
+      "detection_count": 14,
+      "track_ids": [
+        1,
+        2
+      ],
+      "detection_seconds": 1.84,
+      "resolution": [
+        640,
+        480
+      ],
+      "rtl": {
+        "status": "PASS",
+        "checked_regions": 14,
+        "frame_pixels": 307200
+      },
+      "detection_tracking_validation": {
+        "expected": 14,
+        "matches": 14,
+        "misses": [],
+        "id_switches": [],
+        "minimum_matched_iou": 0.961,
+        "partial_edge_person_frames": 0,
+        "status": "PASS"
+      }
+    },
+    {
+      "source": "web bus, brightness 0.8",
+      "frames": 7,
+      "frames_with_person": 7,
+      "detection_count": 21,
+      "track_ids": [
+        1,
+        2,
+        3
+      ],
+      "detection_seconds": 1.72,
+      "resolution": [
+        640,
+        480
+      ],
+      "rtl": {
+        "status": "PASS",
+        "checked_regions": 21,
+        "frame_pixels": 307200
+      },
+      "detection_tracking_validation": {
+        "expected": 21,
+        "matches": 21,
+        "misses": [],
+        "id_switches": [],
+        "minimum_matched_iou": 0.855,
+        "partial_edge_person_frames": 0,
+        "status": "PASS"
+      }
+    },
+    {
+      "source": "web zidane, brightness 0.8",
+      "frames": 7,
+      "frames_with_person": 7,
+      "detection_count": 14,
+      "track_ids": [
+        1,
+        2
+      ],
+      "detection_seconds": 1.93,
+      "resolution": [
+        640,
+        480
+      ],
+      "rtl": {
+        "status": "PASS",
+        "checked_regions": 14,
+        "frame_pixels": 307200
+      },
+      "detection_tracking_validation": {
+        "expected": 14,
+        "matches": 14,
+        "misses": [],
+        "id_switches": [],
+        "minimum_matched_iou": 0.961,
+        "partial_edge_person_frames": 0,
+        "status": "PASS"
+      }
+    },
+    {
+      "source": "web bus, brightness 1.1",
+      "frames": 7,
+      "frames_with_person": 7,
+      "detection_count": 23,
+      "track_ids": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "detection_seconds": 2.83,
+      "resolution": [
+        640,
+        480
+      ],
+      "rtl": {
+        "status": "PASS",
+        "checked_regions": 23,
+        "frame_pixels": 307200
+      },
+      "detection_tracking_validation": {
+        "expected": 21,
+        "matches": 21,
+        "misses": [],
+        "id_switches": [],
+        "minimum_matched_iou": 0.902,
+        "partial_edge_person_frames": 2,
+        "status": "PASS"
+      }
+    },
+    {
+      "source": "web zidane, brightness 1.1",
+      "frames": 7,
+      "frames_with_person": 7,
+      "detection_count": 14,
+      "track_ids": [
+        1,
+        2
+      ],
+      "detection_seconds": 1.92,
+      "resolution": [
+        640,
+        480
+      ],
+      "rtl": {
+        "status": "PASS",
+        "checked_regions": 14,
+        "frame_pixels": 307200
+      },
+      "detection_tracking_validation": {
+        "expected": 14,
+        "matches": 14,
+        "misses": [],
+        "id_switches": [],
+        "minimum_matched_iou": 0.961,
+        "partial_edge_person_frames": 0,
+        "status": "PASS"
+      }
+    },
+    {
+      "source": "black, white, real fruit photo negatives",
+      "frames": 3,
+      "frames_with_person": 0,
+      "detection_count": 0,
+      "track_ids": [],
+      "detection_seconds": 0.91,
+      "resolution": [
+        640,
+        480
+      ],
+      "rtl": {
+        "status": "PASS",
+        "checked_regions": 3,
+        "frame_pixels": 307200
+      },
+      "negative_validation": "PASS"
+    }
+  ],
+  "tracker": {
+    "tests_run": 6,
+    "failures": 0,
+    "errors": 0,
+    "status": "PASS"
+  },
+  "observed_limitation": "Heavily truncated left-edge person in bus image detected in 4/21 transformed frames; excluded from the 105 main-person annotations and reported separately, not claimed as zero-miss overall.",
+  "architecture": "CPU YOLOX detection and short-term tracking; full 640x480 RTL ROI color statistics and same-track feature comparison; captured-then-processed, not real-time FPGA inference."
+}

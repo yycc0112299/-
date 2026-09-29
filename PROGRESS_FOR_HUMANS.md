@@ -4,7 +4,7 @@
 
 ## 最新進度
 
-本機最新整合版位於 `modelsim_draft/person_tracking`：電腦使用 OpenCV Zoo YOLOX 偵測人物，搭配專題自寫短期追蹤；ModelSim 負責完整 640×480 人物框內的色彩特徵處理。另有雙 USB 鏡頭流程，分別追蹤兩邊人物，再用自寫的外觀規則產生跨鏡頭候選。
+最新整合版已上傳到 `影像處理/ModelSim_YOLOX_PersonTracking/`：OpenCV Zoo YOLOX 偵測人物，專題自寫短期追蹤維護追蹤編號，ModelSim 處理完整 640×480 人物框內的色彩特徵；另有雙 USB 鏡頭候選配對程式和本機即時追蹤網站。
 
 ## 驗證狀況
 
@@ -14,6 +14,6 @@
 
 ## GitHub 版本差異
 
-共享 GitHub 目前仍是較早的 8×8 合成色彩原型和 FPGA SAD 展示，尚未同步本機最新的 ModelSim + YOLOX + 追蹤整合程式。本次已更新此進度說明，沒有搬移整合程式碼或重新執行驗證。
+模型權重、測試圖片、相機照片和模擬輸出未上傳；專案附有模型/測試素材下載腳本。程式碼這次有整理執行環境設定，但沒有重新執行模擬、攝影機或網站驗證。
 
 詳細交接與數據見 [PROGRESS_FOR_CODEX.md](PROGRESS_FOR_CODEX.md)。

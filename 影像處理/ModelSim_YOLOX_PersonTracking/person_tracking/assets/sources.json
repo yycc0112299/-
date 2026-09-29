@@ -1,0 +1,8 @@
+{
+  "LICENSE_YOLOX": "https://raw.githubusercontent.com/opencv/opencv_zoo/main/models/object_detection_yolox/LICENSE",
+  "yolox.py": "https://raw.githubusercontent.com/opencv/opencv_zoo/main/models/object_detection_yolox/yolox.py",
+  "zidane.jpg": "https://raw.githubusercontent.com/ultralytics/ultralytics/main/ultralytics/assets/zidane.jpg",
+  "bus.jpg": "https://raw.githubusercontent.com/ultralytics/ultralytics/main/ultralytics/assets/bus.jpg",
+  "fruits.jpg": "https://raw.githubusercontent.com/opencv/opencv/master/samples/data/fruits.jpg",
+  "yolox.onnx": "https://media.githubusercontent.com/media/opencv/opencv_zoo/main/models/object_detection_yolox/object_detection_yolox_2022nov.onnx"
+}

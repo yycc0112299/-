@@ -120,7 +120,7 @@ def main():
                         continue
                     track_id = detection["track_id"]
                     if track_id not in samples:
-                        samples[track_id] = {"sum": np.zeros((2, 192), dtype=float), "count": 0}
+                        samples[track_id] = {"sum": np.zeros_like(detection["appearance"], dtype=float), "count": 0}
                     samples[track_id]["sum"] += detection["appearance"]
                     samples[track_id]["count"] += 1
                 rendered = draw(frame, detections, f"CAMERA A  {elapsed:.1f}s")
@@ -188,7 +188,7 @@ def main():
     else:
         result_status = "b_tracks_seen_but_no_candidate_confirmed"
     gallery_json = [
-        {"a_track_id": g["track_id"], "samples": g["samples"], "upper_lower_hsv_histograms": json_feature(g["appearance"])}
+        {"a_track_id": g["track_id"], "samples": g["samples"], "upper_lower_color_histograms": json_feature(g["appearance"])}
         for g in gallery
     ]
     (output / "camera_a_feature_gallery.json").write_text(

@@ -7,16 +7,32 @@ import numpy as np
 
 def appearance(frame,box):
     x0,y0,x1,y1=box
-    # Central 60% reduces background at box edges. Neutral colors have no reliable hue.
+    # Use the center to limit background; interpolate color bins so camera exposure
+    # and white balance do not turn small pixel changes into unrelated categories.
     margin=(x1-x0)//5
     roi=frame[y0:y1,x0+margin:x1-margin]
-    hsv=p.cv2.cvtColor(roi,p.cv2.COLOR_BGR2HSV).astype(np.int32)
-    hsv[:,:,0][hsv[:,:,1]<48]=0
-    codes=(hsv[:,:,0]*12//180)*16+(hsv[:,:,1]*4//256)*4+hsv[:,:,2]*4//256
+    hsv=p.cv2.cvtColor(roi,p.cv2.COLOR_BGR2HSV).astype(np.float32)
     half=roi.shape[0]//2
     rows=[]
-    for part in [codes[:half],codes[half:]]:
-        h=np.bincount(part.ravel(),minlength=192).astype(float);rows.append(h/max(1,h.sum()))
+    for part in [hsv[:half],hsv[half:]]:
+        hue,saturation,value=(channel.ravel() for channel in p.cv2.split(part))
+        # Dark/neutral colors carry little reliable hue. Soft value boundaries
+        # tolerate different exposure while keeping black and white distinct.
+        neutral=np.clip((80-saturation)/40,0,1)
+        neutral=np.maximum(neutral,np.clip((65-value)/30,0,1))
+        dark=np.clip((150-value)/80,0,1)
+        light=np.clip((value-150)/80,0,1)
+        hist=np.zeros(15,dtype=float)
+        hist[0]=np.sum(neutral*dark)
+        hist[1]=np.sum(neutral*(1-dark-light))
+        hist[2]=np.sum(neutral*light)
+        hue_pos=hue/15
+        left=np.floor(hue_pos).astype(np.int32)%12
+        fraction=hue_pos-np.floor(hue_pos)
+        chromatic=1-neutral
+        hist[3:]+=np.bincount(left,weights=chromatic*(1-fraction),minlength=12)
+        hist[3:]+=np.bincount((left+1)%12,weights=chromatic*fraction,minlength=12)
+        rows.append(hist/max(1,len(hue)))
     return np.array(rows)
 
 def capture_pair(camera_a,camera_b,count):

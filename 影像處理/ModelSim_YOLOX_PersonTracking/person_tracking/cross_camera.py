@@ -1,6 +1,11 @@
 """Hand-written conservative cross-camera appearance association, no ReID model."""
 import numpy as np
 
+def appearance_similarity(first,second):
+    """Soft color overlap; upper clothing remains useful in partial-body views."""
+    region_overlap=np.minimum(first,second).sum(axis=1)
+    return float(.75*region_overlap[0]+.25*region_overlap[1])
+
 class CrossCameraMatcher:
     def __init__(self,threshold=.72,margin=.08,min_hits=3):
         self.threshold=threshold;self.margin=margin;self.min_hits=min_hits
@@ -13,8 +18,7 @@ class CrossCameraMatcher:
         scores=np.zeros((len(a),len(b)))
         for i,x in enumerate(a):
             for j,y in enumerate(b):
-                # Both upper/lower halves must look similar; black/white kept distinct.
-                scores[i,j]=float(np.minimum(x['appearance'],y['appearance']).sum(axis=1).min())
+                scores[i,j]=appearance_similarity(x['appearance'],y['appearance'])
         accepted={};pairs=[]
         for i,x in enumerate(a):
             if not b:continue

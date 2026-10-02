@@ -3,7 +3,7 @@ import numpy as np
 from cross_camera import CrossCameraMatcher
 
 def person(tid,color,status='confirmed'):
-    appearance=np.zeros((2,192));appearance[:,color]=1
+    appearance=np.zeros((2,15));appearance[:,color]=1
     return dict(track_id=tid,status=status,appearance=appearance)
 
 class CrossCameraTests(unittest.TestCase):

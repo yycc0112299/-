@@ -51,6 +51,18 @@ $env:MODELSIM_VSIM='C:\modeltech64_2020.4\win64\vsim.exe'
 
 目前保存的雙鏡頭紀錄是已保存畫面的 replay，並非兩台實體相機實測；見 `person_tracking/verification_report.json` 及共享倉庫 `PROGRESS_FOR_CODEX.md`。
 
+### 單鏡頭 A→B 時序交接模擬
+
+要先用同一台 USB 攝影機模擬兩個先後鏡頭，可執行：
+
+```powershell
+.\run_sequential_handoff.ps1 -Camera 0 -ASeconds 10 -TransitionSeconds 1 -BSeconds 10
+```
+
+前 10 秒標為 A，中間 1 秒切換，從第 11 秒起標為 B。切換時重置 B 的局部追蹤器，但保留 A 追蹤目標的上下區 HSV 外觀特徵；B 中重新偵測到的人物連續 3 次成為互為最佳候選後，顯示 `P1 SAME-CANDIDATE`。同一人須在切換前後持續留在畫面。輸出只含特徵直方圖、逐影格配對紀錄和摘要，不保存相機畫面，位置在 `person_tracking/runs/handoff_日期_時間/`。
+
+此模式驗證「先保存 A 特徵，再於 B 時段重新關聯」的軟體資料流程；單鏡頭同視角無法代替兩台實體鏡頭，也不代表跨鏡頭身份辨識已完成。細節見 `person_tracking/DUAL_CAMERA.md`。
+
 ## 本機即時網站
 
 雙擊 `啟動即時追蹤網站.cmd`。網站僅監聽 `127.0.0.1:8765`，透過既有 `person_tracking/pipeline.py` 的 YOLOX 偵測與 Tracker 顯示單鏡頭即時畫面。它不執行 ModelSim 或雙鏡頭配對。細節見 `live_site/README.md`。

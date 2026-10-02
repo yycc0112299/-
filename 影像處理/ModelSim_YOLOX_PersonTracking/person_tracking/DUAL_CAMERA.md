@@ -22,6 +22,20 @@
 
 這版先處理兩邊當下都能看到的人物，不含「先從 A 離開、一段時間後出現在 B」的歷史身分資料庫。衣服相似、光線與角度不同都可能誤判；P 編號代表外觀候選，不是身分保證。框內仍含背景，只有上半身入鏡時分區不等於完整上下半身。
 
+## 單鏡頭 A→B 時序交接模擬
+
+若目前只有一台 USB 攝影機，可先用連續時間區段測試儲存特徵及重新關聯：
+
+```powershell
+.\run_sequential_handoff.ps1 -Camera 0 -ASeconds 10 -TransitionSeconds 1 -BSeconds 10
+```
+
+在本專案根目錄執行。0–10 秒做為 A 段，10–11 秒為切換空檔，第 11 秒開始做為 B 段。A 段追蹤到的已確認人物，其上/下區 HSV 直方圖會取平均後寫入 `camera_a_feature_gallery.json`。B 段使用全新的 tracker（局部 ID 重新編號），逐影格與凍結的 A 特徵庫比對；兩區相似度、互為最佳候選、次佳差距及三次連續命中沿用 `cross_camera.py` 規則。B 段輸出 `P<n> SAME-CANDIDATE` 表示找到外觀候選。可在預覽視窗按 `q` 提前結束，或加 `-NoDisplay` 執行純文字模式。
+
+此實驗要讓同一個人全程留在畫面中。結果資料在忽略的 `person_tracking/runs/handoff_日期_時間/`，包含 A 特徵庫、B 配對逐影格紀錄與 `summary.json`；不寫入影像。沒有 A 段特徵、B 段漏抓、衣著/光線改變、候選不唯一或未達連續命中門檻時，可能沒有配對。這只驗證單鏡頭同視角下的時間交接、tracker reset 與特徵比對資料流；不能代表兩台實體鏡頭、視角/色差差異或真正 Re-ID 系統的通過結果。
+
+`summary.json` 的 `result_status` 可區分 `candidate_found`、`no_a_person_detected_or_confirmed`、`no_person_detected_in_b`、`b_tracks_seen_but_no_candidate_confirmed`；沒有候選時要先看 A/B 偵測數，不能直接解讀為外觀比對演算法失敗。
+
 ## 輸出與測試範圍
 
 結果在 `person_tracking/dual_runs/日期_時間`：原始 A/B 照片、並排標註圖、`tracks_and_pairs.json`、`pairs.csv`、`summary.json`、`report.html`。加 `-Rtl` 時 A/B 各自保留 ModelSim 記錄與波形；跨鏡頭配對本身目前在 Python 執行。

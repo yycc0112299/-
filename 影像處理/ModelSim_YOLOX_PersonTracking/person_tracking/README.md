@@ -17,6 +17,8 @@
 
 另有 `validate_camera.py` 會先連續擷取兩輪各 120 張，再處理；`validate_web.py` 會使用兩張人物照片、三種亮度和每組七個位置，搭配手標人物框核對 IoU 與 ID 切換，並測試水果照片等負例；`test_tracking.py` 測試追蹤交會、遮擋、離開，以及手算 ROI 硬體案例。
 
+只有一台 USB 攝影機時，可從專案根目錄執行 `run_sequential_handoff.ps1 -Camera 0 -ASeconds 10 -TransitionSeconds 1 -BSeconds 10`，以前 10 秒模擬鏡頭 A，第 11 秒起模擬鏡頭 B。程式會保存 A 段已確認追蹤目標的上下區 HSV 外觀特徵、重置 B 段局部 tracker，再檢查同一人是否能重新關聯。需同一人持續留在畫面中；這是單鏡頭時間切段模擬，不等於雙實體鏡頭驗證。
+
 ## 檔案分工
 
 - `pipeline.py`：人物偵測、位置／HSV 外觀追蹤、原圖與標註存檔、RTL 驗證。

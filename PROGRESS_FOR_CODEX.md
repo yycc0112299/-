@@ -1,6 +1,6 @@
 # 專題狀態與交接記錄（供 Codex）
 
-最後核對：2026-09-30
+最後核對：2026-10-02
 
 ## 重要：目前最新版本在哪裡
 
@@ -88,3 +88,14 @@
 - 同步單鏡頭 YOLOX + 自寫短期追蹤 + 完整 640×480 ModelSim ROI RTL、雙 USB 外觀候選配對、本機即時網站及早期 RTL 基準原始碼。
 - 增加可攜式 Python/ModelSim 執行路徑選擇、requirements 與模型/公開測試圖片下載腳本。該程式碼包尚未在本次重新執行模擬、相機或網站驗證。
 - 排除大型模型權重、公開/私有圖片、相機輸出、生成報告畫廊、WLF 與本機 OpenCV 執行二進位；細節見專案 `.gitignore`。
+
+## 2026-10-02 變更紀錄：單鏡頭 A→B 時序特徵交接
+
+- 新增 `person_tracking/sequential_handoff.py` 與根目錄啟動器 `run_sequential_handoff.ps1`。預設使用同一台 640×480 USB 攝影機，0–10 秒標為 A，10–11 秒切換空檔，第 11 秒起標為 B，B 段再執行 10 秒；時間均可用參數調整。
+- A 段用既有 YOLOX 偵測與自寫 tracker。對每個已確認 A track，計算中央 60% 人物框的上下區 HSV 直方圖並累積平均；切換時將特徵庫寫到本機 `person_tracking/runs/handoff_<timestamp>/camera_a_feature_gallery.json`，並重置 B 段局部 Tracker 以模擬新鏡頭 ID。
+- B 段仍用同一 YOLOX 與全新 Tracker；新觀測與凍結 A 特徵庫透過既有 `CrossCameraMatcher` 比對。兩區相似度門檻 0.72、互為最佳候選、與次佳差至少 0.08，連續 3 次才顯示 `P<n> SAME-CANDIDATE`。逐影格匹配及摘要寫入本機 `handoff_matches.json`、`summary.json`；不保存影像，輸出路徑在 `.gitignore` 忽略的 `person_tracking/runs/`。
+- 預覽視窗顯示 A/B 標籤、局部 track ID 和候選結果；`-NoDisplay` 可純文字執行，按 `q` 可提早結束。預設流程需同一人持續出現在畫面中；若 A 段沒有足夠已確認的 track，B 不會產生候選。
+- 此設計測試保存特徵、重置 tracker、時間交接後重新關聯的資料流程；由於同一鏡頭視角/裝置不變，不能證明雙實體鏡頭視角、光照、色彩差異下可正確配對，更不能宣稱人物身分辨識已完成。
+- 程式新增後已用本機 USB camera 0 跑完一次 21.125 秒現場流程：A 43 幀、切換 27 幀、B 45 幀；A/B 偵測數皆 0、A 特徵庫 0 個，沒有候選結果。因此此次只證明相機擷取迴圈及時間切段結束，無法判定特徵交接是否成功，也不能說辨認失敗。執行時畫面中未確認有可偵測人物。結果 JSON 在本機 `modelsim_draft/person_tracking/runs/handoff_20261002_100707/`，沒有保存/上傳影像。
+- 第一次由 PowerShell 啟動時選到 WindowsApps Python alias，啟動失敗；`run_sequential_handoff.ps1` 已調整為優先選 Codex bundled Python，再退回 PATH，後續現場重跑應使用此啟動器。
+- 需要同一人完整出現在 A 與 B 畫面中重跑，才可得到 `candidate_found` 或「B 有人物但未達配對」的有效結果。既有 2026-09-25 雙 USB replay 數據是歷史紀錄，不是此新模式的驗證。

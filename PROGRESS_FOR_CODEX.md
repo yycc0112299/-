@@ -2,6 +2,12 @@
 
 最後核對：2026-10-02
 
+## 2026-10-02 變更：雙鏡頭即時 localhost 儀表板與實機驗證
+
+- 新增 `影像處理/ModelSim_YOLOX_PersonTracking/live_site/dual_server.py`、`dual_index.html` 與 `start_dual.ps1`。Server 僅綁定 `127.0.0.1:8766`，以雙 DirectShow capture、兩個獨立 `Tracker` 和既有 `CrossCameraMatcher` 在記憶體中處理畫面；`/api/live` 回傳兩張 JPEG、各側人物和候選配對。閒置 10 秒後釋放兩台鏡頭。
+- 實機確認鏡頭 0（Integrated Camera）與鏡頭 1（Logitech C270）可同時擷取 30 張 640×480 影格。兩側各自送入 `run_rtl`，均回傳 `PERSON_RTL_PASS: 30 person/empty regions`，ModelSim 編譯／模擬為零 error、零 warning。該批沒有 confirmed P 候選；這是外觀門檻未連續滿足的結果，非擷取或 RTL 失敗。
+- 網頁即時模式不呼叫 ModelSim，避免在每一幀阻塞瀏覽器畫面；ModelSim 驗證仍由 `run_dual_camera.ps1 -Rtl` 的離線擷取流程負責。
+
 ## 重要：目前最新版本在哪裡
 
 使用者確認的最新工作方向，以及本機檔案/執行記錄所支持的最新整合版，源自 `C:\Users\USER\Desktop\codex\專題\modelsim_draft\`；已同步至本倉庫 `影像處理/ModelSim_YOLOX_PersonTracking/`。後續應以該路徑為共享程式碼基線，較早的 8×8 合成 testbench 不得覆蓋它。

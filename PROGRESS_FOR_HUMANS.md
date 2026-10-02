@@ -8,6 +8,8 @@
 
 新增單鏡頭 A→B 時序交接模擬：前 10 秒保存鏡頭 A 的人物外觀特徵，第 11 秒起重置追蹤器並以該特徵庫重新辨認 B 段人物。符合條件時標示 `SAME-CANDIDATE`。
 
+2026-10-02 新增雙鏡頭 localhost 儀表板 `live_site/dual_server.py` 與 `dual_index.html`：可同時顯示 A/B USB 畫面、兩側本地 Track ID 及跨鏡頭外觀候選。實機以內建鏡頭與 Logitech C270 擷取各 30 張，兩側各完成 30 個 ROI 的 ModelSim 驗證 PASS；本次未產生已確認 P 候選。
+
 ## 驗證狀況
 
 - 單鏡頭已保存兩輪 USB 實拍紀錄，共 240 張；偵測/追蹤及 ModelSim 特徵核對通過。

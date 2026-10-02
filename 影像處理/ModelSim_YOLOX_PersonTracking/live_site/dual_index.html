@@ -61,7 +61,7 @@ async function poll(){
 poll();
 </script><script>
 const reviewStyle=document.createElement('style');
-reviewStyle.textContent='.manual-picker{display:flex;flex-wrap:wrap;align-items:end;gap:10px;margin:10px 0 18px}.manual-picker label{margin:0;min-width:120px;flex:1}.manual-picker select{margin-top:6px}.manual-picker button{margin:0;background:#26495c;color:#fff}.review-controls{display:flex;gap:8px;margin-top:10px}.review-controls button{flex:1;margin:0}.approve{background:#255d48;color:#ddfff0}.reject{background:#633632;color:#ffe8e4}.review-state{font-size:13px;color:var(--muted);margin-top:9px}.reviewed-same{border-color:var(--green)}.reviewed-different{border-color:#d57b77}.review-note{color:var(--muted);font-size:13px;margin:4px 0 12px}.retake{width:100%;margin-top:7px;padding:7px;background:#26495c;color:#fff;font-size:12px}.retake:disabled{opacity:.45;cursor:not-allowed}';
+reviewStyle.textContent='.manual-picker{display:flex;flex-wrap:wrap;align-items:end;gap:10px;margin:10px 0 18px}.manual-picker label{margin:0;min-width:120px;flex:1}.manual-picker select{margin-top:6px}.manual-picker button{margin:0;background:#26495c;color:#fff}.review-controls{display:flex;gap:8px;margin-top:10px}.review-controls button{flex:1;margin:0}.approve{background:#255d48;color:#ddfff0}.reject{background:#633632;color:#ffe8e4}.review-state{font-size:13px;color:var(--muted);margin-top:9px}.reviewed-same{border-color:var(--green)}.reviewed-different{border-color:#d57b77}.review-note{color:var(--muted);font-size:13px;margin:4px 0 12px}.retake{width:100%;margin-top:7px;padding:7px;background:#26495c;color:#fff;font-size:12px}.retake:disabled{opacity:.45;cursor:not-allowed}.fade-reviewed{opacity:0;transform:scale(.97);transition:opacity .6s ease,transform .6s ease}.review-archive{color:var(--muted);font-size:13px;margin-top:12px}.review-archive button{margin:0 0 0 10px;padding:5px 9px;background:#26495c;color:#fff;font-size:12px}';
 document.head.append(reviewStyle);
 const reviewPanel=$('matchPhotos').parentElement;
 $('stop').textContent='停止雙鏡頭並清除全部人物照片';
@@ -70,7 +70,7 @@ savedDescription.textContent='只清除本網站保存的本次與舊工作階�
 reviewPanel.querySelector('h2').textContent='人工核對區：自動 P 候選與手動選擇';
 $('matchEmpty').textContent='尚無配對；可從兩側已保存照片選一組加入人工核對。';
 const reviewNote=document.createElement('p');reviewNote.className='review-note';
-reviewNote.textContent='先在下方挑照片，人物轉正後可按「用目前畫面重拍」鎖定照片；人工判斷只作用於本次連線，不會自動訓練模型。';
+reviewNote.textContent='先在下方挑照片，人物轉正後可按「用目前畫面重拍」鎖定照片；按 ✓／✕ 後照片約 5 秒淡出，可重新展開修改。人工判斷只作用於本次連線，不會自動訓練模型。';
 const picker=document.createElement('div');picker.className='manual-picker';
 const selectA=document.createElement('select'),selectB=document.createElement('select'),addPair=document.createElement('button');
 selectA.setAttribute('aria-label','選擇鏡頭 A 人物');selectB.setAttribute('aria-label','選擇鏡頭 B 人物');
@@ -84,11 +84,22 @@ const reviewError=document.createElement('p');reviewError.className='error';revi
 reviewPanel.insertBefore(reviewNote,$('matchEmpty'));
 reviewPanel.insertBefore(picker,$('matchEmpty'));
 reviewPanel.insertBefore(reviewError,$('matchEmpty'));
+const reviewArchive=document.createElement('div'),archiveSummary=document.createElement('span'),archiveButton=document.createElement('button');
+reviewArchive.className='review-archive';reviewArchive.hidden=true;
+archiveButton.type='button';reviewArchive.append(archiveSummary,archiveButton);reviewPanel.append(reviewArchive);
+let showReviewed=false;
+const localReviewTimes=new Map();
+archiveButton.onclick=()=>{showReviewed=!showReviewed};
 async function reviewPost(path,payload){
   const response=await fetch(path,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
   if(!response.ok)throw Error('操作失敗：請確認人物仍在畫面中、本次照片仍在，而且尚未完成審核。');
   reviewError.hidden=true;
-  return response.json();
+  const result=await response.json();
+  if(path==='/api/review'){
+    showReviewed=false;
+    localReviewTimes.set(result.pair.pair_label,Date.now());
+  }
+  return result;
 }
 addPair.onclick=async()=>{
   try{await reviewPost('/api/manual_pair',{a_id:Number(selectA.value),b_id:Number(selectB.value)})}
@@ -104,19 +115,46 @@ function syncSelect(select,items){
   if(items.some(person=>String(person.track_id)===selected))select.value=selected;
 }
 let gallerySession=null;
+function reviewPhase(match,now){
+  if(match.review==null||showReviewed)return 'visible';
+  const reviewedAt=localReviewTimes.get(match.pair_label)??Date.parse(match.reviewed_at||'');
+  const age=Number.isFinite(reviewedAt)?now-reviewedAt:Infinity;
+  return age<5000?'visible':age<5600?'fading':'hidden';
+}
 function renderPhotos(state){
   if(state.session!==gallerySession){
     gallerySession=state.session;
+    showReviewed=false;
+    localReviewTimes.clear();
     $('savedPhotos').replaceChildren();
     $('matchPhotos').replaceChildren();
   }
   const saved=state.saved_people||[],matches=state.matched_pairs||[];
+  const now=Date.now(),phases=new Map(matches.map(match=>[match.pair_label,reviewPhase(match,now)]));
+  const visibleMatches=matches.filter(match=>phases.get(match.pair_label)!=='hidden');
+  const visibleSaved=saved.filter(person=>{
+    const related=matches.filter(match=>(person.camera==='A'?match.a_id:match.b_id)===person.track_id);
+    return !related.length||related.some(match=>match.review==null||phases.get(match.pair_label)!=='hidden');
+  });
+  const reviewed=matches.filter(match=>match.review!=null);
+  reviewArchive.hidden=!reviewed.length;
+  if(reviewed.length){
+    const same=reviewed.filter(match=>match.review==='same').length;
+    archiveSummary.textContent=`已審核 ${reviewed.length} 組（同一人 ${same}／不同人 ${reviewed.length-same}）`;
+    archiveButton.textContent=showReviewed?'收起已審核照片':'查看／修改已審核照片';
+  }
   syncSelect(selectA,saved.filter(person=>person.camera==='A'));
   syncSelect(selectB,saved.filter(person=>person.camera==='B'));
   addPair.disabled=!selectA.options.length||!selectB.options.length;
-  $('savedEmpty').hidden=saved.length>0;
-  $('matchEmpty').hidden=matches.length>0;
-  for(const person of saved){
+  $('savedEmpty').hidden=visibleSaved.length>0;
+  $('savedEmpty').textContent=saved.length?'已審核的人物照片已收起。':'尚未保存人物照片。';
+  $('matchEmpty').hidden=visibleMatches.length>0;
+  $('matchEmpty').textContent=matches.length?'已審核的配對照片已收起，可按下方按鈕重新查看。':'尚無配對；可從兩側已保存照片選一組加入人工核對。';
+  const visiblePeopleKeys=new Set(visibleSaved.map(person=>`${person.camera}-${person.track_id}`));
+  for(const figure of Array.from($('savedPhotos').children))if(!visiblePeopleKeys.has(figure.dataset.key))figure.remove();
+  const visiblePairKeys=new Set(visibleMatches.map(match=>match.pair_label));
+  for(const card of Array.from($('matchPhotos').children))if(!visiblePairKeys.has(card.dataset.key))card.remove();
+  for(const person of visibleSaved){
     const key=`${person.camera}-${person.track_id}`;
     let figure=Array.from($('savedPhotos').children).find(node=>node.dataset.key===key);
     if(!figure){
@@ -137,8 +175,10 @@ function renderPhotos(state){
     const visible=(state.people?.[sideIndex]||[]).some(item=>item.track_id===person.track_id&&item.status==='confirmed');
     const reviewed=matches.some(pair=>pair.review!=null&&(sideIndex===0?pair.a_id:pair.b_id)===person.track_id);
     figure.querySelector('button').disabled=!state.enabled||!visible||reviewed;
+    const related=matches.filter(match=>(person.camera==='A'?match.a_id:match.b_id)===person.track_id);
+    figure.classList.toggle('fade-reviewed',related.length>0&&related.every(match=>match.review!=null&&phases.get(match.pair_label)==='fading'));
   }
-  for(const match of matches){
+  for(const match of visibleMatches){
     let card=Array.from($('matchPhotos').children).find(node=>node.dataset.key===match.pair_label);
     if(!card){
       card=document.createElement('article');card.className='match-card';card.dataset.key=match.pair_label;
@@ -167,6 +207,7 @@ function renderPhotos(state){
     }
     card.classList.toggle('reviewed-same',match.review==='same');
     card.classList.toggle('reviewed-different',match.review==='different');
+    card.classList.toggle('fade-reviewed',phases.get(match.pair_label)==='fading');
     card.querySelector('.review-state').textContent=match.review==='same'?'✓ 人工確認：同一人':match.review==='different'?'✕ 人工否決：不是同一人':'待人工審核';
   }
 }

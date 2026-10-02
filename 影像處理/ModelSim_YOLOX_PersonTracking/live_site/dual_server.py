@@ -198,7 +198,7 @@ class DualEngine:
                 raise ValueError("Unknown pair or review decision")
             record = self.matched_pairs[label]
             record["review"] = decision
-            record["reviewed_at"] = datetime.now().isoformat(timespec="seconds")
+            record["reviewed_at"] = datetime.now().isoformat(timespec="milliseconds")
             self._manifest()
             return record
 

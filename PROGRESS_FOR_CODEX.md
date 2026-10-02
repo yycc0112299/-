@@ -142,3 +142,10 @@
 - 程式新增後已用本機 USB camera 0 跑完一次 21.125 秒現場流程：A 43 幀、切換 27 幀、B 45 幀；A/B 偵測數皆 0、A 特徵庫 0 個，沒有候選結果。因此此次只證明相機擷取迴圈及時間切段結束，無法判定特徵交接是否成功，也不能說辨認失敗。執行時畫面中未確認有可偵測人物。結果 JSON 在本機 `modelsim_draft/person_tracking/runs/handoff_20261002_100707/`，沒有保存/上傳影像。
 - 第一次由 PowerShell 啟動時選到 WindowsApps Python alias，啟動失敗；`run_sequential_handoff.ps1` 已調整為優先選 Codex bundled Python，再退回 PATH，後續現場重跑應使用此啟動器。
 - 需要同一人完整出現在 A 與 B 畫面中重跑，才可得到 `candidate_found` 或「B 有人物但未達配對」的有效結果。既有 2026-09-25 雙 USB replay 數據是歷史紀錄，不是此新模式的驗證。
+
+## 2026-10-02 變更紀錄：人工審核照片自動淡出
+
+- `影像處理/ModelSim_YOLOX_PersonTracking/live_site/dual_index.html`：本頁操作以 POST 成功的本機時間開始計算，重整後改用伺服器回傳的 `reviewed_at`。按 ✓／✕ 後，配對照片保留約 5 秒、再淡出約 0.6 秒，然後從 DOM 及版面移除。已審核人物縮圖在沒有其他待審核配對使用該 Track ID 時也收起；未配對人物照與待審核照片仍顯示。頁面保留已審核同／不同人計數及「查看／修改已審核照片」切換，可重新展開改判；頁面重整不會讓舊審核照片永久重現。
+- `dual_server.py` 的 `review_pair` 將審核時間記為毫秒精度 ISO 本機時間，支援較準確的五秒 UI 倒數；舊 manifest 秒級時間仍可解析。`test_dual_server.py` 增加時間格式檢查。
+- 資料流未加入訓練：UI 審核寫入本次工作階段的 `matched_pairs`／`manifest.json`，正面判斷只凍結配對照片，負面判斷另在 `process()` 中轉為同一組 A/B Track ID 的 `excluded_pairs`，傳給 `CrossCameraMatcher.update()`；新工作階段沒有讀回舊標籤，`appearance_similarity()` 仍是固定 HSV 直方圖加權，YOLOX 權重未更動。五秒收起只是網頁視覺行為，本機 JPEG 仍留存至明確按停止時按 manifest 清除。
+- 驗證：`live_site/test_dual_server.py` 6 項合成單元測試 PASS；兩段網頁 JavaScript 語法檢查 PASS；純函數 `reviewPhase()` 的 4999／5000／5599／5600 ms 邊界測試 PASS；目前執行中的 localhost:8766 已從磁碟回傳含新版淡出／重看按鈕的 HTML。未用真人雙鏡頭實拍驗證淡出視覺效果或配對準確率。執行中的 Python 服務未重啟（環境拒絕重啟命令），因此該程序仍以舊版秒級時間寫新審核；頁面操作已用 POST 完成時間作精確倒數，重整後亦可解析舊秒級時間，新啟動服務才會使用毫秒時間。

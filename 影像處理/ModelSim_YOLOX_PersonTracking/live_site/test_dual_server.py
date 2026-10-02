@@ -84,6 +84,7 @@ class SnapshotTests(unittest.TestCase):
                 self.assertEqual(manual["pair_label"], "M1")
                 engine.review_pair("M1", "different")
                 self.assertEqual(engine.matched_pairs["M1"]["review"], "different")
+                self.assertRegex(engine.matched_pairs["M1"]["reviewed_at"], r"\.\d{3}$")
                 before = engine.photos[("A", 1)]["revision"]
                 engine.save_people_and_pairs(frames, observed, [], 1)
                 self.assertEqual(engine.photos[("A", 1)]["revision"], before)

@@ -265,35 +265,49 @@ class DualEngine:
                 self._manifest()
 
     def stop_and_clear(self, camera_a=0, camera_b=1):
-        """Stop and delete only JPEGs registered for this session plus its manifest."""
+        """Stop and clear app-named person JPEGs from current and older sessions."""
         with self.lock:
             self.control(False, camera_a, camera_b)
-            if self.session_id is None:
-                self.state["message"] = "雙鏡頭已停止；本次沒有保存的照片"
-                return 0
-            if re.fullmatch(r"[0-9]{8}_[0-9]{6}_[0-9]{6}", self.session_id) is None:
-                raise ValueError("Invalid capture session")
-            folder = CAPTURE_ROOT / self.session_id
-            filenames = {record["file"] for record in self.photos.values()}
-            if any(re.fullmatch(r"[AB]_[0-9]{4,}\.jpg", name) is None for name in filenames):
-                raise ValueError("Invalid capture filename")
+            if CAPTURE_ROOT.is_symlink():
+                raise ValueError("Capture root must not be a link")
+            root = CAPTURE_ROOT.resolve()
+            current = self.session_id
             deleted = 0
-            for name in filenames:
-                photo = folder / name
-                if photo.exists() or photo.is_symlink():
-                    photo.unlink()
-                    deleted += 1
-            (folder / "manifest.json").unlink(missing_ok=True)
-            try:
-                folder.rmdir()  # Leave any unregistered file untouched.
-            except OSError:
-                pass
+            if CAPTURE_ROOT.is_dir():
+                for folder in CAPTURE_ROOT.iterdir():
+                    if (folder.is_symlink() or not folder.is_dir() or
+                            re.fullmatch(r"[0-9]{8}_[0-9]{6}_[0-9]{6}", folder.name) is None or
+                            folder.resolve().parent != root):
+                        continue
+                    manifest_path = folder / "manifest.json"
+                    if not manifest_path.is_file() or manifest_path.is_symlink():
+                        continue
+                    try:
+                        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+                        if manifest.get("session") != folder.name or not isinstance(manifest.get("people"), list):
+                            continue
+                    except (OSError, ValueError, AttributeError):
+                        continue
+                    filenames = {record.get("file") for record in manifest["people"] if isinstance(record, dict)}
+                    for name in filenames:
+                        if not isinstance(name, str) or re.fullmatch(r"[AB]_[0-9]{4,}\.jpg", name) is None:
+                            continue
+                        photo = folder / name
+                        if photo.is_file() or photo.is_symlink():
+                            photo.unlink()
+                            deleted += 1
+                    if folder.name == current:
+                        (folder / "manifest.json").unlink(missing_ok=True)
+                        try:
+                            folder.rmdir()  # Leave any unregistered file untouched.
+                        except OSError:
+                            pass
             self.photos = {}
             self.matched_pairs = {}
             self.photo_observations = {}
             self.latest_crops = {}
             self.session_id = None
-            self.state["message"] = f"雙鏡頭已停止；已清除本次保存的 {deleted} 張照片"
+            self.state["message"] = f"雙鏡頭已停止；已清除本次及舊工作階段的 {deleted} 張人物照片"
             return deleted
 
     def snapshot(self):

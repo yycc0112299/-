@@ -2,6 +2,12 @@
 
 最後核對：2026-10-02
 
+## 2026-10-02 變更：停止時清除舊工作階段照片
+
+- 使用者補充「舊照片也刪掉」。`live_site/dual_server.py` 的 `stop_and_clear()` 現在在停止後遍歷**僅** `person_tracking/live_captures/` 下名稱符合 `YYYYMMDD_HHMMSS_ffffff` 的直接子資料夾；資料夾須不是 symlink、解析後仍在預期根目錄。每個工作階段只依其非 symlink `manifest.json`、且 `session` 名稱匹配，刪除 `people[].file` 列出、檔名符合 `[AB]_[0-9]{4,}.jpg` 的直接 JPEG。未登記 JPEG、其他檔案／資料夾、舊 manifest 保留；本次 manifest 仍按先前停止規則移除。沒有目前 session 也可按停止清舊照。API `deleted_photos` 和頁面訊息回報所有工作階段的刪除張數。
+- `dual_index.html` 按鈕與說明改成「停止雙鏡頭並清除全部人物照片」。`test_dual_server.py` 改驗本次+舊工作階段登記照片刪除，未登記同命名 JPG、不同目錄 JPG、舊 manifest／其他檔案保留，重複停止安全。
+- 實機操作：先核對 `live_captures` 8 個工作階段各有合法 manifest，549 張 A/B JPG 均列於 `people[].file`，無未登記同命名 JPG；停止原服務防止繼續拍攝，啟動新版後在無 active session 下呼叫 `/api/stop`，回報 `deleted_photos=549`。事後以同一目錄範圍複查，剩餘人物 JPG 為 0、8 份舊 manifest 保留，`/api/live` 為 stopped 且 `saved_people=[]`。未觸及 repo 其他未追蹤檔案。新增無 active session 的舊照清除單元測試。
+
 ## 2026-10-02 變更：多影格特徵、最佳人物照與人工審核
 
 - 原本保存的首張人物 JPEG **不參與**跨鏡頭分數計算；分數取當次推論影格的衣著特徵。因此首張是側面照主要妨礙人工判讀，不直接造成配對失敗；實際低分/模糊候選仍可能來自視角、裁切、曝光與多人衣著相近。`live_site/dual_server.py` 新增 `AppearanceHistory`，每個鏡頭／Track ID 將最近五次特徵平均後與當前特徵各占一半，再交給既有 matcher；0.72 門檻、0.08 歧義差與三次連續 P 規則未變，尚未宣稱配對準確率改善。

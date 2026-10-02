@@ -112,20 +112,29 @@ class SnapshotTests(unittest.TestCase):
         np.testing.assert_allclose(blended, .25 * dark + .75 * light)
         np.testing.assert_allclose(history.update("B", 1, dark), dark)
 
-    def test_explicit_stop_deletes_only_current_registered_photos(self):
+    def test_explicit_stop_deletes_current_and_old_registered_photos_only(self):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
             current = root / "20261002_120000_000001"
             previous = root / "20261002_110000_000001"
+            unrelated_folder = root / "not-a-camera-session"
             current.mkdir()
             previous.mkdir()
+            unrelated_folder.mkdir()
+            unrelated_photo = unrelated_folder / "A_0007.jpg"
+            unrelated_photo.write_bytes(b"unrelated")
             photo = current / "A_0001.jpg"
             photo.write_bytes(b"test JPEG")
-            (current / "manifest.json").write_text("{}", encoding="utf-8")
+            (current / "manifest.json").write_text(
+                json.dumps({"session": current.name, "people": [{"file": photo.name}]}), encoding="utf-8")
             unrelated = current / "my-notes.txt"
             unrelated.write_text("keep me", encoding="utf-8")
+            unregistered = current / "A_0999.jpg"
+            unregistered.write_bytes(b"do not delete")
             older_photo = previous / "B_0002.jpg"
             older_photo.write_bytes(b"older JPEG")
+            (previous / "manifest.json").write_text(
+                json.dumps({"session": previous.name, "people": [{"file": older_photo.name}]}), encoding="utf-8")
             engine = dual_server.DualEngine.__new__(dual_server.DualEngine)
             engine.lock = threading.RLock()
             engine.enabled = True
@@ -139,14 +148,41 @@ class SnapshotTests(unittest.TestCase):
             with patch.object(dual_server, "CAPTURE_ROOT", root):
                 engine.control(False, 2, 1)  # Automatic inactivity stop does not delete.
                 self.assertTrue(photo.exists())
-                self.assertEqual(engine.stop_and_clear(2, 1), 1)
+                self.assertEqual(engine.stop_and_clear(2, 1), 2)
                 self.assertFalse(photo.exists())
                 self.assertFalse((current / "manifest.json").exists())
                 self.assertTrue(unrelated.exists())
-                self.assertTrue(older_photo.exists())
+                self.assertTrue(unregistered.exists())
+                self.assertTrue(unrelated_photo.exists())
+                self.assertFalse(older_photo.exists())
+                self.assertTrue((previous / "manifest.json").exists())
                 self.assertIsNone(engine.snapshot()["session"])
                 self.assertEqual(engine.snapshot()["saved_people"], [])
                 self.assertEqual(engine.stop_and_clear(2, 1), 0)
+
+    def test_stop_clears_old_photos_without_an_active_session(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            folder = root / "20261002_110000_000001"
+            folder.mkdir()
+            photo = folder / "B_0002.jpg"
+            photo.write_bytes(b"old JPEG")
+            (folder / "manifest.json").write_text(
+                json.dumps({"session": folder.name, "people": [{"file": photo.name}]}), encoding="utf-8")
+            engine = dual_server.DualEngine.__new__(dual_server.DualEngine)
+            engine.lock = threading.RLock()
+            engine.enabled = False
+            engine.epoch = 1
+            engine.session_id = None
+            engine.cameras = (2, 1)
+            engine.photos = {}
+            engine.matched_pairs = {}
+            engine.state = engine._state("stopped", "test")
+            engine.images = [None, None]
+            with patch.object(dual_server, "CAPTURE_ROOT", root):
+                self.assertEqual(engine.stop_and_clear(2, 1), 1)
+                self.assertFalse(photo.exists())
+                self.assertTrue((folder / "manifest.json").exists())
 
 
 if __name__ == "__main__":

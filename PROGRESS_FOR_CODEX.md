@@ -2,6 +2,13 @@
 
 最後核對：2026-10-02
 
+## 2026-10-02 變更：雙鏡頭人物照片保存及配對核對
+
+- `live_site/dual_server.py`：每次 `/api/start` 建立 `person_tracking/live_captures/<時間戳>/`；處理執行緒對每個鏡頭的每個 `status=confirmed` Track ID 首次出現時裁切人物框，存為一張 JPEG，並更新 `manifest.json`。原始連續影格仍只在記憶體中。`/api/live` 新增 `session`、`saved_people`、`matched_pairs`；`/api/photo/A|B/<track_id>` 只讀取目前工作階段已登記的照片，不接受任意檔案路徑。Host/Origin 防護及 loopback 限制保留。
+- `live_site/dual_index.html`：顯示本次已保存照片；對 `confirmed_candidate` 且有 P 標籤、兩側照片均存在的配對，保留 A/B 並排照片、ID 與分數供人工檢查。新工作階段清空頁面舊卡片，但不刪硬碟照片。照片 DOM 節點不隨每次輪詢重建，避免反覆下載 JPEG。
+- `.gitignore` 排除 `person_tracking/live_captures/`；相機照片與 manifest 不上傳 GitHub。限制：只存每個已確認 Track ID 的首張裁切照，並非連續錄影；遮擋/重建 ID 可使同一人有多張。P 是衣著外觀候選而非身分確認，人工仍須核對。ModelSim 不在即時網站迴圈中。
+- 驗證：`live_site/test_dual_server.py` 以合成影格確認 A/B JPEG 各只存一張、manifest 及 P 配對含兩張照片 URL；單元測試 PASS。重啟本機服務後用實體鏡頭 2/1 檢查 `/api/live` 為 live、雙側人物照片有保存、`/api/photo/A/1` 回傳 JPEG 200、瀏覽器照片載入無破圖。當次多人場景只見 ambiguous 候選，尚無真實 P 配對可供現場人工正誤核對；並排照片的資料流程由合成測試確認，實機配對展示仍待兩鏡頭出現滿足門檻的同一人。
+
 ## 2026-10-02 變更：跨鏡頭外觀分數修正
 
 - 使用者提供同一人出現在兩台鏡頭、A 鏡頭只見部分身體的截圖，舊版網頁分數約 0.367。舊特徵使用 192 格 HSV 直方圖，且取上下兩區較低的交集分數，對曝光及視角裁切敏感。

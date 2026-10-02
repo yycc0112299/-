@@ -9,6 +9,7 @@
 /results/
 /person_tracking/runs/
 /person_tracking/dual_runs/
+/person_tracking/live_captures/
 /person_tracking/tests/*/
 /person_tracking/verification_report.html
 /modelsim.ini

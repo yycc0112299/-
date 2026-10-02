@@ -1,15 +1,18 @@
-"""Loopback-only dual USB-camera tracking dashboard. Frames remain in memory."""
+"""Loopback-only dual USB-camera dashboard with local person snapshots."""
 import argparse
 import base64
 import json
+import re
 import sys
 import threading
 import time
 import webbrowser
+from datetime import datetime
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
+CAPTURE_ROOT = ROOT.parent / "person_tracking" / "live_captures"
 sys.path.insert(0, str(ROOT.parent / "person_tracking"))
 import pipeline as p
 from cross_camera import CrossCameraMatcher
@@ -26,6 +29,9 @@ class DualEngine:
         self.raw = None
         self.images = [None, None]
         self.capture_id = 0
+        self.session_id = None
+        self.photos = {}
+        self.matched_pairs = {}
         self.state = self._state("stopped", "尚未啟動雙鏡頭")
         threading.Thread(target=self.capture, daemon=True).start()
         threading.Thread(target=self.process, daemon=True).start()
@@ -35,10 +41,79 @@ class DualEngine:
         return dict(status=status, message=message, cameras=[0, 1], people=[[], []],
                     pairs=[], fps=0, latency_ms=0, frame_id=0)
 
+    def _manifest(self):
+        if self.session_id is None:
+            return
+        data = dict(session=self.session_id, cameras=list(self.cameras),
+                    people=list(self.photos.values()), pairs=list(self.matched_pairs.values()))
+        (CAPTURE_ROOT / self.session_id / "manifest.json").write_text(
+            json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
+
+    def save_people_and_pairs(self, frames, observed, pairs, epoch):
+        """Store one crop per confirmed local track and retain confirmed P candidates."""
+        with self.lock:
+            if not self.enabled or self.epoch != epoch or self.session_id is None:
+                return
+            changed = False
+            folder = CAPTURE_ROOT / self.session_id
+            for camera, detections in enumerate(observed):
+                frame = frames[camera]
+                height, width = frame.shape[:2]
+                side = "AB"[camera]
+                for item in detections:
+                    track_id = int(item["track_id"])
+                    key = (side, track_id)
+                    if item["status"] != "confirmed" or key in self.photos:
+                        continue
+                    x0, y0, x1, y1 = [int(n) for n in item["box"]]
+                    x0, y0 = max(0, x0), max(0, y0)
+                    x1, y1 = min(width, x1), min(height, y1)
+                    if x1 - x0 < 8 or y1 - y0 < 8:
+                        continue
+                    ok, jpeg = p.cv2.imencode(".jpg", frame[y0:y1, x0:x1],
+                                              [p.cv2.IMWRITE_JPEG_QUALITY, 90])
+                    if not ok:
+                        continue
+                    filename = f"{side}_{track_id:04d}.jpg"
+                    (folder / filename).write_bytes(jpeg.tobytes())
+                    self.photos[key] = dict(camera=side, track_id=track_id,
+                                            photo_url=f"/api/photo/{side}/{track_id}",
+                                            file=filename, captured_at=datetime.now().isoformat(timespec="seconds"))
+                    changed = True
+            for pair in pairs:
+                if pair["status"] != "confirmed_candidate" or not pair.get("pair_label"):
+                    continue
+                photo_a = self.photos.get(("A", pair["a_id"]))
+                photo_b = self.photos.get(("B", pair["b_id"]))
+                if not photo_a or not photo_b:
+                    continue
+                label = pair["pair_label"]
+                record = dict(pair_label=label, a_id=pair["a_id"], b_id=pair["b_id"],
+                              score=pair["score"], photo_a_url=photo_a["photo_url"],
+                              photo_b_url=photo_b["photo_url"],
+                              matched_at=datetime.now().isoformat(timespec="seconds"))
+                if label not in self.matched_pairs:
+                    self.matched_pairs[label] = record
+                    changed = True
+            if changed:
+                self._manifest()
+
+    def photo(self, side, track_id):
+        with self.lock:
+            record = self.photos.get((side, track_id))
+            if record is None or self.session_id is None:
+                return None
+            return (CAPTURE_ROOT / self.session_id / record["file"]).read_bytes()
+
     def control(self, enabled, camera_a=0, camera_b=1):
         if camera_a == camera_b:
             raise ValueError("請選擇兩個不同的鏡頭編號")
         with self.lock:
+            if enabled:
+                self.session_id = datetime.now().strftime("%Y%m%d_%H%M%S_%f")
+                (CAPTURE_ROOT / self.session_id).mkdir(parents=True, exist_ok=False)
+                self.photos = {}
+                self.matched_pairs = {}
             self.enabled = enabled
             self.cameras = (camera_a, camera_b)
             self.epoch += 1
@@ -48,11 +123,15 @@ class DualEngine:
             self.state = self._state("connecting" if enabled else "stopped",
                                      "正在連接兩台 USB 攝影機…" if enabled else "雙鏡頭已停止")
             self.state["cameras"] = list(self.cameras)
+            if enabled:
+                self._manifest()
 
     def snapshot(self):
         with self.lock:
             self.heartbeat = time.monotonic()
-            return dict(self.state, images=list(self.images), enabled=self.enabled)
+            return dict(self.state, images=list(self.images), enabled=self.enabled,
+                        session=self.session_id, saved_people=list(self.photos.values()),
+                        matched_pairs=list(self.matched_pairs.values()))
 
     def capture(self):
         while True:
@@ -143,6 +222,7 @@ class DualEngine:
                         item["appearance"] = appearance(frame, item["box"])
                     observed.append(detections)
                 pairs = matcher.update(*observed)
+                self.save_people_and_pairs(frames, observed, pairs, epoch)
                 people = []
                 for camera, frame in enumerate(frames):
                     clean = []
@@ -196,6 +276,10 @@ class Handler(BaseHTTPRequestHandler):
             return self.send_body(200, {"app": "usb-dual-person-live", "version": 1})
         if self.path == "/api/live":
             return self.send_body(200, self.server.engine.snapshot())
+        photo = re.fullmatch(r"/api/photo/([AB])/([1-9][0-9]*)", self.path)
+        if photo:
+            body = self.server.engine.photo(photo.group(1), int(photo.group(2)))
+            return self.send_body(200, body, "image/jpeg") if body is not None else self.send_body(404, {"error": "Not found"})
         if self.path == "/":
             return self.send_body(200, (ROOT / "dual_index.html").read_bytes(), "text/html; charset=utf-8")
         self.send_body(404, {"error": "Not found"})

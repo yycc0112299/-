@@ -25,6 +25,7 @@ class DualEngine:
         self.heartbeat = 0.0
         self.raw = None
         self.images = [None, None]
+        self.capture_id = 0
         self.state = self._state("stopped", "尚未啟動雙鏡頭")
         threading.Thread(target=self.capture, daemon=True).start()
         threading.Thread(target=self.process, daemon=True).start()
@@ -64,6 +65,7 @@ class DualEngine:
                 time.sleep(.1)
                 continue
             caps = []
+            last_encoded = 0.0
             try:
                 for index in indexes:
                     cap = p.cv2.VideoCapture(index, p.cv2.CAP_DSHOW)
@@ -84,9 +86,23 @@ class DualEngine:
                         if not ok or frame.shape != (480, 640, 3):
                             raise RuntimeError("兩台鏡頭都必須輸出原生 640 × 480")
                         frames.append(frame)
+                    now = time.monotonic()
+                    images = None
+                    if now - last_encoded >= .1:
+                        images = []
+                        for frame in frames:
+                            ok, jpg = p.cv2.imencode(".jpg", frame, [p.cv2.IMWRITE_JPEG_QUALITY, 70])
+                            if not ok:
+                                raise RuntimeError("影像編碼失敗")
+                            images.append(base64.b64encode(jpg).decode("ascii"))
+                        last_encoded = now
                     with self.lock:
                         if self.epoch == epoch:
-                            self.raw = (frames, time.monotonic(), epoch, self.state["frame_id"] + 1)
+                            self.capture_id += 1
+                            self.raw = (frames, now, epoch, self.capture_id)
+                            if images is not None:
+                                self.images = images
+                            self.state.update(frame_id=self.capture_id, cameras=list(indexes))
             except Exception as error:
                 with self.lock:
                     if self.epoch == epoch:
@@ -127,31 +143,18 @@ class DualEngine:
                         item["appearance"] = appearance(frame, item["box"])
                     observed.append(detections)
                 pairs = matcher.update(*observed)
-                encoded, people = [], []
+                people = []
                 for camera, frame in enumerate(frames):
-                    view = frame.copy()
                     clean = []
                     for item in observed[camera]:
-                        x0, y0, x1, y1 = item["box"]
-                        labels = [pair["pair_label"] for pair in pairs
-                                  if pair["status"] == "confirmed_candidate"
-                                  and pair[("a_id", "b_id")[camera]] == item["track_id"]]
-                        p.cv2.rectangle(view, (x0, y0), (x1, y1), (80, 230, 110), 2)
-                        text = f"{'AB'[camera]}:{item['track_id']} " + (" ".join(labels) or "tracking")
-                        p.cv2.putText(view, text, (x0, max(20, y0 - 6)), p.cv2.FONT_HERSHEY_SIMPLEX, .58, (80, 230, 110), 2)
                         clean.append({key: value for key, value in item.items() if key not in {"hist", "appearance"}})
-                    ok, jpg = p.cv2.imencode(".jpg", view, [p.cv2.IMWRITE_JPEG_QUALITY, 82])
-                    if not ok:
-                        raise RuntimeError("影像編碼失敗")
-                    encoded.append(base64.b64encode(jpg).decode("ascii"))
                     people.append(clean)
                 now = time.monotonic()
                 with self.lock:
                     if self.enabled and self.epoch == epoch:
-                        self.images = encoded
                         self.state.update(status="live", message="雙鏡頭追蹤中；P 標籤只代表外觀候選",
                                           people=people, pairs=pairs, fps=round(1 / max(.001, now - last), 1),
-                                          latency_ms=round((now - stamp) * 1000), frame_id=frame_id,
+                                          latency_ms=round((now - stamp) * 1000),
                                           cameras=list(self.cameras), inference_ms=round((now - started) * 1000))
                         last = now
             except Exception as error:

@@ -10,6 +10,8 @@
 
 2026-10-02 新增雙鏡頭 localhost 儀表板 `live_site/dual_server.py` 與 `dual_index.html`：可同時顯示 A/B USB 畫面、兩側本地 Track ID 及跨鏡頭外觀候選。實機以內建鏡頭與 Logitech C270 擷取各 30 張，兩側各完成 30 個 ROI 的 ModelSim 驗證 PASS；本次未產生已確認 P 候選。
 
+儀表板後續改為「最新相機影格」與「背景 AI 標註」分離更新。實機頁面約 9 FPS，AI 約 1.6 FPS、延遲約 0.7 秒；影像不再等待 YOLOX 完成才更新。
+
 ## 驗證狀況
 
 - 單鏡頭已保存兩輪 USB 實拍紀錄，共 240 張；偵測/追蹤及 ModelSim 特徵核對通過。

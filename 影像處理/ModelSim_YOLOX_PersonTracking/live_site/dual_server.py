@@ -126,6 +126,36 @@ class DualEngine:
             if enabled:
                 self._manifest()
 
+    def stop_and_clear(self, camera_a=0, camera_b=1):
+        """Stop and delete only JPEGs registered for this session plus its manifest."""
+        with self.lock:
+            self.control(False, camera_a, camera_b)
+            if self.session_id is None:
+                self.state["message"] = "雙鏡頭已停止；本次沒有保存的照片"
+                return 0
+            if re.fullmatch(r"[0-9]{8}_[0-9]{6}_[0-9]{6}", self.session_id) is None:
+                raise ValueError("Invalid capture session")
+            folder = CAPTURE_ROOT / self.session_id
+            filenames = {record["file"] for record in self.photos.values()}
+            if any(re.fullmatch(r"[AB]_[0-9]{4,}\.jpg", name) is None for name in filenames):
+                raise ValueError("Invalid capture filename")
+            deleted = 0
+            for name in filenames:
+                photo = folder / name
+                if photo.exists() or photo.is_symlink():
+                    photo.unlink()
+                    deleted += 1
+            (folder / "manifest.json").unlink(missing_ok=True)
+            try:
+                folder.rmdir()  # Leave any unregistered file untouched.
+            except OSError:
+                pass
+            self.photos = {}
+            self.matched_pairs = {}
+            self.session_id = None
+            self.state["message"] = f"雙鏡頭已停止；已清除本次保存的 {deleted} 張照片"
+            return deleted
+
     def snapshot(self):
         with self.lock:
             self.heartbeat = time.monotonic()
@@ -297,12 +327,18 @@ class Handler(BaseHTTPRequestHandler):
             camera_a, camera_b = data.get("camera_a", 0), data.get("camera_b", 1)
             if type(camera_a) is not int or type(camera_b) is not int or not all(0 <= item <= 9 for item in (camera_a, camera_b)):
                 raise ValueError()
-            self.server.engine.control(self.path == "/api/start", camera_a, camera_b)
+            if self.path == "/api/start":
+                self.server.engine.control(True, camera_a, camera_b)
+                result = {"ok": True}
+            elif self.path == "/api/stop":
+                result = {"ok": True, "deleted_photos": self.server.engine.stop_and_clear(camera_a, camera_b)}
+            else:
+                return self.send_body(404, {"error": "Not found"})
         except (ValueError, TypeError):
             return self.send_body(400, {"error": "Invalid request; choose two different camera indexes"})
-        if self.path not in {"/api/start", "/api/stop"}:
-            return self.send_body(404, {"error": "Not found"})
-        self.send_body(200, {"ok": True})
+        except OSError:
+            return self.send_body(500, {"error": "Could not clear all saved photos; check the local capture folder"})
+        self.send_body(200, result)
 
 
 def main():

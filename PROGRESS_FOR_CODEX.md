@@ -2,6 +2,12 @@
 
 最後核對：2026-10-02
 
+## 2026-10-02 變更：手動停止時只清除本次人物照片
+
+- `live_site/dual_server.py` 新增 `stop_and_clear()`：`POST /api/stop` 先停鏡頭並切換 epoch，鎖內只刪目前 `session_id` 工作階段中 `self.photos` 已登記的 JPEG 及該次 `manifest.json`，清空本次照片／P 候選狀態；資料夾僅在已空時移除。舊工作階段、未登記檔案、其他專題資料均不碰。10 秒無頁面輪詢的自動停鏡頭仍走 `control(False)`，不刪照片。API 成功回傳 `deleted_photos`，頁面訊息顯示數量。
+- 網頁停止按鈕與說明文字更新為「停止雙鏡頭並清除本次照片」。單元測試加入本次照片／manifest 刪除、舊工作階段與未登記檔案保留、重複停止，以及非手動停鏡頭不刪除等檢查。此變更不追溯刪除先前已有的本機照片，需使用者另行指定範圍。
+- 驗證：兩項 `live_site/test_dual_server.py` 單元測試 PASS。新版服務用實體鏡頭 2/1 啟動工作階段 `20261002_160018_047057`，停止 API 回報刪除 17 張本次 JPEG；之後 `/api/live` 為 `stopped`、`saved_people=[]`、`session=null`，本次資料夾已移除，先前 `20261002_155716_106196` 資料夾仍存在。網頁按鈕沿用同一 `/api/stop` 路徑；未另外做手動 UI 點擊驗證。
+
 ## 2026-10-02 變更：雙鏡頭人物照片保存及配對核對
 
 - `live_site/dual_server.py`：每次 `/api/start` 建立 `person_tracking/live_captures/<時間戳>/`；處理執行緒對每個鏡頭的每個 `status=confirmed` Track ID 首次出現時裁切人物框，存為一張 JPEG，並更新 `manifest.json`。原始連續影格仍只在記憶體中。`/api/live` 新增 `session`、`saved_people`、`matched_pairs`；`/api/photo/A|B/<track_id>` 只讀取目前工作階段已登記的照片，不接受任意檔案路徑。Host/Origin 防護及 loopback 限制保留。

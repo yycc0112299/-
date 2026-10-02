@@ -149,3 +149,10 @@
 - `dual_server.py` 的 `review_pair` 將審核時間記為毫秒精度 ISO 本機時間，支援較準確的五秒 UI 倒數；舊 manifest 秒級時間仍可解析。`test_dual_server.py` 增加時間格式檢查。
 - 資料流未加入訓練：UI 審核寫入本次工作階段的 `matched_pairs`／`manifest.json`，正面判斷只凍結配對照片，負面判斷另在 `process()` 中轉為同一組 A/B Track ID 的 `excluded_pairs`，傳給 `CrossCameraMatcher.update()`；新工作階段沒有讀回舊標籤，`appearance_similarity()` 仍是固定 HSV 直方圖加權，YOLOX 權重未更動。五秒收起只是網頁視覺行為，本機 JPEG 仍留存至明確按停止時按 manifest 清除。
 - 驗證：`live_site/test_dual_server.py` 6 項合成單元測試 PASS；兩段網頁 JavaScript 語法檢查 PASS；純函數 `reviewPhase()` 的 4999／5000／5599／5600 ms 邊界測試 PASS；目前執行中的 localhost:8766 已從磁碟回傳含新版淡出／重看按鈕的 HTML。未用真人雙鏡頭實拍驗證淡出視覺效果或配對準確率。執行中的 Python 服務未重啟（環境拒絕重啟命令），因此該程序仍以舊版秒級時間寫新審核；頁面操作已用 POST 完成時間作精確倒數，重整後亦可解析舊秒級時間，新啟動服務才會使用毫秒時間。
+
+## 2026-10-02 變更紀錄：保留既有版本並同步目前進度
+
+- 同步前 `HEAD` 與 `origin/main` 均為 `47773ef`，工作樹只有兩份未追蹤的精簡測試紀錄；既有程式、雙鏡頭網站、人工審核與五秒淡出已在遠端。本次採追加提交，不 force push、不刪除或覆蓋既有內容。
+- 新納入 `影像處理/MCDPT_Verilog_Two_Image_ReID/modelsim_transcript_20261002.txt`：2026-10-02 00:28 的早期 8×8 RTL testbench 執行紀錄，`vlog` 顯示 0 errors／0 warnings，`vsim` 印出 3 個同人 frame `same = 1`、1 個不同人 `same = 0`，最後 `two camera color test ok`、0 errors／0 warnings。此檔為已存在的本機紀錄，本次只檢查文字並歸檔，沒有重新執行 ModelSim；不可當成最新 640×480 YOLOX／雙實體 USB 流程通過的證據。
+- 新納入 `影像處理/ModelSim_YOLOX_PersonTracking/person_tracking/tests/tracking_results.json`：既有測試摘要記載 `tests_run=6`、`failures=0`、`errors=0`、`status=PASS`；本次尚未確認其個別測試案例或重新執行。被 `.gitignore` 排除的 `tests/rtl_*/` 逐次輸出中另有 `summary.json` 記載 5 個手算區域、307200 pixels/frame、PASS，但它和 WLF、完整 run 產物仍不入 Git；歷史驗證請區分摘要與原始輸出。
+- `PROJECT_CONTENTS.md` 與 `PROGRESS_FOR_HUMANS.md` 更新共享範圍。`person_tracking/live_captures/` 的人物 JPEG／審核 manifest、下載的 YOLOX 權重、相機影格、大型 replay／run 與 WLF 等仍保留本機，不因本次「同步全部」而上傳；這遵循既有隱私與產物排除決策。若後續確實需要共享含人物的標註資料，應另行界定同意、匿名化及存取方式。

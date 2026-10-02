@@ -25,3 +25,10 @@
 - `automation/join-weekly-google-meet.ps1`、`.line-read-state.json`、`transcript` 及根目錄 Vivado 執行記錄：與專題交付無關或屬於個人/應用程式狀態。
 
 盤點涵蓋當日 Codex「專題」工作資料夾中可見的檔案與目錄。未把個人偏好、Codex 設定或本機帳號資料寫入共享內容。
+
+## 2026-10-02 補充同步
+
+- `影像處理/MCDPT_Verilog_Two_Image_ReID/modelsim_transcript_20261002.txt`：早期 8×8 雙相機色彩比對 testbench 的小型 ModelSim 執行紀錄；它是舊原型的驗證證據，不代表最新 YOLOX／雙 USB 網站已通過相同測試。
+- `影像處理/ModelSim_YOLOX_PersonTracking/person_tracking/tests/tracking_results.json`：既有追蹤測試的精簡結果檔，記載 6 項、0 failures、0 errors、PASS；僅保存摘要，不納入旁邊被忽略的逐次輸出資料夾。
+- 目前版本的雙鏡頭網站、人工審核、照片五秒淡出、停止後清除照片，以及詳細限制，已在最新版程式、`live_site/README.md` 與兩份進度文件中保留；本次是增量提交，不改寫或覆蓋既有 Git 歷史。
+- 仍不共享 `live_captures/` 人物照片／審核 manifest、模型權重、波形、相機影格和大型生成報告。這些資料含個人影像或為本機產物，不因「同步全部進度」而強制加入 Git。

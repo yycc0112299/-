@@ -7,9 +7,13 @@ import sys
 import threading
 import time
 import webbrowser
+from collections import deque
 from datetime import datetime
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
+from urllib.parse import urlsplit
+
+import numpy as np
 
 ROOT = Path(__file__).resolve().parent
 CAPTURE_ROOT = ROOT.parent / "person_tracking" / "live_captures"
@@ -17,6 +21,49 @@ sys.path.insert(0, str(ROOT.parent / "person_tracking"))
 import pipeline as p
 from cross_camera import CrossCameraMatcher
 from dual_camera import appearance
+
+FACE_CASCADE = p.cv2.CascadeClassifier(
+    str(Path(p.cv2.data.haarcascades) / "haarcascade_frontalface_default.xml"))
+
+
+def snapshot_quality(frame, box, confidence, check_face=True):
+    """Score a person crop; frontal-face detection improves review photos only."""
+    height, width = frame.shape[:2]
+    x0, y0, x1, y1 = [int(n) for n in box]
+    x0, y0 = max(0, x0), max(0, y0)
+    x1, y1 = min(width, x1), min(height, y1)
+    if x1 - x0 < 8 or y1 - y0 < 8:
+        return None
+    crop = frame[y0:y1, x0:x1]
+    gray = p.cv2.cvtColor(crop, p.cv2.COLOR_BGR2GRAY)
+    sharpness = float(p.cv2.Laplacian(gray, p.cv2.CV_64F).var())
+    face_found = False
+    if check_face and not FACE_CASCADE.empty() and crop.shape[0] >= 60 and crop.shape[1] >= 40:
+        upper = gray[: max(1, int(gray.shape[0] * .65))]
+        scale = min(1.0, 180 / max(upper.shape))
+        resized = p.cv2.resize(upper, None, fx=scale, fy=scale) if scale < 1 else upper
+        faces = FACE_CASCADE.detectMultiScale(resized, scaleFactor=1.1, minNeighbors=4,
+                                               minSize=(18, 18))
+        face_found = len(faces) > 0
+    area = (x1 - x0) * (y1 - y0) / (width * height)
+    complete = int(x0 > 2 and y0 > 2 and x1 < width - 2 and y1 < height - 2)
+    quality = (1.5 * face_found + .8 * min(1.0, area / .30)
+               + .35 * min(1.0, sharpness / 180) + .3 * complete
+               + .25 * float(confidence))
+    return crop, quality, face_found
+
+
+class AppearanceHistory:
+    """Smooth recent clothing features without retaining full video frames."""
+    def __init__(self, length=5):
+        self.length = length
+        self.samples = {}
+
+    def update(self, side, track_id, feature):
+        key = (side, track_id)
+        samples = self.samples.setdefault(key, deque(maxlen=self.length))
+        samples.append(feature)
+        return .5 * feature + .5 * np.mean(samples, axis=0)
 
 
 class DualEngine:
@@ -32,6 +79,8 @@ class DualEngine:
         self.session_id = None
         self.photos = {}
         self.matched_pairs = {}
+        self.photo_observations = {}
+        self.latest_crops = {}
         self.state = self._state("stopped", "尚未啟動雙鏡頭")
         threading.Thread(target=self.capture, daemon=True).start()
         threading.Thread(target=self.process, daemon=True).start()
@@ -50,36 +99,55 @@ class DualEngine:
             json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
 
     def save_people_and_pairs(self, frames, observed, pairs, epoch):
-        """Store one crop per confirmed local track and retain confirmed P candidates."""
+        """Replace weak snapshots with better views and retain reviewable pairs."""
+        candidates = []
+        for camera, detections in enumerate(observed):
+            side = "AB"[camera]
+            for item in detections:
+                if item["status"] != "confirmed":
+                    continue
+                track_id = int(item["track_id"])
+                key = (side, track_id)
+                counter_key = (epoch, side, track_id)
+                count = self.photo_observations.get(counter_key, 0) + 1
+                self.photo_observations[counter_key] = count
+                candidate = snapshot_quality(frames[camera], item["box"],
+                                             item.get("confidence", 0),
+                                             check_face=(count == 1 or count % 3 == 0))
+                if candidate is not None:
+                    candidates.append((key, *candidate))
         with self.lock:
             if not self.enabled or self.epoch != epoch or self.session_id is None:
                 return
             changed = False
             folder = CAPTURE_ROOT / self.session_id
-            for camera, detections in enumerate(observed):
-                frame = frames[camera]
-                height, width = frame.shape[:2]
-                side = "AB"[camera]
-                for item in detections:
-                    track_id = int(item["track_id"])
-                    key = (side, track_id)
-                    if item["status"] != "confirmed" or key in self.photos:
-                        continue
-                    x0, y0, x1, y1 = [int(n) for n in item["box"]]
-                    x0, y0 = max(0, x0), max(0, y0)
-                    x1, y1 = min(width, x1), min(height, y1)
-                    if x1 - x0 < 8 or y1 - y0 < 8:
-                        continue
-                    ok, jpeg = p.cv2.imencode(".jpg", frame[y0:y1, x0:x1],
-                                              [p.cv2.IMWRITE_JPEG_QUALITY, 90])
-                    if not ok:
-                        continue
-                    filename = f"{side}_{track_id:04d}.jpg"
-                    (folder / filename).write_bytes(jpeg.tobytes())
-                    self.photos[key] = dict(camera=side, track_id=track_id,
-                                            photo_url=f"/api/photo/{side}/{track_id}",
-                                            file=filename, captured_at=datetime.now().isoformat(timespec="seconds"))
-                    changed = True
+            self.latest_crops = {key: (crop.copy(), quality, face_found, time.monotonic())
+                                 for key, crop, quality, face_found in candidates}
+            for (side, track_id), crop, quality, face_found in candidates:
+                key = (side, track_id)
+                current = self.photos.get(key)
+                frozen = any(record.get("review") is not None and
+                             (record["a_id"] == track_id if side == "A" else record["b_id"] == track_id)
+                             for record in self.matched_pairs.values())
+                if frozen or (current and (current.get("locked") or quality < current.get("quality", -1) + .08)):
+                    continue
+                ok, jpeg = p.cv2.imencode(".jpg", crop, [p.cv2.IMWRITE_JPEG_QUALITY, 90])
+                if not ok:
+                    continue
+                filename = f"{side}_{track_id:04d}.jpg"
+                (folder / filename).write_bytes(jpeg.tobytes())
+                revision = (current or {}).get("revision", 0) + 1
+                self.photos[key] = dict(camera=side, track_id=track_id,
+                                        photo_url=f"/api/photo/{side}/{track_id}?v={revision}",
+                                        file=filename, captured_at=datetime.now().isoformat(timespec="seconds"),
+                                        revision=revision, quality=round(quality, 3), face_detected=face_found,
+                                        locked=False)
+                for record in self.matched_pairs.values():
+                    if record["a_id"] == track_id and side == "A":
+                        record["photo_a_url"] = self.photos[key]["photo_url"]
+                    if record["b_id"] == track_id and side == "B":
+                        record["photo_b_url"] = self.photos[key]["photo_url"]
+                changed = True
             for pair in pairs:
                 if pair["status"] != "confirmed_candidate" or not pair.get("pair_label"):
                     continue
@@ -87,9 +155,17 @@ class DualEngine:
                 photo_b = self.photos.get(("B", pair["b_id"]))
                 if not photo_a or not photo_b:
                     continue
+                existing = next((record for record in self.matched_pairs.values()
+                                 if record["a_id"] == pair["a_id"] and record["b_id"] == pair["b_id"]), None)
+                if existing is not None:
+                    if existing["score"] is None:
+                        existing["score"] = pair["score"]
+                        changed = True
+                    continue
                 label = pair["pair_label"]
                 record = dict(pair_label=label, a_id=pair["a_id"], b_id=pair["b_id"],
-                              score=pair["score"], photo_a_url=photo_a["photo_url"],
+                              score=pair["score"], source="auto", review=None,
+                              photo_a_url=photo_a["photo_url"],
                               photo_b_url=photo_b["photo_url"],
                               matched_at=datetime.now().isoformat(timespec="seconds"))
                 if label not in self.matched_pairs:
@@ -97,6 +173,66 @@ class DualEngine:
                     changed = True
             if changed:
                 self._manifest()
+
+    def add_manual_pair(self, a_id, b_id):
+        with self.lock:
+            if self.session_id is None or ("A", a_id) not in self.photos or ("B", b_id) not in self.photos:
+                raise ValueError("Select two saved person photos from the current session")
+            for record in self.matched_pairs.values():
+                if record["a_id"] == a_id and record["b_id"] == b_id:
+                    return record
+            number = 1 + sum(label.startswith("M") for label in self.matched_pairs)
+            label = f"M{number}"
+            record = dict(pair_label=label, a_id=a_id, b_id=b_id, score=None,
+                          source="manual", review=None,
+                          photo_a_url=self.photos[("A", a_id)]["photo_url"],
+                          photo_b_url=self.photos[("B", b_id)]["photo_url"],
+                          matched_at=datetime.now().isoformat(timespec="seconds"))
+            self.matched_pairs[label] = record
+            self._manifest()
+            return record
+
+    def review_pair(self, label, decision):
+        with self.lock:
+            if decision not in {"same", "different"} or label not in self.matched_pairs:
+                raise ValueError("Unknown pair or review decision")
+            record = self.matched_pairs[label]
+            record["review"] = decision
+            record["reviewed_at"] = datetime.now().isoformat(timespec="seconds")
+            self._manifest()
+            return record
+
+    def retake_photo(self, side, track_id):
+        """Let the user choose the current processed view, then hold it for review."""
+        with self.lock:
+            key = (side, track_id)
+            record = self.photos.get(key)
+            recent = self.latest_crops.get(key)
+            if self.session_id is None or not self.enabled or record is None or recent is None:
+                raise ValueError("Person is not visible in the current camera analysis")
+            crop, quality, face_found, captured = recent
+            if time.monotonic() - captured > 3:
+                raise ValueError("Current person frame is too old")
+            if any(pair.get("review") is not None and
+                   (pair["a_id"] == track_id if side == "A" else pair["b_id"] == track_id)
+                   for pair in self.matched_pairs.values()):
+                raise ValueError("Reviewed pair photos cannot be changed")
+            ok, jpeg = p.cv2.imencode(".jpg", crop, [p.cv2.IMWRITE_JPEG_QUALITY, 90])
+            if not ok:
+                raise ValueError("Could not encode the current person frame")
+            (CAPTURE_ROOT / self.session_id / record["file"]).write_bytes(jpeg.tobytes())
+            record.update(revision=record["revision"] + 1,
+                          photo_url=f"/api/photo/{side}/{track_id}?v={record['revision'] + 1}",
+                          captured_at=datetime.now().isoformat(timespec="seconds"),
+                          quality=round(quality, 3), face_detected=face_found,
+                          locked=True)
+            for pair in self.matched_pairs.values():
+                if side == "A" and pair["a_id"] == track_id:
+                    pair["photo_a_url"] = record["photo_url"]
+                if side == "B" and pair["b_id"] == track_id:
+                    pair["photo_b_url"] = record["photo_url"]
+            self._manifest()
+            return record
 
     def photo(self, side, track_id):
         with self.lock:
@@ -114,6 +250,8 @@ class DualEngine:
                 (CAPTURE_ROOT / self.session_id).mkdir(parents=True, exist_ok=False)
                 self.photos = {}
                 self.matched_pairs = {}
+                self.photo_observations = {}
+                self.latest_crops = {}
             self.enabled = enabled
             self.cameras = (camera_a, camera_b)
             self.epoch += 1
@@ -152,6 +290,8 @@ class DualEngine:
                 pass
             self.photos = {}
             self.matched_pairs = {}
+            self.photo_observations = {}
+            self.latest_crops = {}
             self.session_id = None
             self.state["message"] = f"雙鏡頭已停止；已清除本次保存的 {deleted} 張照片"
             return deleted
@@ -227,6 +367,7 @@ class DualEngine:
         detector = None
         trackers = None
         matcher = None
+        appearance_history = None
         seen = -1
         generation = -1
         last = time.monotonic()
@@ -243,15 +384,20 @@ class DualEngine:
                     detector = p.Detector()
                 if epoch != generation:
                     trackers, matcher, generation = [p.Tracker(), p.Tracker()], CrossCameraMatcher(), epoch
+                    appearance_history = AppearanceHistory()
                     last = time.monotonic()
                 started = time.monotonic()
                 observed = []
                 for camera, frame in enumerate(frames):
                     detections = trackers[camera].update(detector.detect(frame))
                     for item in detections:
-                        item["appearance"] = appearance(frame, item["box"])
+                        feature = appearance(frame, item["box"])
+                        item["appearance"] = appearance_history.update(camera, item["track_id"], feature)
                     observed.append(detections)
-                pairs = matcher.update(*observed)
+                with self.lock:
+                    excluded = {(record["a_id"], record["b_id"])
+                                for record in self.matched_pairs.values() if record.get("review") == "different"}
+                pairs = matcher.update(*observed, excluded_pairs=excluded)
                 self.save_people_and_pairs(frames, observed, pairs, epoch)
                 people = []
                 for camera, frame in enumerate(frames):
@@ -306,7 +452,7 @@ class Handler(BaseHTTPRequestHandler):
             return self.send_body(200, {"app": "usb-dual-person-live", "version": 1})
         if self.path == "/api/live":
             return self.send_body(200, self.server.engine.snapshot())
-        photo = re.fullmatch(r"/api/photo/([AB])/([1-9][0-9]*)", self.path)
+        photo = re.fullmatch(r"/api/photo/([AB])/([1-9][0-9]*)", urlsplit(self.path).path)
         if photo:
             body = self.server.engine.photo(photo.group(1), int(photo.group(2)))
             return self.send_body(200, body, "image/jpeg") if body is not None else self.send_body(404, {"error": "Not found"})
@@ -324,18 +470,36 @@ class Handler(BaseHTTPRequestHandler):
             if not 0 < size < 1024:
                 raise ValueError()
             data = json.loads(self.rfile.read(size))
-            camera_a, camera_b = data.get("camera_a", 0), data.get("camera_b", 1)
-            if type(camera_a) is not int or type(camera_b) is not int or not all(0 <= item <= 9 for item in (camera_a, camera_b)):
+            if not isinstance(data, dict):
                 raise ValueError()
-            if self.path == "/api/start":
-                self.server.engine.control(True, camera_a, camera_b)
-                result = {"ok": True}
-            elif self.path == "/api/stop":
-                result = {"ok": True, "deleted_photos": self.server.engine.stop_and_clear(camera_a, camera_b)}
+            if self.path in {"/api/start", "/api/stop"}:
+                camera_a, camera_b = data.get("camera_a", 0), data.get("camera_b", 1)
+                if type(camera_a) is not int or type(camera_b) is not int or not all(0 <= item <= 9 for item in (camera_a, camera_b)):
+                    raise ValueError()
+                if self.path == "/api/start":
+                    self.server.engine.control(True, camera_a, camera_b)
+                    result = {"ok": True}
+                else:
+                    result = {"ok": True, "deleted_photos": self.server.engine.stop_and_clear(camera_a, camera_b)}
+            elif self.path == "/api/manual_pair":
+                a_id, b_id = data.get("a_id"), data.get("b_id")
+                if type(a_id) is not int or type(b_id) is not int or min(a_id, b_id) < 1:
+                    raise ValueError()
+                result = {"ok": True, "pair": self.server.engine.add_manual_pair(a_id, b_id)}
+            elif self.path == "/api/review":
+                label, decision = data.get("pair_label"), data.get("decision")
+                if not isinstance(label, str) or not re.fullmatch(r"[PM][1-9][0-9]*", label):
+                    raise ValueError()
+                result = {"ok": True, "pair": self.server.engine.review_pair(label, decision)}
+            elif self.path == "/api/retake":
+                side, track_id = data.get("camera"), data.get("track_id")
+                if side not in {"A", "B"} or type(track_id) is not int or track_id < 1:
+                    raise ValueError()
+                result = {"ok": True, "photo": self.server.engine.retake_photo(side, track_id)}
             else:
                 return self.send_body(404, {"error": "Not found"})
         except (ValueError, TypeError):
-            return self.send_body(400, {"error": "Invalid request; choose two different camera indexes"})
+            return self.send_body(400, {"error": "Invalid camera, photo selection, or review request"})
         except OSError:
             return self.send_body(500, {"error": "Could not clear all saved photos; check the local capture folder"})
         self.send_body(200, result)

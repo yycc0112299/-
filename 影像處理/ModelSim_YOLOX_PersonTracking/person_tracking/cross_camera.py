@@ -11,18 +11,21 @@ class CrossCameraMatcher:
         self.threshold=threshold;self.margin=margin;self.min_hits=min_hits
         self.streaks={};self.labels={};self.next_label=1
 
-    def update(self,a,b):
+    def update(self,a,b,excluded_pairs=None):
         # Only actual, confirmed observations can establish a cross-camera pair.
         a=[d for d in a if d['status']=='confirmed']
         b=[d for d in b if d['status']=='confirmed']
+        excluded_pairs=excluded_pairs or set()
         scores=np.zeros((len(a),len(b)))
         for i,x in enumerate(a):
             for j,y in enumerate(b):
-                scores[i,j]=appearance_similarity(x['appearance'],y['appearance'])
+                scores[i,j]=(-1 if (x['track_id'],y['track_id']) in excluded_pairs
+                             else appearance_similarity(x['appearance'],y['appearance']))
         accepted={};pairs=[]
         for i,x in enumerate(a):
             if not b:continue
             j=int(scores[i].argmax());score=float(scores[i,j])
+            if score<0:continue
             row=sorted(scores[i],reverse=True);col=sorted(scores[:,j],reverse=True)
             ambiguous=(len(row)>1 and score-row[1]<self.margin) or (len(col)>1 and score-col[1]<self.margin)
             if score<self.threshold:status='unmatched'

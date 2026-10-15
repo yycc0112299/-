@@ -1,5 +1,14 @@
 # 專題狀態與交接記錄（供 Codex）
 
+## 2026-10-15：ModelSim 可重跑自動檢查與 GUI 入口
+
+- 使用者要求下一個進度直接做在 Vivado 或 ModelSim，之後開啟可見。選擇驗證現有 ROI RTL，未假設 PYNQ 型號或鏡頭介面，也未改動原 RTL/網站。
+- 修改前 `git fetch origin`，main 與 origin/main 為 `9c2070e`，工作樹乾淨；核對本機 modelsim_draft 與共享路徑兩份運算 RTL SHA256 相同。新增檔案以 modelsim_draft 為本機入口，同步共享最新整合路徑。
+- `person_tracking/tb_rtl_regression.v`：自動比較手算答案，7 張完整 640×480 frame：全紅、偏移奇數高紅藍分區（插入 stalls）、右下邊界、無人物、零寬、一列高度、全黑。每張檢查完成時機、像素數、上下區面積、特徵/有效訊號；不 reset 的連續 frame 檢查累積器清除。比較器測 35/36 雙向門檻、主色不符與 invalid，末尾測 reset。失敗用 $fatal，另有 watchdog。
+- `person_tracking/open_rtl_regression.ps1`：預設 ModelSim GUI 或 `-Batch` CLI，複製三份 Verilog 到 ASCII `%TEMP%/project_rtl_regression`，產生 regression.do，compile、模擬、記錄 WLF 並配置波形。GUI 保留視窗，Batch 要求 exit code 0 與 PASS 標記。可用 MODELSIM_VSIM 指定工具。`開啟ModelSim驗證.cmd` 為雙擊入口；`RTL_REGRESSION.md` 說明訊號與限制。
+- 實際使用 ModelSim SE-64 2020.4 批次重跑通過，`RTL_REGRESSION_PASS frames=7 checks=89`，0 errors / 0 warnings；原始文字輸出保存 `person_tracking/rtl_regression_console.txt`。7 frame 不等於 7 個 checks，89 包含插入停拍的時機檢查。
+- 限制：合成資料，未窮舉全部色彩分類門檻、未做亂數與中途 reset 測試，未做 synthesis/時序/上板；不能代表 YOLOX 或 Python 跨鏡頭 matcher 已搬到硬體。GUI 暫存副本需透過啟動器重開更新，原始碼在 repo。既有舊進度日期保留作歷史。
+
 最後核對：2026-10-02
 
 ## 2026-10-02 變更：停止時清除舊工作階段照片

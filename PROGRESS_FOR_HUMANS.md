@@ -1,5 +1,11 @@
 # 專題進度（重點版）
 
+## 2026-10-15：可直接開啟的 ModelSim 自動驗證
+
+- 新增 `影像處理/ModelSim_YOLOX_PersonTracking/開啟ModelSim驗證.cmd`，雙擊即開啟 ModelSim、執行測試並保留波形與結果。詳細操作見同目錄 `person_tracking/RTL_REGRESSION.md`。
+- 本機 ModelSim SE-64 2020.4 實跑：7 張完整 640×480 合成影像、89 項檢查 PASS；編譯及模擬 0 errors / 0 warnings。涵蓋色彩特徵、人物框邊界、輸入暫停、連續影格及比較門檻。
+- 本次沒有修改原本運算 RTL 或即時網站。這是上板前的功能驗證，尚未完成 PYNQ/EGo1 上板、YOLOX 硬體化或整套雙鏡頭判斷電路。
+
 更新日期：2026-10-02
 
 ## 最新進度

@@ -11,6 +11,11 @@
 
 最後核對：2026-10-02
 
+## 2026-10-26 變更：PYNQ/EGo1 共用板級 RTL wrapper
+
+- 新增 `影像處理/ModelSim_YOLOX_PersonTracking/fpga/roi_feature_board_top.v`。它不重寫 ROI 計算，直接例化 `person_tracking/person_roi_stream.v`，保留 `pixel_valid`、`frame_start`、RGB888、人物 bbox 與 frame 完成訊號，並以 `result_led = feature_valid && person_valid` 提供最小板級結果指示。
+- 這是 board-neutral synthesizable boundary，不是任一特定板子的可直接燒錄專案。PYNQ-Z2/EGo1 的 clock、XDC 腳位、相機輸入與 PS/AXI adapter 必須等實際板型與輸入方式確認後補上。
+
 ## 2026-10-26 變更：跨鏡頭 matcher 可重跑回歸評估
 
 - 新增 `person_tracking/evaluate_cross_camera.py`。它使用明確的 2×15 合成外觀向量，重跑三個固定案例：同色連續三次後應為 `confirmed_candidate`、不同色應為 `unmatched`、相同外觀競爭者應為 `ambiguous`；使用 `assert`，並輸出同目錄的 `cross_camera_evaluation.json`。

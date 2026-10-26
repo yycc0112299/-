@@ -8,6 +8,11 @@
 
 更新日期：2026-10-02
 
+## 2026-10-26：新增 PYNQ/EGo1 共用板級 RTL 邊界
+
+- 新增 `影像處理/ModelSim_YOLOX_PersonTracking/fpga/roi_feature_board_top.v`，把現有 640×480 ROI 特徵 RTL 包成可接 PYNQ 或 EGo1 的同步串流核心。
+- 新增 `fpga/README.md` 說明要接的 RGB/frame/bbox 訊號與後續 XDC/相機或 AXI adapter 工作。尚未宣稱已產生 bitstream、完成腳位約束或完成實體上板。
+
 ## 2026-10-26：新增可重跑的跨鏡頭 matcher 回歸評估
 
 - 新增 `影像處理/ModelSim_YOLOX_PersonTracking/person_tracking/evaluate_cross_camera.py`，固定測試同色連續確認、不同色拒絕、相同外觀競爭者判為 ambiguous 三種情況，並輸出 `cross_camera_evaluation.json`。

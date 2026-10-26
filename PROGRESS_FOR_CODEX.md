@@ -11,6 +11,13 @@
 
 最後核對：2026-10-02
 
+## 2026-10-26 變更：跨鏡頭 matcher 可重跑回歸評估
+
+- 新增 `person_tracking/evaluate_cross_camera.py`。它使用明確的 2×15 合成外觀向量，重跑三個固定案例：同色連續三次後應為 `confirmed_candidate`、不同色應為 `unmatched`、相同外觀競爭者應為 `ambiguous`；使用 `assert`，並輸出同目錄的 `cross_camera_evaluation.json`。
+- 實際結果：`CROSS_CAMERA_EVALUATION_PASS cases=3`；既有 `test_cross_camera.py` 為 6 tests OK。
+- 這只驗證目前 Python matcher 的門檻、連續命中與歧義保護，不能替代真人標記資料的 precision/recall、雙實體 USB 實拍或身份辨識驗收。
+- 完整 `unittest discover` 另有既有 `test_dual_features.py`、`test_tracking.py` 因目前 Python 3.10 環境未安裝 `cv2` 而無法載入；沒有安裝依賴或改變環境。
+
 ## 2026-10-02 變更：停止時清除舊工作階段照片
 
 - 使用者補充「舊照片也刪掉」。`live_site/dual_server.py` 的 `stop_and_clear()` 現在在停止後遍歷**僅** `person_tracking/live_captures/` 下名稱符合 `YYYYMMDD_HHMMSS_ffffff` 的直接子資料夾；資料夾須不是 symlink、解析後仍在預期根目錄。每個工作階段只依其非 symlink `manifest.json`、且 `session` 名稱匹配，刪除 `people[].file` 列出、檔名符合 `[AB]_[0-9]{4,}.jpg` 的直接 JPEG。未登記 JPEG、其他檔案／資料夾、舊 manifest 保留；本次 manifest 仍按先前停止規則移除。沒有目前 session 也可按停止清舊照。API `deleted_photos` 和頁面訊息回報所有工作階段的刪除張數。

@@ -1,0 +1,51 @@
+{
+  "cases": 3,
+  "passed": 3,
+  "results": [
+    {
+      "case": "same_color",
+      "confirmed": true,
+      "expected_confirmed": true,
+      "final": [
+        {
+          "a_id": 1,
+          "b_id": 7,
+          "score": 1.0,
+          "status": "confirmed_candidate",
+          "consecutive_hits": 3,
+          "pair_label": "P1"
+        }
+      ]
+    },
+    {
+      "case": "different_color",
+      "confirmed": false,
+      "expected_confirmed": false,
+      "final": [
+        {
+          "a_id": 1,
+          "b_id": 7,
+          "score": 0.0,
+          "status": "unmatched",
+          "consecutive_hits": 0,
+          "pair_label": null
+        }
+      ]
+    },
+    {
+      "case": "ambiguous_competitor",
+      "confirmed": false,
+      "expected_confirmed": false,
+      "final": [
+        {
+          "a_id": 1,
+          "b_id": 7,
+          "score": 1.0,
+          "status": "ambiguous",
+          "consecutive_hits": 0,
+          "pair_label": null
+        }
+      ]
+    }
+  ]
+}

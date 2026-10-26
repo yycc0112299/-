@@ -8,6 +8,12 @@
 
 更新日期：2026-10-02
 
+## 2026-10-26：新增可重跑的跨鏡頭 matcher 回歸評估
+
+- 新增 `影像處理/ModelSim_YOLOX_PersonTracking/person_tracking/evaluate_cross_camera.py`，固定測試同色連續確認、不同色拒絕、相同外觀競爭者判為 ambiguous 三種情況，並輸出 `cross_camera_evaluation.json`。
+- 本次合成回歸 3/3 PASS，另有既有 `test_cross_camera.py` 6/6 PASS。這是演算法門檻回歸，不是真人雙鏡頭準確率；PYNQ/EGo1 上板、標記影像準確率與雙實體鏡頭仍未完成。
+- 完整 unittest discovery 目前因執行環境缺少 `cv2`，既有 camera/tracking 測試無法載入；未把缺少依賴誤報為測試通過。
+
 ## 最新進度
 
 2026-10-02 完整同步盤點：現有程式、網站與先前進度已在 GitHub `main`；本次再補上尚未上傳的兩份精簡驗證紀錄（早期 8×8 ModelSim transcript、6 項追蹤測試 PASS 摘要），並更新內容索引與進度。採新增提交保留舊版，不強制覆蓋。人物照片、審核 manifest、模型權重及大量模擬／相機產物仍只留本機，沒有公開上傳；這些排除項目不等於專案進度遺失。

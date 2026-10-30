@@ -1,5 +1,11 @@
 # 專題進度（重點版）
 
+## 2026-10-30：第三台電腦的雙鏡頭網站啟動環境
+
+- 第三台電腦已安裝正式 Python 3.12、NumPy 1.26.4、OpenCV 4.11.0，以及專題所需的 YOLOX ONNX 模型與公開測試素材；VS Code 已安裝 Python 擴充套件。
+- 修正雙鏡頭啟動腳本：不再誤用 Windows Store 的空白 `python.exe` 啟動器，會優先尋找已安裝的 CPython；`啟動即時追蹤網站.cmd` 改為開啟雙鏡頭 localhost 儀表板（預設 `http://127.0.0.1:8766/`）。
+- 此次只完成執行環境與啟動流程準備；尚未確認兩個實體 USB 攝影機、ModelSim 或 Vivado 的實機流程。
+
 ## 2026-10-15：可直接開啟的 ModelSim 自動驗證
 
 - 新增 `影像處理/ModelSim_YOLOX_PersonTracking/開啟ModelSim驗證.cmd`，雙擊即開啟 ModelSim、執行測試並保留波形與結果。詳細操作見同目錄 `person_tracking/RTL_REGRESSION.md`。

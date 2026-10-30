@@ -1,5 +1,12 @@
 # 專題狀態與交接記錄（供 Codex）
 
+## 2026-10-30：第三台電腦環境與雙鏡頭啟動流程
+
+- 目標端為第三台電腦；已安裝使用者層級 CPython 3.12.10：`%LOCALAPPDATA%\\Programs\\Python\\Python312\\python.exe`。以該直譯器安裝 `person_tracking/requirements.txt`，驗證版本為 NumPy 1.26.4 與 OpenCV 4.11.0；`person_tracking/setup_assets.ps1` 的 YOLOX ONNX 和公開圖片亦已準備。VS Code 已安裝 Microsoft Python、Pylance、Python Environments 與 debugpy 擴充套件；此前只解析到 WindowsApps 的 Store alias，並非可用解譯器。
+- 更新 `live_site/start_dual.ps1`：優先由 `%LOCALAPPDATA%\\Programs\\Python` 找 CPython，排除 `WindowsApps\\python.exe` alias，才回退至 PATH 或 `PROJECT_PYTHON`。這避免桌面端啟動雙鏡頭網站時把 Store alias 當成 Python。
+- 更新上層 `啟動即時追蹤網站.cmd` 為呼叫 `live_site/start_dual.ps1`，所以雙擊會執行 `dual_server.py --browser`，預設服務為 loopback `127.0.0.1:8766`。這會開 Chrome 或預設瀏覽器，但畫面是否開始取決於使用者在網站按下連接雙鏡頭、兩個 USB 鏡頭存在且未被其他程式占用。
+- 未聲稱 USB 攝影機、ModelSim 或 Vivado 上板流程已驗證；目前已確認 `C:\\Xilinx\\Vivado\\2024.2` 存在，ModelSim 尚未在第三台確認。
+
 ## 2026-10-15：ModelSim 可重跑自動檢查與 GUI 入口
 
 - 使用者要求下一個進度直接做在 Vivado 或 ModelSim，之後開啟可見。選擇驗證現有 ROI RTL，未假設 PYNQ 型號或鏡頭介面，也未改動原 RTL/網站。

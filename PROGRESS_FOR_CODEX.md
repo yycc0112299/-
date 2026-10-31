@@ -6,6 +6,7 @@
 - 實際以此 Python 執行 `evaluate_cross_camera.py` 為 `CROSS_CAMERA_EVALUATION_PASS cases=3`；`unittest discover -s person_tracking -p test_*.py` 為 18/18 PASS；在 `live_site` 目錄執行 `python -m unittest test_dual_server.py -v` 為 6/6 PASS。這些是合成／程式回歸，不是 USB 相機或 FPGA 實測。
 - 已確認 `C:\\Xilinx\\Vivado\\2024.2` 與內建 `xsim` 存在，但沒有偵測到 ModelSim 的 `vsim.exe`、安裝目錄或安裝媒體；因此現有 ModelSim 啟動器尚不能在本機執行，且不可把 Vivado 的 xsim 當成已驗證的 ModelSim 替代品。ModelSim 安裝仍需授權及安裝程式來源。
 - Windows 裝置清單沒有回報狀態 OK 的 Camera，故未執行實體 USB／內建相機與 localhost 頁面影像流程。接上兩台相機且未被其他程式占用後，才可在 `http://127.0.0.1:8766/` 驗證雙鏡頭。
+- 為讓已安裝的 Vivado 可立即使用，新增 `person_tracking/open_xsim_regression.ps1` 和上層雙擊入口 `開啟VivadoXSim驗證.cmd`。腳本複製 RTL 到 ASCII `%TEMP%/project_xsim_rtl_regression`，以 `xvlog`、`xelab`、`xsim` 編譯、elaborate、模擬；可用 `-Batch` 取得非互動 PASS/FAIL，或預設開 XSim GUI。實測 Vivado 2024.2 批次結果為 `RTL_REGRESSION_PASS frames=7 checks=89`。可設 `VIVADO_XSIM_BIN` 指向其他 Vivado 的 `bin` 目錄，沒有硬編碼使用者專屬路徑。
 
 ## 2026-10-30：第三台電腦環境與雙鏡頭啟動流程
 

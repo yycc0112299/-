@@ -4,6 +4,7 @@
 
 - Python、NumPy、OpenCV、YOLOX 模型和公開測試圖片都已可用，不需要再安裝；程式回歸共 24 項通過。
 - Vivado 2024.2 已安裝，且有內建 xsim；但沒有找到 ModelSim，因此目前不能跑專案的 ModelSim 驗證入口。
+- 現在可雙擊 `開啟VivadoXSim驗證.cmd` 使用已安裝的 Vivado XSim 跑相同 RTL 回歸；本機已跑完 7 張測試影格、89 項檢查並通過。這是 XSim 驗證，並不表示 ModelSim 已安裝。
 - 目前 Windows 未偵測到可用相機，所以雙鏡頭網站尚未做實拍驗證。接上兩台相機後即可用 `啟動即時追蹤網站.cmd` 開啟 localhost 網站測試。
 
 ## 2026-10-30：第三台電腦的雙鏡頭網站啟動環境

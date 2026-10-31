@@ -1,5 +1,12 @@
 # 專題狀態與交接記錄（供 Codex）
 
+## 2026-10-31：第三台電腦執行環境複核
+
+- 以 `%LOCALAPPDATA%\\Programs\\Python\\Python312\\python.exe` 實測：Python 3.12.10、NumPy 1.26.4、OpenCV 4.11.0 均可匯入；`person_tracking/setup_assets.ps1` 已確認 YOLOX ONNX 與三張公開測試圖存在，模型 SHA-256 為預期的 `c5c2d13e59ae883e6af3b45daea64af4833a4951c92d116ec270d9ddbe998063`。不需重複下載或安裝 Python 相依套件。
+- 實際以此 Python 執行 `evaluate_cross_camera.py` 為 `CROSS_CAMERA_EVALUATION_PASS cases=3`；`unittest discover -s person_tracking -p test_*.py` 為 18/18 PASS；在 `live_site` 目錄執行 `python -m unittest test_dual_server.py -v` 為 6/6 PASS。這些是合成／程式回歸，不是 USB 相機或 FPGA 實測。
+- 已確認 `C:\\Xilinx\\Vivado\\2024.2` 與內建 `xsim` 存在，但沒有偵測到 ModelSim 的 `vsim.exe`、安裝目錄或安裝媒體；因此現有 ModelSim 啟動器尚不能在本機執行，且不可把 Vivado 的 xsim 當成已驗證的 ModelSim 替代品。ModelSim 安裝仍需授權及安裝程式來源。
+- Windows 裝置清單沒有回報狀態 OK 的 Camera，故未執行實體 USB／內建相機與 localhost 頁面影像流程。接上兩台相機且未被其他程式占用後，才可在 `http://127.0.0.1:8766/` 驗證雙鏡頭。
+
 ## 2026-10-30：第三台電腦環境與雙鏡頭啟動流程
 
 - 目標端為第三台電腦；已安裝使用者層級 CPython 3.12.10：`%LOCALAPPDATA%\\Programs\\Python\\Python312\\python.exe`。以該直譯器安裝 `person_tracking/requirements.txt`，驗證版本為 NumPy 1.26.4 與 OpenCV 4.11.0；`person_tracking/setup_assets.ps1` 的 YOLOX ONNX 和公開圖片亦已準備。VS Code 已安裝 Microsoft Python、Pylance、Python Environments 與 debugpy 擴充套件；此前只解析到 WindowsApps 的 Store alias，並非可用解譯器。

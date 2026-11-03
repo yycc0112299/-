@@ -26,6 +26,13 @@
 
 最後核對：2026-10-02
 
+## 2026-11-03 變更：雙電腦程式與網站協作
+
+- `live_site/sync_camera_pc.ps1` 是鏡頭電腦的同步入口：驗證 Git checkout、`git fetch`、`git pull --ff-only`，失敗時停止，不覆蓋本機未提交變更，再呼叫 `start_dual.ps1`。
+- `dual_server.py` 新增 `--bind` 與可重複的 `--allow-host`。預設仍為 loopback；明確指定 LAN bind/allowed Host 後，另一台電腦可用瀏覽器看 `/api/live` 與影像。
+- `start_dual.ps1` 保留原本環境變數／CPython 尋找邏輯，並接受 `-ServerArgs` 傳遞服務參數。
+- 未驗證目標電腦的實際 IP、Windows 防火牆、USB 鏡頭、Python/OpenCV/YOLOX 安裝或跨電腦 HTTP；這些需在鏡頭電腦現場執行。不要把 GitHub 當即時影像通道，也不要把 8766 公開到網際網路。
+
 ## 2026-10-26 變更：PYNQ/EGo1 共用板級 RTL wrapper
 
 - 新增 `影像處理/ModelSim_YOLOX_PersonTracking/fpga/roi_feature_board_top.v`。它不重寫 ROI 計算，直接例化 `person_tracking/person_roi_stream.v`，保留 `pixel_valid`、`frame_start`、RGB888、人物 bbox 與 frame 完成訊號，並以 `result_led = feature_valid && person_valid` 提供最小板級結果指示。

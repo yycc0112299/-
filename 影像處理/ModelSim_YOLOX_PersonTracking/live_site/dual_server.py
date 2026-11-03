@@ -440,7 +440,7 @@ class Handler(BaseHTTPRequestHandler):
         pass
 
     def allowed(self):
-        hosts = {f"127.0.0.1:{self.server.server_port}", f"localhost:{self.server.server_port}"}
+        hosts = self.server.allowed_hosts or {f"127.0.0.1:{self.server.server_port}", f"localhost:{self.server.server_port}"}
         origin = self.headers.get("Origin", f"http://127.0.0.1:{self.server.server_port}")
         return self.headers.get("Host") in hosts and origin in {"http://" + host for host in hosts}
 
@@ -523,11 +523,15 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--port", type=int, default=8766)
     parser.add_argument("--browser", action="store_true")
+    parser.add_argument("--bind", default="127.0.0.1")
+    parser.add_argument("--allow-host", action="append", dest="allow_hosts")
     args = parser.parse_args()
-    server = ThreadingHTTPServer(("127.0.0.1", args.port), Handler)
+    server = ThreadingHTTPServer((args.bind, args.port), Handler)
     server.daemon_threads = True
+    server.allowed_hosts = set(args.allow_hosts or [])
     server.engine = DualEngine()
-    url = f"http://127.0.0.1:{args.port}/"
+    display_host = args.allow_hosts[0].split(":", 1)[0] if args.allow_hosts else "127.0.0.1"
+    url = f"http://{display_host}:{args.port}/"
     print("READY " + url, flush=True)
     if args.browser:
         webbrowser.open(url)

@@ -1,3 +1,4 @@
+param([string[]]$ServerArgs)
 $ErrorActionPreference = 'Stop'
 $pythonExe = $env:PROJECT_PYTHON
 if (!$pythonExe) {
@@ -13,4 +14,4 @@ if (!$pythonExe) {
     if ($candidate -and $candidate -notmatch '\\WindowsApps\\python\.exe$') { $pythonExe = $candidate }
 }
 if (!$pythonExe) { throw 'Python not found. Install Python 3.12, set PROJECT_PYTHON, or add Python to PATH.' }
-& $pythonExe (Join-Path $PSScriptRoot 'dual_server.py') --browser
+& $pythonExe (Join-Path $PSScriptRoot 'dual_server.py') --browser @ServerArgs

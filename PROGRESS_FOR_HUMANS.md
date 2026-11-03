@@ -21,6 +21,12 @@
 
 更新日期：2026-10-02
 
+## 2026-11-03：兩台電腦協作方式
+
+- GitHub `main` 是程式同步來源；有鏡頭的電腦新增 `live_site/sync_camera_pc.ps1`，會先 `fetch`、`pull --ff-only` 再啟動雙鏡頭網站。
+- 雙鏡頭服務新增可設定 LAN bind/allowed Host；鏡頭電腦可用 `-Bind 0.0.0.0 -AllowHost <鏡頭電腦IP>:8766`，另一台以瀏覽器開該網址看即時結果。
+- GitHub 不承載即時影像；目前仍要求同一可信任 LAN 與鏡頭電腦防火牆允許 TCP 8766，未做公開網際網路部署。
+
 ## 2026-10-26：新增 PYNQ/EGo1 共用板級 RTL 邊界
 
 - 新增 `影像處理/ModelSim_YOLOX_PersonTracking/fpga/roi_feature_board_top.v`，把現有 640×480 ROI 特徵 RTL 包成可接 PYNQ 或 EGo1 的同步串流核心。

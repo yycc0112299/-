@@ -21,6 +21,11 @@
 
 更新日期：2026-10-02
 
+## 2026-11-03：保存鏡頭電腦公開啟動 Prompt
+
+- 新增 `CAMERA_PC_PUBLIC_SETUP_PROMPT.md`，讓連 USB 鏡頭的電腦可以直接依 Prompt 啟動網站與 Cloudflare HTTPS 通道。
+- Prompt 要求回傳 `private-link.txt`，並禁止公開 access token；完成仍須在非同一個 Wi-Fi 的手機實測。
+
 ## 2026-11-03：兩台電腦協作方式
 
 - GitHub `main` 是程式同步來源；有鏡頭的電腦新增 `live_site/sync_camera_pc.ps1`，會先 `fetch`、`pull --ff-only` 再啟動雙鏡頭網站。

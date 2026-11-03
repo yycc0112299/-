@@ -26,6 +26,11 @@
 
 最後核對：2026-10-02
 
+## 2026-11-03 變更：鏡頭來源端公開啟動交接文件
+
+- 新增根目錄 `CAMERA_PC_PUBLIC_SETUP_PROMPT.md`，集中保存來源端檢查、CameraA 選擇、`start_remote.ps1` 啟動、private link 讀取和完成驗收條件。
+- 這是來源端操作交接，不代表另一台電腦已實際啟動；目前仍缺目標電腦回傳的鏡頭、health、live 與跨網路手機證據。
+
 ## 2026-11-03 變更：雙電腦程式與網站協作
 
 - `live_site/sync_camera_pc.ps1` 是鏡頭電腦的同步入口：驗證 Git checkout、`git fetch`、`git pull --ff-only`，失敗時停止，不覆蓋本機未提交變更，再呼叫 `start_dual.ps1`。

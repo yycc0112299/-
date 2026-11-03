@@ -1,5 +1,12 @@
 # 專題進度（重點版）
 
+## 2026-11-03：無鏡頭等待中的公開 HTTPS 網站
+
+- 在本機沒有 USB 鏡頭的狀態下，雙鏡頭網站仍可啟動並回報 `stopped`；這是等待未來插入鏡頭的正常狀態，不是架設失敗。
+- 為 Cloudflare Quick Tunnel 增加明確的 `--allow-trycloudflare` 選項；只有啟用時才接受 `https://*.trycloudflare.com` 的頁面/API 請求，平時 localhost/LAN 的原有來源限制不變。
+- 已用新產生的 Quick Tunnel HTTPS 連結驗證首頁、`/api/health` 和 `/api/live`；未啟動相機、未保存相機照片，也未提交 tunnel 網址或任何權杖。
+- 新增一鍵遠端啟動器。它會保存 CameraA/CameraB 的等待設定，建立新的私有連結，但沒有鏡頭時仍不嘗試連線相機。
+
 ## 2026-10-31：這台電腦的可執行環境已複核
 
 - Python、NumPy、OpenCV、YOLOX 模型和公開測試圖片都已可用，不需要再安裝；程式回歸共 24 項通過。

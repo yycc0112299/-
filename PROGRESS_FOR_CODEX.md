@@ -204,3 +204,10 @@
 - 新納入 `影像處理/MCDPT_Verilog_Two_Image_ReID/modelsim_transcript_20261002.txt`：2026-10-02 00:28 的早期 8×8 RTL testbench 執行紀錄，`vlog` 顯示 0 errors／0 warnings，`vsim` 印出 3 個同人 frame `same = 1`、1 個不同人 `same = 0`，最後 `two camera color test ok`、0 errors／0 warnings。此檔為已存在的本機紀錄，本次只檢查文字並歸檔，沒有重新執行 ModelSim；不可當成最新 640×480 YOLOX／雙實體 USB 流程通過的證據。
 - 新納入 `影像處理/ModelSim_YOLOX_PersonTracking/person_tracking/tests/tracking_results.json`：既有測試摘要記載 `tests_run=6`、`failures=0`、`errors=0`、`status=PASS`；本次尚未確認其個別測試案例或重新執行。被 `.gitignore` 排除的 `tests/rtl_*/` 逐次輸出中另有 `summary.json` 記載 5 個手算區域、307200 pixels/frame、PASS，但它和 WLF、完整 run 產物仍不入 Git；歷史驗證請區分摘要與原始輸出。
 - `PROJECT_CONTENTS.md` 與 `PROGRESS_FOR_HUMANS.md` 更新共享範圍。`person_tracking/live_captures/` 的人物 JPEG／審核 manifest、下載的 YOLOX 權重、相機影格、大型 replay／run 與 WLF 等仍保留本機，不因本次「同步全部」而上傳；這遵循既有隱私與產物排除決策。若後續確實需要共享含人物的標註資料，應另行界定同意、匿名化及存取方式。
+## 2026-11-03：無鏡頭的 Cloudflare Quick Tunnel 等待模式
+
+- `live_site/dual_server.py` 新增明確 opt-in 的 `--allow-trycloudflare`。服務在保留既有 localhost/LAN Host + `http` Origin 檢查的前提下，額外允許 `https://*.trycloudflare.com`；這處理 Quick Tunnel 每次重啟有不同主機名，且反向代理可能把 Host 改寫為 local origin 的情況。初始 HTML 導航沒有 `Origin` 時，僅在 Host 本身是 `*.trycloudflare.com` 才放行。沒有此旗標，遠端 Origin 一律維持拒絕。新增 `--camera-a`／`--camera-b`，可在尚未開啟擷取前把等待中的預設相機組合回報給 `/api/live`，`camera-b=-1` 代表目前未配置第二台。
+- 新增 `live_site/start_remote.ps1`：以目前專題目錄啟動服務、等待本機 health 成功、啟動未登入的 Cloudflare Quick Tunnel、將當次 URL 寫入被忽略的 `work/remote_site/private-link.txt`。它不會呼叫 `/api/start`，所以沒有鏡頭時仍維持 stopped 等待；每次啟動會停止本專題原有的 8766 listener，以確保新 tunnel 指向新服務。Cloudflare 執行檔與所有 URL/log 都只放使用者本機。
+- `live_site/README.md` 明確說明服務可在沒有相機時保持 `stopped`，只有 `/api/start`／網頁連接動作才會碰相機；Quick Tunnel 連結、token、模型和相機相片屬本機私密資料，不入 Git。
+- 2026-11-03 已在此電腦以 CameraA 0／CameraB -1 的等待設定啟動新 Quick Tunnel；未呼叫 `/api/start`，因此沒有相機實測或照片產生。透過新 HTTPS URL 的首頁回應 HTTP 200，`/api/health` 回傳應用程式/版本，`/api/live` 回報 `stopped`、`enabled=false` 和 cameras `[0, -1]`；當時 cloudflared 程序仍在執行。連結、log 與 `cloudflared.exe` 均只在使用者本機，不加入此倉庫。
+

@@ -4,6 +4,8 @@
 
 `dual_server.py` 與 `dual_index.html` 提供雙 USB 鏡頭的 localhost 儀表板。它會讓兩台鏡頭各自跑既有 YOLOX 偵測與短期 Tracker，並使用 `cross_camera.py` 顯示外觀候選；即時畫面只留在記憶體，服務僅監聽 `127.0.0.1`。在此資料夾以設定好相依套件的 Python 執行：
 
+沒有鏡頭時，服務仍可啟動並維持 `stopped` 等待狀態；只有按頁面中的「連接雙鏡頭」或呼叫 `/api/start` 才會嘗試開啟指定的相機。若由 Cloudflare Quick Tunnel 公開這個服務，必須明確加上 `--allow-trycloudflare`。此選項只接受 `https://*.trycloudflare.com` 的請求，Quick Tunnel 網址重啟會更換，且不應把 `private-link.txt`、相片、權杖或模型權重提交到 Git。
+
 ```powershell
 $env:PROJECT_PYTHON = 'C:\path\to\python.exe'
 .\start_dual.ps1

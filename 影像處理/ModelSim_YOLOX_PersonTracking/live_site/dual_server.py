@@ -442,7 +442,23 @@ class Handler(BaseHTTPRequestHandler):
     def allowed(self):
         hosts = self.server.allowed_hosts or {f"127.0.0.1:{self.server.server_port}", f"localhost:{self.server.server_port}"}
         origin = self.headers.get("Origin", f"http://127.0.0.1:{self.server.server_port}")
-        return self.headers.get("Host") in hosts and origin in {"http://" + host for host in hosts}
+        if self.headers.get("Host") in hosts and origin in {"http://" + host for host in hosts}:
+            return True
+        # Quick Tunnels have an unpredictable HTTPS hostname.  This opt-in is
+        # deliberately limited to Cloudflare's temporary tunnel domain, so a
+        # normal LAN/local launch retains its previous same-origin guard.
+        if not self.server.allow_trycloudflare:
+            return False
+        host = self.headers.get("Host", "").split(":", 1)[0].lower()
+        origin_parts = urlsplit(origin)
+        origin_host = (origin_parts.hostname or "").lower()
+        is_tunnel_host = host.endswith(".trycloudflare.com")
+        is_tunnel_origin = (origin_parts.scheme == "https" and
+                            origin_host.endswith(".trycloudflare.com"))
+        # Navigation requests do not necessarily include Origin.  cloudflared
+        # can also rewrite Host to its local origin, hence accepting the
+        # HTTPS tunnel Origin for API fetches in that case.
+        return (is_tunnel_host and "Origin" not in self.headers) or is_tunnel_origin
 
     def send_body(self, code, body, kind="application/json; charset=utf-8"):
         if isinstance(body, dict):
@@ -525,11 +541,20 @@ def main():
     parser.add_argument("--browser", action="store_true")
     parser.add_argument("--bind", default="127.0.0.1")
     parser.add_argument("--allow-host", action="append", dest="allow_hosts")
+    parser.add_argument("--allow-trycloudflare", action="store_true",
+                        help="allow a Cloudflare Quick Tunnel HTTPS origin")
+    parser.add_argument("--camera-a", type=int, default=0)
+    parser.add_argument("--camera-b", type=int, default=1)
     args = parser.parse_args()
+    if not 0 <= args.camera_a <= 9 or not -1 <= args.camera_b <= 9:
+        parser.error("camera-a must be 0..9 and camera-b must be -1..9")
     server = ThreadingHTTPServer((args.bind, args.port), Handler)
     server.daemon_threads = True
     server.allowed_hosts = set(args.allow_hosts or [])
+    server.allow_trycloudflare = args.allow_trycloudflare
     server.engine = DualEngine()
+    server.engine.cameras = (args.camera_a, args.camera_b)
+    server.engine.state["cameras"] = [args.camera_a, args.camera_b]
     display_host = args.allow_hosts[0].split(":", 1)[0] if args.allow_hosts else "127.0.0.1"
     url = f"http://{display_host}:{args.port}/"
     print("READY " + url, flush=True)

@@ -1,5 +1,11 @@
 # 專題狀態與交接記錄（供 Codex）
 
+## 2026-11-04：PYNQ-ZU board repository 與 Vivado 驗證
+
+- 使用者提供板子照片確認為 TUL PYNQ-ZU，官方 board part 為 `tul.com.tw:pynqzu:part0:1.1`、device `XCZU5EG-1SFVC784`。本機偵測到其 Xilinx USB JTAG/UART（FTDI VID 0403/PID 6010）於 COM7，但當次打開後未收到 UART boot 輸出，未證明 PYNQ image 已開機或網路可達。
+- 使用者下載的 `C:\Users\dsic\Downloads\XilinxBoardStore-master.zip` 已解壓到被忽略的 `fpga/board_repos/`。新增 `fpga/configure_pynq_zu_board.tcl`：以 script 相對路徑設定 `board.repoPaths`，檢查 `TUL/pynqzu/1.1/board.xml` 存在並執行 `get_board_parts *pynqzu*`。Vivado 2024.2 batch 實跑印出 `PYNQ_ZU_BOARD_PARTS=tul.com.tw:pynqzu:part0:1.1`；其他 Board Store 中此 Vivado 沒安裝的 device 警告與 PYNQ-ZU 無關。
+- 下載的 `pynqzu_master.xdc` 是 Rev 3.B 的完整約束範本，目前不直接加入設計；必須待確定使用哪一個 PL I/O（HDMI/CSI/LED 等）再挑選對應 constraint。`.gitignore` 現排除 `fpga/board_repos/`，不提交約 224 MB 的第三方 Board Store。尚未產生 PYNQ-ZU bitstream、PS block design、AXI bridge、PYNQ overlay 或板端實機驗證。
+
 ## 2026-11-04：公開圖片 dataset 評估彙總
 
 - 新增 `person_tracking/evaluate_detection_dataset.py`，以 `verification_report.json` 為來源彙總 6 組公開圖片／亮度案例。

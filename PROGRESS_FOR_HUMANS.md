@@ -1,5 +1,11 @@
 # 專題進度（重點版）
 
+## 2026-11-04：PYNQ-ZU Vivado board file 已驗證
+
+- 目標板確認為 TUL PYNQ-ZU（XCZU5EG-1SFVC784）。已從使用者下載的 Xilinx Board Store 解壓 board repository，並以 Vivado 2024.2 實測找到 `tul.com.tw:pynqzu:part0:1.1`。
+- 新增可重跑的 `fpga/configure_pynq_zu_board.tcl`，它只設定目前 Vivado session 的 board repository，不修改 Vivado 安裝目錄。
+- 大型第三方 `fpga/board_repos/` 已加入 Git ignore；尚未建立 bitstream、接通板端網路或驗證實體 PYNQ-ZU 開機。
+
 ## 2026-11-04：公開圖片 dataset 彙總評估
 
 - 新增 `person_tracking/evaluate_detection_dataset.py`，讀取既有人工標註驗證報告並彙總 6 組 bus／zidane 亮度案例。

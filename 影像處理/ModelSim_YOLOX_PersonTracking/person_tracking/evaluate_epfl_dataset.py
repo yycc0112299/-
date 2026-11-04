@@ -16,7 +16,7 @@ def iou(a, b):
 
 def run(images, annotations, output, threshold=0.5):
     detector = pipeline.Detector()
-    rows, total_gt, total_pred, matches, misses, false_positives, ious = [], 0, 0, 0, 0, 0, []
+    rows, total_gt, total_pred, matches, misses, false_positives, ious, position_errors = [], 0, 0, 0, 0, 0, [], []
     start = time.perf_counter()
     for annotation in sorted(Path(annotations).glob("det_frame*_cam*.txt")):
         match = re.fullmatch(r"det_frame(\d+)_cam(\d+)\.txt", annotation.name)
@@ -38,12 +38,14 @@ def run(images, annotations, output, threshold=0.5):
         predictions = detector.detect(pipeline.fit(source))
         predicted_boxes = [row["box"] for row in predictions]
         used = set()
-        local_ious = []
+        local_ious, local_position_errors = [], []
         for target in ground_truth:
             candidates = [(iou(target, box), index) for index, box in enumerate(predicted_boxes) if index not in used]
             best = max(candidates, default=(0.0, None))
             if best[0] >= threshold:
                 used.add(best[1]); matches += 1; ious.append(best[0]); local_ious.append(best[0])
+                error = max(abs(a - b) for a, b in zip(target, predicted_boxes[best[1]]))
+                position_errors.append(error); local_position_errors.append(error)
             else:
                 misses += 1
         total_gt += len(ground_truth); total_pred += len(predicted_boxes); false_positives += len(predicted_boxes) - len(used)
@@ -51,7 +53,8 @@ def run(images, annotations, output, threshold=0.5):
                      "predictions": len(predicted_boxes), "matches": len(local_ious),
                      "misses": len(ground_truth) - len(local_ious),
                      "false_positives": len(predicted_boxes) - len(used),
-                     "minimum_iou": round(min(local_ious), 4) if local_ious else None})
+                     "minimum_iou": round(min(local_ious), 4) if local_ious else None,
+                     "maximum_coordinate_error_px": max(local_position_errors) if local_position_errors else None})
     summary = {"dataset": "EPFL Multi-view Multi-class", "cases": len(rows),
                "ground_truth_boxes": total_gt, "predicted_boxes": total_pred, "matches": matches,
                "misses": misses, "false_positives": false_positives,
@@ -59,6 +62,10 @@ def run(images, annotations, output, threshold=0.5):
                "precision": round(matches / total_pred, 4) if total_pred else 0,
                "minimum_iou": round(min(ious), 4) if ious else None,
                "mean_iou": round(sum(ious) / len(ious), 4) if ious else None,
+               "maximum_coordinate_error_px": max(position_errors) if position_errors else None,
+               "mean_coordinate_error_px": round(sum(position_errors) / len(position_errors), 4) if position_errors else None,
+               "coordinate_error_threshold_px": 20,
+               "coordinate_error_pass": all(error < 20 for error in position_errors),
                "iou_threshold": threshold, "seconds": round(time.perf_counter() - start, 2),
                "status": "PASS" if misses == 0 else "PARTIAL", "cases_detail": rows}
     Path(output).write_text(json.dumps(summary, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")

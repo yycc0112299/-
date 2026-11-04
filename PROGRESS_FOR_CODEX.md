@@ -16,6 +16,7 @@
 
 - 新增 `person_tracking/evaluate_epfl_dataset.py`，使用專案 YOLOX/OpenCV 對 EPFL 6-camera 人物框資料逐張推論，依縮放後 ground truth 計算 IoU。
 - 939 cases、1,302 ground-truth boxes、1,565 predictions；matches=1,035、misses=267、false positives=530，recall=0.7949、precision=0.6613、mean IoU=0.7963、minimum IoU=0.5007，耗時 133.84 秒。
+- 座標誤差同步計算：mean=5.7932 px、maximum=37 px；`coordinate_error_threshold_px=20` 且 `coordinate_error_pass=false`，因此部分框超過 20 px。
 - 結果 `EPFL_DATASET_PARTIAL`；完整逐案例明細在 `person_tracking/epfl_dataset_evaluation.json`，不可把先前 bus/zidane 回歸結果替代這次外部資料分數。
 
 ## 2026-10-31：第三台電腦執行環境複核

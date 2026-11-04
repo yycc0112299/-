@@ -5,6 +5,18 @@ import pipeline as p
 from cross_camera import CrossCameraMatcher
 import numpy as np
 
+def rtl_yolox_packet(frame_index, frames, observed, match, timing_ok):
+    """Serialize one CPU-selected A/B pair for the Verilog bbox interface."""
+    selected=[]
+    for camera, track_id in enumerate((match['a_id'],match['b_id'])):
+        detection=next(item for item in observed[camera] if item['track_id']==track_id)
+        rgb=p.cv2.cvtColor(frames[camera],p.cv2.COLOR_BGR2RGB)
+        selected.append(dict(track_id=int(track_id),box=[int(v) for v in detection['box']],
+            confirmed=detection['status']=='confirmed',rtl_feature=f'{p.color_reference(rgb,detection["box"]):06x}'))
+    return dict(frame=int(frame_index),pair_timing_ok=bool(timing_ok),
+        a=selected[0],b=selected[1],software_score=match['score'],
+        software_status=match['status'],pair_present=True)
+
 def appearance(frame,box):
     x0,y0,x1,y1=box
     # Use the center to limit background; interpolate color bins so camera exposure
@@ -75,7 +87,7 @@ def main():
     root=p.ROOT/'dual_runs'/time.strftime('%Y%m%d_%H%M%S');root.mkdir(parents=True)
     for name in ['a','b','annotated']:(root/name).mkdir()
     detector=p.Detector();trackers=[p.Tracker(),p.Tracker()];matcher=CrossCameraMatcher()
-    records=[];roi_records=[[],[]]
+    records=[];roi_records=[[],[]];rtl_packets=[]
     for index,pair in enumerate(frames):
         observed=[]
         for camera,frame in enumerate(pair):
@@ -87,6 +99,10 @@ def main():
         # Retrieval timestamps describe host read order, not hardware exposure synchronization.
         synced=times is None or abs(times[index][0]-times[index][1])<=.15
         matches=matcher.update(*observed) if synced else matcher.update([],[])
+        if synced:
+            for match in matches:
+                if match['status']!='unmatched':
+                    rtl_packets.append(rtl_yolox_packet(index,pair,observed,match,synced))
         record=dict(frame=index,a=roi_records[0][-1]['detections'],b=roi_records[1][-1]['detections'],pairs=matches,pair_timing_ok=synced)
         records.append(record);views=[]
         for camera,frame in enumerate(pair):
@@ -98,6 +114,8 @@ def main():
             views.append(vis)
         p.save_image(root/'annotated'/f'{index:06}.png',np.hstack(views))
     (root/'tracks_and_pairs.json').write_text(json.dumps(records,indent=2))
+    (root/'rtl_yolox_packets.json').write_text(json.dumps(dict(
+        format='rtl-yolox-bbox-v1',resolution=[640,480],packets=rtl_packets),indent=2))
     with (root/'pairs.csv').open('w',newline='') as output:
         fields=['frame','a_id','b_id','score','status','consecutive_hits','pair_label']
         writer=csv.DictWriter(output,fieldnames=fields);writer.writeheader()

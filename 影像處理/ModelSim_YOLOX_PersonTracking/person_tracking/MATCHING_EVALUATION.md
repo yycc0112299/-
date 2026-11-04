@@ -19,3 +19,12 @@ python evaluate_detection_dataset.py
 ```
 
 它讀取已保存的 `verification_report.json`，彙總 6 組公開圖片／亮度案例的人工標註觀測；目前結果為 105/105 配對、annotated recall=1.0、最低 IoU=0.855、ID switch=0。輸出也保留總影格數、總偵測數、總處理秒數，以及每個案例的 expected/matches/misses/recall/minimum IoU/edge frames/status，不只留下 PASS。這是人物框與短期追蹤的 dataset 評估，不是跨鏡頭身分準確率。
+
+EPFL 外部資料可用：
+
+```powershell
+$env:PYTHONPATH='modelsim_draft/camera_deps'
+python person_tracking/evaluate_epfl_dataset.py --images <EPFL images> --annotations <EPFL person annotations>
+```
+
+這個評估器會保留每個 camera/frame 的 ground truth、預測數、matches、misses、false positives、minimum IoU 與 status；目前外部實測結果在 `epfl_dataset_evaluation.json`，為 `PARTIAL`，不是合成資料 PASS。

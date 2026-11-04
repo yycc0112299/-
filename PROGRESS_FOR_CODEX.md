@@ -12,6 +12,12 @@
 - 目前附帶的 4 筆資料是合成 regression fixture，結果為 `TP=1/TN=3/FP=0/FN=0`、accuracy/precision/recall/F1 均 1.0、最大框座標誤差 8 px。這證明評估器與現有 matcher 可重跑，不是真人雙鏡頭準確率。
 - 要取得正式實拍分數，需把 `matching_dataset.json` 換成兩台鏡頭錄影後人工確認的同人／不同人案例；測試集不可用來調門檻。
 
+## 2026-11-04：EPFL 外部資料實測
+
+- 新增 `person_tracking/evaluate_epfl_dataset.py`，使用專案 YOLOX/OpenCV 對 EPFL 6-camera 人物框資料逐張推論，依縮放後 ground truth 計算 IoU。
+- 939 cases、1,302 ground-truth boxes、1,565 predictions；matches=1,035、misses=267、false positives=530，recall=0.7949、precision=0.6613、mean IoU=0.7963、minimum IoU=0.5007，耗時 133.84 秒。
+- 結果 `EPFL_DATASET_PARTIAL`；完整逐案例明細在 `person_tracking/epfl_dataset_evaluation.json`，不可把先前 bus/zidane 回歸結果替代這次外部資料分數。
+
 ## 2026-10-31：第三台電腦執行環境複核
 
 - 以 `%LOCALAPPDATA%\\Programs\\Python\\Python312\\python.exe` 實測：Python 3.12.10、NumPy 1.26.4、OpenCV 4.11.0 均可匯入；`person_tracking/setup_assets.ps1` 已確認 YOLOX ONNX 與三張公開測試圖存在，模型 SHA-256 為預期的 `c5c2d13e59ae883e6af3b45daea64af4833a4951c92d116ec270d9ddbe998063`。不需重複下載或安裝 Python 相依套件。

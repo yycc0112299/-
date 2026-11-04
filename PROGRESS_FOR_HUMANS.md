@@ -12,6 +12,12 @@
 - 目前 4 筆範例回歸結果為 accuracy=1.000、F1=1.000、最大框誤差 8 px；這些是合成資料，只能證明程式可重跑，不能宣稱真人雙鏡頭準確率。
 - 後續只要把 `person_tracking/matching_dataset.json` 換成實拍且人工標記「同人／不同人」的案例，再執行 `python evaluate_matching_dataset.py` 即可得到正式分數。
 
+## 2026-11-04：EPFL 小型公開多鏡頭資料實測
+
+- 使用 EPFL 公開資料的 939 個人工標註影格，實際跑專題 YOLOX；ground truth 1,302 框，預測 1,565 框。
+- IoU>=0.5 配對 1,035，漏抓 267，誤抓 530；recall=0.7949、precision=0.6613、平均 IoU=0.7963、最低 IoU=0.5007，執行 133.84 秒。
+- 結果為 `EPFL_DATASET_PARTIAL`，完整逐案例數字保存在 `person_tracking/epfl_dataset_evaluation.json`；這是外部資料實測，不是合成回歸。
+
 ## 2026-11-03：無鏡頭等待中的公開 HTTPS 網站
 
 - 在本機沒有 USB 鏡頭的狀態下，雙鏡頭網站仍可啟動並回報 `stopped`；這是等待未來插入鏡頭的正常狀態，不是架設失敗。

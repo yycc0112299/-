@@ -5,6 +5,7 @@
 - 目標板確認為 TUL PYNQ-ZU（XCZU5EG-1SFVC784）。已從使用者下載的 Xilinx Board Store 解壓 board repository，並以 Vivado 2024.2 實測找到 `tul.com.tw:pynqzu:part0:1.1`。
 - 新增可重跑的 `fpga/configure_pynq_zu_board.tcl`，它只設定目前 Vivado session 的 board repository，不修改 Vivado 安裝目錄。
 - 大型第三方 `fpga/board_repos/` 已加入 Git ignore；尚未建立 bitstream、接通板端網路或驗證實體 PYNQ-ZU 開機。
+- 新增 `fpga/create_pynq_zu_rtl_project.tcl`，以 PYNQ-ZU board part 建立 Vivado 2024.2 專案並加入目前的 ROI/候選 Verilog；本機已實跑成功建立專案。生成的 `fpga/build/` 不提交。尚未加入 PS block design、AXI、時脈/reset、XDC 或 bitstream。
 
 ## 2026-11-04：公開圖片 dataset 彙總評估
 

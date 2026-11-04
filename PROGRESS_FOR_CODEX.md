@@ -5,6 +5,7 @@
 - 使用者提供板子照片確認為 TUL PYNQ-ZU，官方 board part 為 `tul.com.tw:pynqzu:part0:1.1`、device `XCZU5EG-1SFVC784`。本機偵測到其 Xilinx USB JTAG/UART（FTDI VID 0403/PID 6010）於 COM7，但當次打開後未收到 UART boot 輸出，未證明 PYNQ image 已開機或網路可達。
 - 使用者下載的 `C:\Users\dsic\Downloads\XilinxBoardStore-master.zip` 已解壓到被忽略的 `fpga/board_repos/`。新增 `fpga/configure_pynq_zu_board.tcl`：以 script 相對路徑設定 `board.repoPaths`，檢查 `TUL/pynqzu/1.1/board.xml` 存在並執行 `get_board_parts *pynqzu*`。Vivado 2024.2 batch 實跑印出 `PYNQ_ZU_BOARD_PARTS=tul.com.tw:pynqzu:part0:1.1`；其他 Board Store 中此 Vivado 沒安裝的 device 警告與 PYNQ-ZU 無關。
 - 下載的 `pynqzu_master.xdc` 是 Rev 3.B 的完整約束範本，目前不直接加入設計；必須待確定使用哪一個 PL I/O（HDMI/CSI/LED 等）再挑選對應 constraint。`.gitignore` 現排除 `fpga/board_repos/`，不提交約 224 MB 的第三方 Board Store。尚未產生 PYNQ-ZU bitstream、PS block design、AXI bridge、PYNQ overlay 或板端實機驗證。
+- 新增 `fpga/create_pynq_zu_rtl_project.tcl`。它設定本機 board repo、`create_project` 使用 `xczu5eg-sfvc784-1-e`、套用 `tul.com.tw:pynqzu:part0:1.1`，並加入 `person_roi_stream.v`、`cross_camera_pair_matcher.v`、`dual_camera_roi_match_top.v`，top 為 `dual_camera_roi_match_top`。2026-11-04 以 Vivado 2024.2 batch 實跑建立成功；Vivado 警告專案中文/長路徑可能影響日後 IP/BD，未出現 RTL 加檔錯誤。`fpga/build/` 已加入 Git ignore。尚未 run synthesis 或建立含 PS/AXI 的 block design。
 
 ## 2026-11-04：公開圖片 dataset 評估彙總
 

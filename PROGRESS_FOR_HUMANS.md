@@ -25,6 +25,7 @@
 - 本核心目前使用既有的簡化 24-bit 主色／比例特徵；尚未搬移 Python 的 YOLOX、HSV 15-bin 相似度、0.72 分數、多人物最佳配對或上板相機介面。因此不能把這次模擬當成真人跨鏡頭準確率或 FPGA 實機完成。
 - 新增 `dual_camera_roi_match_top.v`，將兩路同步 RGB 串流、CPU/YOLOX 提供的 A/B 人物框、兩個完整解析度 ROI 特徵核心及三次候選確認串接；已以 Vivado XSim 編譯通過。YOLOX 神經網路、不同時脈 USB 相機 frame buffer、bbox 傳輸及多人物仲裁仍未改成 Verilog。
 - 新增完整 640×480 雙串流 testbench，實測三個連續相似人物框會在第三張確認，下一張不同色人物框會歸零；Vivado XSim 16 項檢查 PASS。這是合成像素與 bbox 的 RTL 模擬，不是實體 USB/FPGA 或 YOLOX 網路硬體驗證。
+- `dual_camera.py` 現在會把 CPU/YOLOX 已選定的 A/B 配對輸出成每次執行的本機 `rtl_yolox_packets.json`：包含 frame、同步狀態、A/B track ID、bbox、確認狀態與相容的 24-bit RTL 色彩特徵。此檔是 Python 到 Verilog bbox 介面的資料契約，不包含影像，且尚未直接寫入 FPGA。
 
 ## 2026-11-03：無鏡頭等待中的公開 HTTPS 網站
 

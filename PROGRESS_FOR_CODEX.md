@@ -26,6 +26,7 @@
 - 與 Python `cross_camera.py` 的關係：此 RTL 只確認一個已由上層選定的 pair，未等價實作 15-bin HSV overlap、0.72 門檻、歷史平滑、互為最佳、0.08 次佳差或多人物仲裁。YOLOX/Tracker/bbox 和 pair 選擇仍在 CPU；下一個 RTL 範圍應在固定 feature contract 後新增 A/B 多候選緩衝與仲裁，而不是聲稱已完全硬體化現有網站 matcher。
 - 同日新增 `fpga/dual_camera_roi_match_top.v`：同一 clock domain 的雙 RGB888 pixel stream + CPU/YOLOX bbox integration top。兩個 `person_roi_stream` 在完整 640×480 frame 結尾輸出 feature 後，top 緩衝 feature，下一個 clock 送一拍 `observation_valid` 給 `cross_camera_pair_matcher`，避免讀到 nonblocking 舊值且不讓兩影格之間的 pixel gap 清空 hit 計數。以 Vivado 2024.2 `xvlog` 編譯 `person_roi_stream.v`、`cross_camera_pair_matcher.v`、此 top 成功；尚未建立真實 YOLOX bbox 的 pair testbench，也未完成不同時脈 USB / frame buffer、CPU-FPGA bbox protocol、多人物仲裁或 YOLOX network RTL。
 - 新增 `fpga/tb_dual_camera_roi_match_top.v`，每個案例逐拍送完整 307,200 pixel 的 A/B RGB888 frame 與 bbox（用來模擬 YOLOX 已完成的偵測）。三張紅色相似 ROI 必須產生連續 1/2/3 並在第三張 `confirmed`，第四張紅/藍 mismatch 必須清為 0。以 Vivado 2024.2 XSim 實跑 `DUAL_CAMERA_ROI_MATCH_TOP_PASS checks=16`。這是 top 級合成影格與 bbox 模擬，仍不等於真實 YOLOX output、USB 兩時脈或 FPGA 實機。
+- `person_tracking/dual_camera.py` 現在對每個已由 Python matcher 選出的非 unmatched A/B pair 寫入被忽略的 run artifact `rtl_yolox_packets.json`。格式 `rtl-yolox-bbox-v1` 含 640×480 resolution、frame、pair timing、兩側 track ID/bbox/confirmed、以 `pipeline.color_reference` 產生的 24-bit feature、軟體 score/status；不含 raw frame。這建立 YOLOX/Tracker 對 RTL `dual_camera_roi_match_top` bbox input 的可檢查封包契約，但未直接控制 FPGA、未證明 USB 同步，且不將 YOLOX 網路硬體化。已以 Python 3.12 `py_compile` 通過。
 
 ## 2026-10-31：第三台電腦執行環境複核
 

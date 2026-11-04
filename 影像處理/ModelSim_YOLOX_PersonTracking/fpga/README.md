@@ -42,3 +42,8 @@ A/B bbox、兩個 640×480 ROI feature core 與候選確認器串接。每個完
 feature 會先緩衝、下一個 clock 才送進 matcher，因此影格間 idle clock 不會重設三次
 連續計數。USB 相機若不同 clock 或非硬體同步，仍需 frame buffer / clock-domain adapter；
 YOLOX 網路、多人物排程、bbox 傳輸介面和板級相機輸入尚未硬體化。
+
+`tb_dual_camera_roi_match_top.v` 會實際送入四個完整 640×480 的同步 RGB frame，模擬
+YOLOX 已提供完整人物 bbox。三個相似 A/B ROI 於第三個 frame-pair 確認，第四個
+不同色 ROI 清除 streak；本機 Vivado 2024.2 XSim 結果為
+`DUAL_CAMERA_ROI_MATCH_TOP_PASS checks=16`。

@@ -1,5 +1,11 @@
 # 專題狀態與交接記錄（供 Codex）
 
+## 2026-11-04：跨鏡頭同人配對正式評估入口
+
+- 新增 `影像處理/ModelSim_YOLOX_PersonTracking/person_tracking/evaluate_matching_dataset.py`、`matching_dataset.json` 與 `MATCHING_EVALUATION.md`。評估人工標記的同人／不同人案例，輸出 TP、TN、FP、FN、accuracy、precision、recall、F1；有框座標時另檢查最大像素誤差是否小於 20 px。
+- 目前附帶的 4 筆資料是合成 regression fixture，結果為 `TP=1/TN=3/FP=0/FN=0`、accuracy/precision/recall/F1 均 1.0、最大框座標誤差 8 px。這證明評估器與現有 matcher 可重跑，不是真人雙鏡頭準確率。
+- 要取得正式實拍分數，需把 `matching_dataset.json` 換成兩台鏡頭錄影後人工確認的同人／不同人案例；測試集不可用來調門檻。
+
 ## 2026-10-31：第三台電腦執行環境複核
 
 - 以 `%LOCALAPPDATA%\\Programs\\Python\\Python312\\python.exe` 實測：Python 3.12.10、NumPy 1.26.4、OpenCV 4.11.0 均可匯入；`person_tracking/setup_assets.ps1` 已確認 YOLOX ONNX 與三張公開測試圖存在，模型 SHA-256 為預期的 `c5c2d13e59ae883e6af3b45daea64af4833a4951c92d116ec270d9ddbe998063`。不需重複下載或安裝 Python 相依套件。

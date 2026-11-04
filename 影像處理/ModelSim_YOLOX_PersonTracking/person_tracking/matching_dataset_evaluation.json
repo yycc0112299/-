@@ -1,0 +1,81 @@
+{
+  "cases": 4,
+  "TP": 1,
+  "TN": 3,
+  "FP": 0,
+  "FN": 0,
+  "accuracy": 1.0,
+  "precision": 1.0,
+  "recall": 1.0,
+  "f1": 1.0,
+  "position_error_threshold_px": 20,
+  "max_box_coordinate_error_px": 8,
+  "position_error_pass": true,
+  "results": [
+    {
+      "name": "same_person",
+      "expected_same_person": true,
+      "predicted_same_person": true,
+      "final": [
+        {
+          "a_id": 1,
+          "b_id": 7,
+          "score": 1.0,
+          "status": "confirmed_candidate",
+          "consecutive_hits": 3,
+          "pair_label": "P1"
+        }
+      ],
+      "classification": "TP",
+      "max_box_coordinate_error_px": 8
+    },
+    {
+      "name": "different_person",
+      "expected_same_person": false,
+      "predicted_same_person": false,
+      "final": [
+        {
+          "a_id": 2,
+          "b_id": 8,
+          "score": 0.0,
+          "status": "unmatched",
+          "consecutive_hits": 0,
+          "pair_label": null
+        }
+      ],
+      "classification": "TN"
+    },
+    {
+      "name": "ambiguous_competitor",
+      "expected_same_person": false,
+      "predicted_same_person": false,
+      "final": [
+        {
+          "a_id": 3,
+          "b_id": 9,
+          "score": 1.0,
+          "status": "ambiguous",
+          "consecutive_hits": 0,
+          "pair_label": null
+        }
+      ],
+      "classification": "TN"
+    },
+    {
+      "name": "different_appearance",
+      "expected_same_person": false,
+      "predicted_same_person": false,
+      "final": [
+        {
+          "a_id": 4,
+          "b_id": 11,
+          "score": 0.0,
+          "status": "unmatched",
+          "consecutive_hits": 0,
+          "pair_label": null
+        }
+      ],
+      "classification": "TN"
+    }
+  ]
+}

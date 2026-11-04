@@ -1,0 +1,9 @@
+{
+  "description": "可重跑的跨鏡頭同人配對標註範例；請以人工標記的實拍案例取代這些合成外觀向量。",
+  "cases": [
+    {"name": "same_person", "same_person": true, "a_id": 1, "b_ids": [7], "a_color": 2, "b_colors": [2], "a_box": [100, 60, 220, 360], "b_box": [108, 68, 228, 368]},
+    {"name": "different_person", "same_person": false, "a_id": 2, "b_ids": [8], "a_color": 2, "b_colors": [4]},
+    {"name": "ambiguous_competitor", "same_person": false, "a_id": 3, "b_ids": [9, 10], "a_color": 2, "b_colors": [2, 2]},
+    {"name": "different_appearance", "same_person": false, "a_id": 4, "b_ids": [11], "a_color": 2, "b_colors": [14]}
+  ]
+}

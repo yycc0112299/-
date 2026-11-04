@@ -24,6 +24,8 @@
 - `pipeline.py`：人物偵測、位置／HSV 外觀追蹤、原圖與標註存檔、RTL 驗證。
 - `person_roi_stream.v`：每拍一個原始 RGB 像素，掃完整 307,200 個像素，僅人物框內參與直方圖。以人物框高度的中點分上下區域；奇數高度多一列歸下區域。
 - `person_feature_compare.v`：比較同 ID 前次與本次主色、比例差（最多 35 個百分點）。
+- `cross_camera_pair_matcher.v`：接收外部已選定的一組 A/B 人物 24-bit 特徵；兩側特徵有效、上下主色相同且兩個比例差都不超過 35 個百分點時視為本影格候選，連續三個已觀測候選才輸出 `confirmed`。缺少配對或任一不相似影格會歸零連續計數。它是可綜合的單一候選確認核心；不含 YOLOX、人物框產生、多人物互為最佳或次佳差距仲裁，這些仍需由 CPU/上層排程器處理。
+- `tb_cross_camera_pair_matcher.v`：上列核心的獨立 RTL regression，涵蓋第三次命中確認、已確認飽和、色碼／比例不符、缺失影格、黑色服裝特徵及 reset。
 - `tb_person_roi.v`：讀完整 RGB 與人物框，驗證資料長度、有效訊號與像素數；每個 ID 的历史特徵目前由 testbench 保存，支援 ID 1–4095。
 
 模型來源：[OpenCV Zoo YOLOX](https://github.com/opencv/opencv_zoo/tree/main/models/object_detection_yolox)，Apache 2.0，完整授權見 `assets/LICENSE_YOLOX`。模型 SHA-256：`c5c2d13e59ae883e6af3b45daea64af4833a4951c92d116ec270d9ddbe998063`。公開照片來源存於 `assets/sources.json`；水果負例來自 [OpenCV samples](https://github.com/opencv/opencv/blob/master/samples/data/fruits.jpg)。照片僅用於本機測試，沒有上傳。

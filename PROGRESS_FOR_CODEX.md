@@ -18,6 +18,12 @@
 - 939 cases、1,302 ground-truth boxes、1,565 predictions；matches=1,035、misses=267、false positives=530，recall=0.7949、precision=0.6613、mean IoU=0.7963、minimum IoU=0.5007，耗時 133.84 秒。
 - 座標誤差同步計算：mean=5.7932 px、maximum=37 px；`coordinate_error_threshold_px=20` 且 `coordinate_error_pass=false`，因此部分框超過 20 px。
 - 結果 `EPFL_DATASET_PARTIAL`；完整逐案例明細在 `person_tracking/epfl_dataset_evaluation.json`，不可把先前 bus/zidane 回歸結果替代這次外部資料分數。
+## 2026-11-04：雙鏡頭單一候選 Verilog 確認核心
+
+- 本機目前以兩支 USB 鏡頭執行 `live_site/dual_server.py`，`/api/live` 曾回報 `live`、cameras `[0, 1]`、人物偵測與候選分數。白牆 10 個即時樣本的平均亮度 A/B 差為約 `+1.1/255`；另一輪以低飽和高亮區測得近似白色的 Lab 色差。這些是 2026-11-04 當時實機畫面量測，不等於人物同一性或準確率驗證，現場變化／自動曝光仍可能改變結果。
+- 新增 `person_tracking/cross_camera_pair_matcher.v`，為可綜合的固定點單一 A/B pair 確認核心。輸入：時脈、reset、`pair_observed`、雙方有效位元、既有 `{top_color,bottom_color,top_percent,bottom_percent}` 24-bit 特徵；輸出：組合 `feature_similar`、每個相似觀測的 `candidate_valid`、第三個連續命中時的 `confirmed`，以及飽和於 3 的 `consecutive_hits`。主色兩段相等、各比例差 <=35 是相似條件；black 色碼 0 可透過獨立 valid 正確處理。缺少 pair 或不相似會清除計數。
+- 新增 `person_tracking/tb_cross_camera_pair_matcher.v`，覆蓋第一次/第二次候選、第三次確認、確認後飽和、色碼不符、缺失觀測、black feature、36 個百分點比例差及 reset。用 `C:\Xilinx\Vivado\2024.2\bin\xvlog.bat`、`xelab.bat`、`xsim.bat` 實跑，輸出 `CROSS_CAMERA_PAIR_MATCHER_PASS checks=10`，無編譯或模擬錯誤。這是本機第三台的 XSim 模擬，非 ModelSim，也非合成、時序、PYNQ/EGo1 或相機實機驗證。
+- 與 Python `cross_camera.py` 的關係：此 RTL 只確認一個已由上層選定的 pair，未等價實作 15-bin HSV overlap、0.72 門檻、歷史平滑、互為最佳、0.08 次佳差或多人物仲裁。YOLOX/Tracker/bbox 和 pair 選擇仍在 CPU；下一個 RTL 範圍應在固定 feature contract 後新增 A/B 多候選緩衝與仲裁，而不是聲稱已完全硬體化現有網站 matcher。
 
 ## 2026-10-31：第三台電腦執行環境複核
 

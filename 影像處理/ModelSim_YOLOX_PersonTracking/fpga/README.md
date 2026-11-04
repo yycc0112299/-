@@ -22,3 +22,17 @@ x0/y0/x1/y1[9:0]
 把本檔和上層 `person_tracking/person_roi_stream.v` 一起加入專案即可先做 RTL
 compile。既有 `person_tracking/open_rtl_regression.ps1 -Batch` 仍是功能回歸入口；
 真正接板時必須另外以目標板的 Vivado board part、XDC 與 clock wizard 重新合成。
+
+## 跨鏡頭候選確認核心
+
+`../person_tracking/cross_camera_pair_matcher.v` 可接在兩側 `person_roi_stream` 的結果之後。
+它不自行挑選多個人，而是由 CPU／上層邏輯對每個 frame 提供一組已選定的
+`feature_a`、`feature_b` 與 `pair_observed`。兩側 feature 都有效、上/下主色相同且
+兩個比例差各不超過 35 時，`candidate_valid` 有效；連續三個符合的已觀測 frame 才
+會輸出一拍 `confirmed`。沒有候選或不符合即清除計數。這保留了現有 Python 流程的
+「連續三次才確認」保護，但尚未硬體化 HSV 15-bin 分數、0.72 門檻、互為最佳與
+多人物歧義判斷。
+
+在這台電腦以 Vivado 2024.2 XSim 執行
+`tb_cross_camera_pair_matcher.v`：`CROSS_CAMERA_PAIR_MATCHER_PASS checks=10`。
+這是 RTL 模擬，不是 PYNQ/EGo1 合成、時序分析、相機串流或上板驗證。

@@ -1,5 +1,12 @@
 # 專題進度（重點版）
 
+## 2026-11-04：YOLOX 已有可接 FPGA 的傳遞介面
+
+- 保留 GitHub 先前已驗證的 Verilog：雙路人物框色彩特徵、跨鏡頭三次確認、640×480 模擬。
+- 新增 PYNQ-ZU AXI4-Lite mailbox：Python YOLOX 可把每幀選定的 A/B bbox 和影格號寫入 FPGA；FPGA 只在相同影格開始時鎖住座標，避免錯影格或半寫入。
+- 本機 Vivado mailbox 模擬 5 項檢查 PASS，整合 Verilog top 編譯成功；Python 寫入暫存器的合約測試也 PASS。
+- 尚未上板：PS Block Design、相機輸入、腳位/時脈、bitstream 與實機 MMIO 都未完成。YOLOX 仍在 CPU/PS，FPGA 只做接 bbox 後的 ROI 特徵及確認，不能說 YOLOX 已在 FPGA 推論。
+
 ## 2026-11-04：PYNQ-ZU Vivado board file 已驗證
 
 - 目標板確認為 TUL PYNQ-ZU（XCZU5EG-1SFVC784）。已從使用者下載的 Xilinx Board Store 解壓 board repository，並以 Vivado 2024.2 實測找到 `tul.com.tw:pynqzu:part0:1.1`。

@@ -1,5 +1,14 @@
 # 專題狀態與交接記錄（供 Codex）
 
+## 2026-11-04：YOLOX 到 PYNQ-ZU RTL 的 AXI4-Lite bbox 資料邊界
+
+- 已核對並沿用既有 Verilog 提交：`6317be2` 跨鏡頭確認 matcher、`83cbdfe` 雙路 ROI 串接、`df14947` 完整 640×480 testbench；本次不重寫已驗證的 ROI/matcher 核心。
+- 新增 `fpga/yolox_bbox_axilite.v`，提供同一 PL clock 的 AXI4-Lite command mailbox。PS 先寫 frame ID 和 A/B bbox，最後 CONTROL.bit0 commit；matching frame 接收後清除 pending，未消耗前再 commit 會置 `overrun` 且保留舊命令。
+- 新增 `fpga/yolox_frame_command_adapter.v`，只在 video `frame_start` 與 command frame ID 相同時鎖住 bbox；`fpga/dual_camera_yolox_axilite_top.v` 將此 adapter、mailbox 與既有 dual ROI top 串接。`create_pynq_zu_rtl_project.tcl` 已新增 sources 並將該整合 top 設為 top。
+- 新增 `person_tracking/pynq_yolox_mmio.py`，可驗證和送出 `dual_camera.py` 的 `rtl-yolox-bbox-v1` packet 到 PYNQ MMIO；硬體 base address 必須由最終 Block Design 的 Address Editor 提供，不寫死在共享程式碼。
+- 此電腦驗證：Vivado 2024.2 `xvlog` 成功編譯完整整合 top；`tb_yolox_command_path.v` 的 commit、錯影格保留、正確影格 latch 與 consume 模擬通過，輸出 `YOLOX_COMMAND_PATH_PASS checks=5`。Python fake-MMIO 合約測試也通過，產生正確的 6 次 payload/control 寫入。
+- 未驗證：PYNQ-ZU 的 PYNQ image/network、PS Block Design/AXI interconnect、clock converter、camera/MIPI 或 USB frame-buffer、XDC、synthesis/implementation、bitstream、實機 MMIO。YOLOX 仍在 CPU/PS Python；RTL 只接收已選 pair 的 bbox，不能宣稱 YOLOX 神經網路已用 Verilog 實現。
+
 ## 2026-11-04：PYNQ-ZU board repository 與 Vivado 驗證
 
 - 使用者提供板子照片確認為 TUL PYNQ-ZU，官方 board part 為 `tul.com.tw:pynqzu:part0:1.1`、device `XCZU5EG-1SFVC784`。本機偵測到其 Xilinx USB JTAG/UART（FTDI VID 0403/PID 6010）於 COM7，但當次打開後未收到 UART boot 輸出，未證明 PYNQ image 已開機或網路可達。

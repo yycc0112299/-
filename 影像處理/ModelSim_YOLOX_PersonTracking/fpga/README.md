@@ -47,3 +47,27 @@ YOLOX 網路、多人物排程、bbox 傳輸介面和板級相機輸入尚未硬
 YOLOX 已提供完整人物 bbox。三個相似 A/B ROI 於第三個 frame-pair 確認，第四個
 不同色 ROI 清除 streak；本機 Vivado 2024.2 XSim 結果為
 `DUAL_CAMERA_ROI_MATCH_TOP_PASS checks=16`。
+
+## YOLOX 到 FPGA 的 AXI4-Lite 邊界（2026-11-04）
+
+`dual_camera_yolox_axilite_top.v` 是目前 PYNQ-ZU Vivado project 的整合 top：
+
+```text
+PYNQ PS / Python YOLOX → AXI4-Lite bbox mailbox → frame command adapter
+                         → dual_camera_roi_match_top → feature / confirmed
+```
+
+- `yolox_bbox_axilite.v` 是 64-byte AXI4-Lite slave。先寫 `0x04` frame ID、`0x08/0x0c`
+  A 的 `(x0,x1)/(y0,y1)`、`0x10/0x14` B 的座標，最後寫 `0x00 = 0x3` 提交一組存在的
+  bbox。CONTROL bit 0=pending、bit 1=pair present、bit 2=overrun。
+- `yolox_frame_command_adapter.v` 僅在相同 `stream_frame_id` 的 `frame_start` 鎖住 bbox；
+  錯影格輸出 `frame_command_missing` 並不讓舊 bbox 用於新 frame。
+- `person_tracking/pynq_yolox_mmio.py` 將既有 `rtl-yolox-bbox-v1` JSON 寫入 PYNQ `MMIO`。
+  PYNQ overlay 完成後以 `open_pynq_mmio(<Address Editor 的 base address>)` 建立 MMIO；
+  base address 不能硬編碼，必須取自最終 Vivado Block Design。
+
+本機 Vivado 2024.2 的 `tb_yolox_command_path.v` 模擬通過
+`YOLOX_COMMAND_PATH_PASS checks=5`，整個 `dual_camera_yolox_axilite_top.v` 也已編譯。
+Python fake-MMIO 合約測試確認 packet 會先寫五筆 payload，最後才寫 control。這不是 PYNQ-ZU
+上板結果：尚未完成 PS Block Design、MIPI/USB frame buffer、clock-domain crossing、XDC、
+bitstream 或硬體 MMIO；YOLOX 仍是 CPU/PS 推論，不是 Verilog 神經網路。

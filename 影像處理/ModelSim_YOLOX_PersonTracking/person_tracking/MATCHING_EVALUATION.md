@@ -18,4 +18,4 @@ python evaluate_matching_dataset.py
 python evaluate_detection_dataset.py
 ```
 
-它讀取已保存的 `verification_report.json`，彙總 6 組公開圖片／亮度案例的人工標註觀測；目前結果為 105/105 配對、annotated recall=1.0、最低 IoU=0.855、ID switch=0。這是人物框與短期追蹤的 dataset 評估，不是跨鏡頭身分準確率。
+它讀取已保存的 `verification_report.json`，彙總 6 組公開圖片／亮度案例的人工標註觀測；目前結果為 105/105 配對、annotated recall=1.0、最低 IoU=0.855、ID switch=0。輸出也保留總影格數、總偵測數、總處理秒數，以及每個案例的 expected/matches/misses/recall/minimum IoU/edge frames/status，不只留下 PASS。這是人物框與短期追蹤的 dataset 評估，不是跨鏡頭身分準確率。

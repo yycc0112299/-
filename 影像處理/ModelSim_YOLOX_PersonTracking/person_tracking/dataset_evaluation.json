@@ -4,10 +4,107 @@
   "matched_observations": 105,
   "misses": 0,
   "id_switches": 0,
+  "total_detection_count": 109,
+  "total_frames": 42,
+  "total_detection_seconds": 11.93,
   "annotated_recall": 1.0,
   "minimum_iou": 0.855,
   "iou_threshold": 0.5,
   "negative_cases_pass": true,
   "status": "PASS",
-  "source_artifact": "verification_report.json"
+  "source_artifact": "verification_report.json",
+  "cases": [
+    {
+      "source": "web bus, brightness 1.0",
+      "frames": 7,
+      "detection_count": 23,
+      "detection_seconds": 1.69,
+      "expected": 21,
+      "matches": 21,
+      "misses": 0,
+      "id_switches": 0,
+      "recall": 1.0,
+      "minimum_iou": 0.864,
+      "partial_edge_person_frames": 2,
+      "status": "PASS"
+    },
+    {
+      "source": "web zidane, brightness 1.0",
+      "frames": 7,
+      "detection_count": 14,
+      "detection_seconds": 1.84,
+      "expected": 14,
+      "matches": 14,
+      "misses": 0,
+      "id_switches": 0,
+      "recall": 1.0,
+      "minimum_iou": 0.961,
+      "partial_edge_person_frames": 0,
+      "status": "PASS"
+    },
+    {
+      "source": "web bus, brightness 0.8",
+      "frames": 7,
+      "detection_count": 21,
+      "detection_seconds": 1.72,
+      "expected": 21,
+      "matches": 21,
+      "misses": 0,
+      "id_switches": 0,
+      "recall": 1.0,
+      "minimum_iou": 0.855,
+      "partial_edge_person_frames": 0,
+      "status": "PASS"
+    },
+    {
+      "source": "web zidane, brightness 0.8",
+      "frames": 7,
+      "detection_count": 14,
+      "detection_seconds": 1.93,
+      "expected": 14,
+      "matches": 14,
+      "misses": 0,
+      "id_switches": 0,
+      "recall": 1.0,
+      "minimum_iou": 0.961,
+      "partial_edge_person_frames": 0,
+      "status": "PASS"
+    },
+    {
+      "source": "web bus, brightness 1.1",
+      "frames": 7,
+      "detection_count": 23,
+      "detection_seconds": 2.83,
+      "expected": 21,
+      "matches": 21,
+      "misses": 0,
+      "id_switches": 0,
+      "recall": 1.0,
+      "minimum_iou": 0.902,
+      "partial_edge_person_frames": 2,
+      "status": "PASS"
+    },
+    {
+      "source": "web zidane, brightness 1.1",
+      "frames": 7,
+      "detection_count": 14,
+      "detection_seconds": 1.92,
+      "expected": 14,
+      "matches": 14,
+      "misses": 0,
+      "id_switches": 0,
+      "recall": 1.0,
+      "minimum_iou": 0.961,
+      "partial_edge_person_frames": 0,
+      "status": "PASS"
+    }
+  ],
+  "negative_cases": [
+    {
+      "source": "black, white, real fruit photo negatives",
+      "frames": 3,
+      "detection_count": 0,
+      "negative_validation": "PASS"
+    }
+  ]
 }

@@ -23,6 +23,7 @@
 - 實際雙 USB 鏡頭 localhost 網站已啟動；白牆連續抽樣顯示兩側亮度接近，最新量測平均差約 1.1/255。這只驗證當時的影像一致性，不是人物配對準確率。
 - 新增 Verilog `cross_camera_pair_matcher.v`：對上層已選定的一組 A/B 人物色彩特徵，連續三個相似且有效的觀測才確認候選；不相似或缺少配對時重置。新增測試平台後以這台電腦的 Vivado 2024.2 XSim 實跑 10 項檢查通過。
 - 本核心目前使用既有的簡化 24-bit 主色／比例特徵；尚未搬移 Python 的 YOLOX、HSV 15-bin 相似度、0.72 分數、多人物最佳配對或上板相機介面。因此不能把這次模擬當成真人跨鏡頭準確率或 FPGA 實機完成。
+- 新增 `dual_camera_roi_match_top.v`，將兩路同步 RGB 串流、CPU/YOLOX 提供的 A/B 人物框、兩個完整解析度 ROI 特徵核心及三次候選確認串接；已以 Vivado XSim 編譯通過。YOLOX 神經網路、不同時脈 USB 相機 frame buffer、bbox 傳輸及多人物仲裁仍未改成 Verilog。
 
 ## 2026-11-03：無鏡頭等待中的公開 HTTPS 網站
 

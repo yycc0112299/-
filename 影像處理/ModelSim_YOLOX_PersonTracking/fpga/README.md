@@ -27,7 +27,7 @@ compile。既有 `person_tracking/open_rtl_regression.ps1 -Batch` 仍是功能�
 
 `../person_tracking/cross_camera_pair_matcher.v` 可接在兩側 `person_roi_stream` 的結果之後。
 它不自行挑選多個人，而是由 CPU／上層邏輯對每個 frame 提供一組已選定的
-`feature_a`、`feature_b` 與 `pair_observed`。兩側 feature 都有效、上/下主色相同且
+`feature_a`、`feature_b` 與每個 frame-pair 的 `observation_valid`／`pair_present`。兩側 feature 都有效、上/下主色相同且
 兩個比例差各不超過 35 時，`candidate_valid` 有效；連續三個符合的已觀測 frame 才
 會輸出一拍 `confirmed`。沒有候選或不符合即清除計數。這保留了現有 Python 流程的
 「連續三次才確認」保護，但尚未硬體化 HSV 15-bin 分數、0.72 門檻、互為最佳與
@@ -36,3 +36,9 @@ compile。既有 `person_tracking/open_rtl_regression.ps1 -Batch` 仍是功能�
 在這台電腦以 Vivado 2024.2 XSim 執行
 `tb_cross_camera_pair_matcher.v`：`CROSS_CAMERA_PAIR_MATCHER_PASS checks=10`。
 這是 RTL 模擬，不是 PYNQ/EGo1 合成、時序分析、相機串流或上板驗證。
+
+`dual_camera_roi_match_top.v` 把兩路同 clock 的 RGB888 pixel stream、CPU/YOLOX 提供的
+A/B bbox、兩個 640×480 ROI feature core 與候選確認器串接。每個完整 frame-pair 的
+feature 會先緩衝、下一個 clock 才送進 matcher，因此影格間 idle clock 不會重設三次
+連續計數。USB 相機若不同 clock 或非硬體同步，仍需 frame buffer / clock-domain adapter；
+YOLOX 網路、多人物排程、bbox 傳輸介面和板級相機輸入尚未硬體化。

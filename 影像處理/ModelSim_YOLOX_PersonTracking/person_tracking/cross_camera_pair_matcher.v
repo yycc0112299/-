@@ -8,7 +8,8 @@ module cross_camera_pair_matcher #(
 )(
  input wire clk,
  input wire reset,
- input wire pair_observed,
+ input wire observation_valid,
+ input wire pair_present,
  input wire a_valid,
  input wire b_valid,
  input wire [23:0] feature_a,
@@ -42,17 +43,20 @@ module cross_camera_pair_matcher #(
   end else begin
    candidate_valid <= 1'b0;
    confirmed <= 1'b0;
-   // A missing pair is deliberately a break in continuity, matching the
-   // software rule that an observation must be present on consecutive frames.
-   if (!pair_observed || !feature_similar) begin
-    consecutive_hits <= 2'd0;
-   end else begin
-    candidate_valid <= 1'b1;
-    if (consecutive_hits >= REQUIRED_HITS - 1'b1) begin
-     consecutive_hits <= REQUIRED_HITS;
-     confirmed <= 1'b1;
+   // Only a completed A/B frame-pair is an observation. Idle pixel clocks
+   // between frames preserve history; an observed missing or dissimilar pair
+   // deliberately breaks continuity.
+   if (observation_valid) begin
+    if (!pair_present || !feature_similar) begin
+     consecutive_hits <= 2'd0;
     end else begin
-     consecutive_hits <= consecutive_hits + 1'b1;
+     candidate_valid <= 1'b1;
+     if (consecutive_hits >= REQUIRED_HITS - 1'b1) begin
+      consecutive_hits <= REQUIRED_HITS;
+      confirmed <= 1'b1;
+     end else begin
+      consecutive_hits <= consecutive_hits + 1'b1;
+     end
     end
    end
   end

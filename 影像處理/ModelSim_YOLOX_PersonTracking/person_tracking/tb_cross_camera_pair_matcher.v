@@ -2,14 +2,14 @@
 module tb_cross_camera_pair_matcher;
  reg clk = 0;
  always #5 clk = ~clk;
- reg reset = 1, pair_observed = 0, a_valid = 0, b_valid = 0;
+ reg reset = 1, observation_valid = 0, pair_present = 0, a_valid = 0, b_valid = 0;
  reg [23:0] feature_a = 0, feature_b = 0;
  wire feature_similar, candidate_valid, confirmed;
  wire [1:0] consecutive_hits;
  integer checks = 0;
 
  cross_camera_pair_matcher dut(
-  .clk(clk), .reset(reset), .pair_observed(pair_observed),
+  .clk(clk), .reset(reset), .observation_valid(observation_valid), .pair_present(pair_present),
   .a_valid(a_valid), .b_valid(b_valid), .feature_a(feature_a), .feature_b(feature_b),
   .feature_similar(feature_similar), .candidate_valid(candidate_valid),
   .confirmed(confirmed), .consecutive_hits(consecutive_hits)
@@ -33,7 +33,7 @@ module tb_cross_camera_pair_matcher;
   input [23:0] fa, fb;
   begin
    @(negedge clk);
-   pair_observed = observed; a_valid = av; b_valid = bv; feature_a = fa; feature_b = fb;
+   observation_valid = observed; pair_present = observed; a_valid = av; b_valid = bv; feature_a = fa; feature_b = fb;
    @(posedge clk); #1;
   end
  endtask
@@ -56,7 +56,9 @@ module tb_cross_camera_pair_matcher;
   // An observation gap also breaks continuity.
   sample(1, 1, 1, 24'h006464, 24'h006464);
   check(feature_similar && candidate_valid && consecutive_hits == 1, "black color feature remains valid");
-  sample(0, 1, 1, 24'h006464, 24'h006464);
+  sample(1, 1, 1, 24'h006464, 24'h006464);
+  pair_present = 0;
+  @(posedge clk); #1;
   check(feature_similar && !candidate_valid && !confirmed && consecutive_hits == 0, "missing pair resets streak");
   // A 36-point percentage mismatch is outside the allowed inclusive boundary.
   sample(1, 1, 1, 24'h226464, 24'h224040);

@@ -24,6 +24,7 @@
 - 新增 `person_tracking/cross_camera_pair_matcher.v`，為可綜合的固定點單一 A/B pair 確認核心。輸入：時脈、reset、`pair_observed`、雙方有效位元、既有 `{top_color,bottom_color,top_percent,bottom_percent}` 24-bit 特徵；輸出：組合 `feature_similar`、每個相似觀測的 `candidate_valid`、第三個連續命中時的 `confirmed`，以及飽和於 3 的 `consecutive_hits`。主色兩段相等、各比例差 <=35 是相似條件；black 色碼 0 可透過獨立 valid 正確處理。缺少 pair 或不相似會清除計數。
 - 新增 `person_tracking/tb_cross_camera_pair_matcher.v`，覆蓋第一次/第二次候選、第三次確認、確認後飽和、色碼不符、缺失觀測、black feature、36 個百分點比例差及 reset。用 `C:\Xilinx\Vivado\2024.2\bin\xvlog.bat`、`xelab.bat`、`xsim.bat` 實跑，輸出 `CROSS_CAMERA_PAIR_MATCHER_PASS checks=10`，無編譯或模擬錯誤。這是本機第三台的 XSim 模擬，非 ModelSim，也非合成、時序、PYNQ/EGo1 或相機實機驗證。
 - 與 Python `cross_camera.py` 的關係：此 RTL 只確認一個已由上層選定的 pair，未等價實作 15-bin HSV overlap、0.72 門檻、歷史平滑、互為最佳、0.08 次佳差或多人物仲裁。YOLOX/Tracker/bbox 和 pair 選擇仍在 CPU；下一個 RTL 範圍應在固定 feature contract 後新增 A/B 多候選緩衝與仲裁，而不是聲稱已完全硬體化現有網站 matcher。
+- 同日新增 `fpga/dual_camera_roi_match_top.v`：同一 clock domain 的雙 RGB888 pixel stream + CPU/YOLOX bbox integration top。兩個 `person_roi_stream` 在完整 640×480 frame 結尾輸出 feature 後，top 緩衝 feature，下一個 clock 送一拍 `observation_valid` 給 `cross_camera_pair_matcher`，避免讀到 nonblocking 舊值且不讓兩影格之間的 pixel gap 清空 hit 計數。以 Vivado 2024.2 `xvlog` 編譯 `person_roi_stream.v`、`cross_camera_pair_matcher.v`、此 top 成功；尚未建立真實 YOLOX bbox 的 pair testbench，也未完成不同時脈 USB / frame buffer、CPU-FPGA bbox protocol、多人物仲裁或 YOLOX network RTL。
 
 ## 2026-10-31：第三台電腦執行環境複核
 

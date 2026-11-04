@@ -1,5 +1,11 @@
 # 專題進度（重點版）
 
+## 2026-11-04：公開圖片 dataset 彙總評估
+
+- 新增 `person_tracking/evaluate_detection_dataset.py`，讀取既有人工標註驗證報告並彙總 6 組 bus／zidane 亮度案例。
+- 結果：105/105 個人工標註人物觀測配對成功，annotated recall=1.000、最低 IoU=0.855、ID switch=0，負例測試 PASS。
+- 這是人物框／短期追蹤 dataset 評估，不是跨鏡頭真人身分配對準確率；後者仍需人工標記兩台鏡頭的同人／不同人資料。
+
 ## 2026-11-04：新增同人配對分數測試入口
 
 - 新增跨鏡頭配對評估程式，可計算同一人判斷的 accuracy、precision、recall、F1、TP/TN/FP/FN，並檢查人物框座標最大誤差是否小於 20 px。

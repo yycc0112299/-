@@ -1,0 +1,13 @@
+{
+  "dataset_cases": 6,
+  "annotated_person_observations": 105,
+  "matched_observations": 105,
+  "misses": 0,
+  "id_switches": 0,
+  "annotated_recall": 1.0,
+  "minimum_iou": 0.855,
+  "iou_threshold": 0.5,
+  "negative_cases_pass": true,
+  "status": "PASS",
+  "source_artifact": "verification_report.json"
+}

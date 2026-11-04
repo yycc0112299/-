@@ -1,5 +1,11 @@
 # 專題狀態與交接記錄（供 Codex）
 
+## 2026-11-04：公開圖片 dataset 評估彙總
+
+- 新增 `person_tracking/evaluate_detection_dataset.py`，以 `verification_report.json` 為來源彙總 6 組公開圖片／亮度案例。
+- 實際輸出 `DATASET_EVALUATION_PASS cases=6 observations=105 recall=1.000 minimum_iou=0.855`：105/105 人工標註觀測配對成功、0 miss、0 ID switch，負例 PASS。
+- 這證明人物偵測框與短期追蹤的 dataset 評估已可交付；不延伸宣稱跨鏡頭真人身分準確率，因目前仍缺人工同人／不同人標註集。
+
 ## 2026-11-04：跨鏡頭同人配對正式評估入口
 
 - 新增 `影像處理/ModelSim_YOLOX_PersonTracking/person_tracking/evaluate_matching_dataset.py`、`matching_dataset.json` 與 `MATCHING_EVALUATION.md`。評估人工標記的同人／不同人案例，輸出 TP、TN、FP、FN、accuracy、precision、recall、F1；有框座標時另檢查最大像素誤差是否小於 20 px。

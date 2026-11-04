@@ -16,6 +16,13 @@
 - 新增 `fpga/synthesize_pynq_zu_yolox.tcl`，生成 BD HDL wrapper 並跑 `synth_1`。初次在 repo 中文長路徑下 IP generate 失敗（檔案找不到），已改三個 script 以環境變數 `PYNQ_ZU_BUILD_DIR` 可覆寫、預設 `%TEMP%/pynq_zu_rtl` 的短 ASCII 生成路徑；原 repo 下的舊 build 未刪除。
 - 短路徑實跑：BD `validate_bd_design` 完成，僅有 SmartConnect 對 AXI4-Lite low-area/WRAP burst 的一般 warning；wrapper synth 產生 `pynq_zu_yolox_wrapper.dcp`，日誌為 `synth_design completed successfully`，0 errors、0 critical warnings。這證明 PS/AXI/RTL 結構可綜合，不證明 IO 約束、implementation、bitstream、PYNQ overlay、camera 影像或板端 MMIO。
 
+## 2026-11-04：可接 DMA 的同步雙 RGB AXI-Stream 資料面
+
+- 新增 `fpga/axis_dual_rgb_stream_adapter.v` 與 `dual_camera_yolox_axis_top.v`。前者把一條 64-bit AXI stream 的 A `[23:0]`、B `[55:32]` RGB888 word 轉成既有 dual ROI core 所需的同 clock/同拍 pixel stream；每 307,200 word 形成 640×480 frame，檢查 TLAST 是否落在終點並鎖存 boundary error。後者將 AXI stream adapter 與已驗證的 PS AXI-Lite bbox top 串接。
+- 單一合併 DMA stream 是刻意設計：兩支獨立 DMA 若有 valid gap，既有同步 core 不能保證每個 A pixel 對應同一個 B pixel。此介面允許 PS/camera 軟體先將同時間 pair 成為一個 frame-pair buffer，再送入 PL。
+- `pynq_yolox_mmio.py` 新增 `pack_dual_rgb888_frames()` 和 `copy_dual_frame_to_dma_buffer()`；只接受 matching `uint8` RGB H×W×3 frames，依硬體位元布局產生 `uint64` DMA words。fake NumPy test 的輸出為 `0x00aabbcc00112233`；Vivado XSim 的 adapter test 結果為 `AXIS_DUAL_RGB_STREAM_ADAPTER_PASS checks=7`，完整 axis top `xvlog` 成功。
+- 未驗證：尚未選定/接上 PYNQ-ZU 的實體 camera interface（CSI、HDMI 或 PS USB），也尚未把 AXI DMA/high-performance memory port 加到 BD、產生 bitstream 或用 PYNQ DMA 實機傳影像。故這是已測試的資料格式/RTL 入口，不是相機上板結果。
+
 ## 2026-11-04：PYNQ-ZU board repository 與 Vivado 驗證
 
 - 使用者提供板子照片確認為 TUL PYNQ-ZU，官方 board part 為 `tul.com.tw:pynqzu:part0:1.1`、device `XCZU5EG-1SFVC784`。本機偵測到其 Xilinx USB JTAG/UART（FTDI VID 0403/PID 6010）於 COM7，但當次打開後未收到 UART boot 輸出，未證明 PYNQ image 已開機或網路可達。

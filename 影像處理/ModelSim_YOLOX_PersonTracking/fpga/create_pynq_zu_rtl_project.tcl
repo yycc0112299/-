@@ -20,7 +20,9 @@ add_files [list \
  [file join $script_dir dual_camera_roi_match_top.v] \
  [file join $script_dir yolox_bbox_axilite.v] \
  [file join $script_dir yolox_frame_command_adapter.v] \
- [file join $script_dir dual_camera_yolox_axilite_top.v]]
+ [file join $script_dir dual_camera_yolox_axilite_top.v] \
+ [file join $script_dir axis_dual_rgb_stream_adapter.v] \
+ [file join $script_dir dual_camera_yolox_axis_top.v]]
 set_property top dual_camera_yolox_axilite_top [current_fileset]
 update_compile_order -fileset sources_1
 puts "PYNQ_ZU_PROJECT_CREATED=$build_dir"

@@ -14,6 +14,12 @@
 - Windows 的專題資料夾路徑過長且含中文會造成 Zynq IP 生成失敗；腳本已改成預設把可丟棄的 Vivado 生成物放在短的 `%TEMP%/pynq_zu_rtl`，不影響 GitHub 原始碼。
 - 尚未做相機輸入、腳位/XDC、implementation/bitstream、PYNQ overlay 或實機讀寫。因此這是「可綜合的硬體結構」，不是已經能在板子上看見雙鏡頭結果。
 
+## 2026-11-04：雙鏡頭資料可由同一條 DMA 串流送進 FPGA
+
+- 新增通用 64-bit AXI-Stream 入口：一個 DMA word 同時裝 A、B 兩個 RGB 像素，讓兩鏡頭像素保持同步；每 640×480 張影像自動形成一個 frame。
+- Python 已能把兩張 RGB 影像打包到 PYNQ DMA buffer；Verilog 模擬 7 項檢查與 Python 打包測試都通過。
+- 這可供未來的 USB/PS、CSI 或 HDMI 來源共用；還沒選定實體相機介面，也還沒接上 DMA/相機實機。
+
 ## 2026-11-04：PYNQ-ZU Vivado board file 已驗證
 
 - 目標板確認為 TUL PYNQ-ZU（XCZU5EG-1SFVC784）。已從使用者下載的 Xilinx Board Store 解壓 board repository，並以 Vivado 2024.2 實測找到 `tul.com.tw:pynqzu:part0:1.1`。

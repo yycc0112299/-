@@ -92,3 +92,38 @@ def open_pynq_mmio(base_address: int, length: int = 0x1000) -> MMIOWriter:
     """Create the real PYNQ MMIO object; call only after loading the overlay."""
     from pynq import MMIO  # installed only on the PYNQ-ZU image
     return MMIO(base_address, length)
+
+
+def pack_dual_rgb888_frames(frame_a: Any, frame_b: Any):
+    """Return little-endian uint64 words for ``axis_dual_rgb_stream_adapter``.
+
+    Inputs must already be RGB (not OpenCV BGR), H×W×3 arrays with matching
+    shapes.  Each word uses A RGB in bits 23:0 and B RGB in bits 55:32.
+    ``axis_dual_rgb_stream_adapter`` treats every 640×480 words as one frame.
+    """
+    import numpy as np
+
+    a = np.asarray(frame_a)
+    b = np.asarray(frame_b)
+    if a.shape != b.shape or a.ndim != 3 or a.shape[2] != 3:
+        raise ValueError("frame_a and frame_b must be matching HxWx3 RGB arrays")
+    if a.dtype != np.uint8 or b.dtype != np.uint8:
+        raise ValueError("RGB frame arrays must have dtype uint8")
+    a64 = a.astype(np.uint64)
+    b64 = b.astype(np.uint64)
+    words = ((a64[..., 0] << 16) | (a64[..., 1] << 8) | a64[..., 2] |
+             (b64[..., 0] << 48) | (b64[..., 1] << 40) | (b64[..., 2] << 32))
+    return words.reshape(-1)
+
+
+def copy_dual_frame_to_dma_buffer(buffer: Any, frame_a: Any, frame_b: Any) -> int:
+    """Pack two RGB frames into a PYNQ allocated uint64 DMA buffer in place."""
+    words = pack_dual_rgb888_frames(frame_a, frame_b)
+    if getattr(buffer, "dtype", None) is None or buffer.dtype.itemsize != 8:
+        raise ValueError("DMA buffer must have an 8-byte element dtype")
+    if buffer.size < words.size:
+        raise ValueError(f"DMA buffer has {buffer.size} words; requires {words.size}")
+    buffer.flat[:words.size] = words
+    if hasattr(buffer, "flush"):
+        buffer.flush()
+    return int(words.size)

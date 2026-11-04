@@ -90,3 +90,20 @@ Windows 上原始碼資料夾含中文且路徑很長，Vivado 會在產生 Zynq
 預設把**生成物**放到 `%TEMP%/pynq_zu_rtl`；可設定環境變數 `PYNQ_ZU_BUILD_DIR` 指向另一個
 短的 ASCII 絕對路徑。這不改動或提交原始碼。雖已綜合，外部 pixel ports 尚未指定攝影機
 來源/腳位/XDC，故實作、bitstream、overlay 和板端測試仍不是已完成項目。
+
+## 通用雙鏡頭 AXI-Stream 入口（2026-11-04）
+
+`axis_dual_rgb_stream_adapter.v` 接一條 64-bit AXI4-Stream：每個 word 的 A RGB888 位於
+`[23:0]`、B RGB888 位於 `[55:32]`。它每 307,200 word 自動形成一個 640×480 frame，並以
+`TLAST` 檢查邊界；錯誤會鎖存於 `frame_boundary_error`。因此兩張影像在同一 DMA 轉送內
+保持逐像素同步，避免獨立兩個 DMA 發生 cycle gap 而違反既有 dual ROI core 的同步輸入要求。
+
+`dual_camera_yolox_axis_top.v` 將這個 adapter 包在 AXI-Lite YOLOX mailbox top 外；可以由
+PS USB/CSI capture 後的 DMA、HDMI frame buffer 或其他能輸出相同 AXI stream 格式的來源連接。
+`pynq_yolox_mmio.py` 的 `pack_dual_rgb888_frames()` 會把兩個**已轉成 RGB** 的 NumPy `uint8`
+H×W×3 frame 打成 `uint64` word；`copy_dual_frame_to_dma_buffer()` 可填入 PYNQ allocated DMA
+buffer 並在支援時 flush。實際 DMA IP、camera driver 與 physical pin path 尚未選定/上板。
+
+本機 XSim `tb_axis_dual_rgb_stream_adapter.v` 為
+`AXIS_DUAL_RGB_STREAM_ADAPTER_PASS checks=7`；Python packing 合約測試的單一 word 為
+`0x00aabbcc00112233`。這些是介面/打包驗證，並非 USB、CSI、PYNQ DMA 或板端相機驗證。

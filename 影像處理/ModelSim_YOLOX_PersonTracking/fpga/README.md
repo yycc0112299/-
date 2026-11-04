@@ -71,3 +71,22 @@ PYNQ PS / Python YOLOX → AXI4-Lite bbox mailbox → frame command adapter
 Python fake-MMIO 合約測試確認 packet 會先寫五筆 payload，最後才寫 control。這不是 PYNQ-ZU
 上板結果：尚未完成 PS Block Design、MIPI/USB frame buffer、clock-domain crossing、XDC、
 bitstream 或硬體 MMIO；YOLOX 仍是 CPU/PS 推論，不是 Verilog 神經網路。
+
+## PYNQ-ZU PS Block Design 與綜合（2026-11-04）
+
+依序以 Vivado batch 執行下列三個腳本：
+
+1. `create_pynq_zu_rtl_project.tcl`
+2. `create_pynq_zu_yolox_bd.tcl`
+3. `synthesize_pynq_zu_yolox.tcl`
+
+第二步建立 `Zynq UltraScale+ PS → SmartConnect → yolox_rtl_0`，以 100 MHz PL clock
+與同步 reset 連接 AXI4-Lite，並保留 video pixel/feature 訊號為 BD 外部 ports。Address
+Editor 自動配置 mailbox 為 `0xA000_0000`、4 KiB。第三步生成 BD wrapper 並綜合；本機
+Vivado 2024.2 的結果為 `synth_design completed successfully`、0 error、0 critical warning，
+checkpoint 位於所選 build directory 的 `pynq_zu_rtl.runs/synth_1/`。
+
+Windows 上原始碼資料夾含中文且路徑很長，Vivado 會在產生 Zynq IP 時失敗。因此三個腳本
+預設把**生成物**放到 `%TEMP%/pynq_zu_rtl`；可設定環境變數 `PYNQ_ZU_BUILD_DIR` 指向另一個
+短的 ASCII 絕對路徑。這不改動或提交原始碼。雖已綜合，外部 pixel ports 尚未指定攝影機
+來源/腳位/XDC，故實作、bitstream、overlay 和板端測試仍不是已完成項目。

@@ -7,7 +7,14 @@
 - 新增 `fpga/yolox_frame_command_adapter.v`，只在 video `frame_start` 與 command frame ID 相同時鎖住 bbox；`fpga/dual_camera_yolox_axilite_top.v` 將此 adapter、mailbox 與既有 dual ROI top 串接。`create_pynq_zu_rtl_project.tcl` 已新增 sources 並將該整合 top 設為 top。
 - 新增 `person_tracking/pynq_yolox_mmio.py`，可驗證和送出 `dual_camera.py` 的 `rtl-yolox-bbox-v1` packet 到 PYNQ MMIO；硬體 base address 必須由最終 Block Design 的 Address Editor 提供，不寫死在共享程式碼。
 - 此電腦驗證：Vivado 2024.2 `xvlog` 成功編譯完整整合 top；`tb_yolox_command_path.v` 的 commit、錯影格保留、正確影格 latch 與 consume 模擬通過，輸出 `YOLOX_COMMAND_PATH_PASS checks=5`。Python fake-MMIO 合約測試也通過，產生正確的 6 次 payload/control 寫入。
-- 未驗證：PYNQ-ZU 的 PYNQ image/network、PS Block Design/AXI interconnect、clock converter、camera/MIPI 或 USB frame-buffer、XDC、synthesis/implementation、bitstream、實機 MMIO。YOLOX 仍在 CPU/PS Python；RTL 只接收已選 pair 的 bbox，不能宣稱 YOLOX 神經網路已用 Verilog 實現。
+- 當時尚未驗證項目已由下一節更新；目前仍未驗證 PYNQ-ZU 的 PYNQ image/network、camera/MIPI 或 USB frame-buffer、XDC、implementation、bitstream、實機 MMIO。YOLOX 仍在 CPU/PS Python；RTL 只接收已選 pair 的 bbox，不能宣稱 YOLOX 神經網路已用 Verilog 實現。
+
+## 2026-11-04：PYNQ-ZU Zynq PS Block Design 與綜合
+
+- 新增 `fpga/create_pynq_zu_yolox_bd.tcl`：建立 board preset 的 `zynq_ultra_ps_e`、開啟 `M_AXI_HPM0_FPD`，接至 `axi_smc_0` 再接 `dual_camera_yolox_axilite_top` 的推導 `S_AXI` 介面。加入 `proc_sys_reset`、PS reset invert 和 100 MHz `pl_clk0`，避免第一次 BD validate 報告的非同步 reset critical warnings。影像輸入/輸出保持 BD external ports，因尚未選定 CSI/HDMI/USB frame buffer 的真實板級路徑。
+- `assign_bd_address` 在此設計中實際配置 `/yolox_rtl_0/S_AXI/reg0` 到 PS address space 的 `0xA000_0000`、4 KiB；這是本腳本已驗證產生的地址，若日後變更 BD，PYNQ 端仍須以 Address Editor/HWH 為準。
+- 新增 `fpga/synthesize_pynq_zu_yolox.tcl`，生成 BD HDL wrapper 並跑 `synth_1`。初次在 repo 中文長路徑下 IP generate 失敗（檔案找不到），已改三個 script 以環境變數 `PYNQ_ZU_BUILD_DIR` 可覆寫、預設 `%TEMP%/pynq_zu_rtl` 的短 ASCII 生成路徑；原 repo 下的舊 build 未刪除。
+- 短路徑實跑：BD `validate_bd_design` 完成，僅有 SmartConnect 對 AXI4-Lite low-area/WRAP burst 的一般 warning；wrapper synth 產生 `pynq_zu_yolox_wrapper.dcp`，日誌為 `synth_design completed successfully`，0 errors、0 critical warnings。這證明 PS/AXI/RTL 結構可綜合，不證明 IO 約束、implementation、bitstream、PYNQ overlay、camera 影像或板端 MMIO。
 
 ## 2026-11-04：PYNQ-ZU board repository 與 Vivado 驗證
 

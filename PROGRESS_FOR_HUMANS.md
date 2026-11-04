@@ -5,7 +5,14 @@
 - 保留 GitHub 先前已驗證的 Verilog：雙路人物框色彩特徵、跨鏡頭三次確認、640×480 模擬。
 - 新增 PYNQ-ZU AXI4-Lite mailbox：Python YOLOX 可把每幀選定的 A/B bbox 和影格號寫入 FPGA；FPGA 只在相同影格開始時鎖住座標，避免錯影格或半寫入。
 - 本機 Vivado mailbox 模擬 5 項檢查 PASS，整合 Verilog top 編譯成功；Python 寫入暫存器的合約測試也 PASS。
-- 尚未上板：PS Block Design、相機輸入、腳位/時脈、bitstream 與實機 MMIO 都未完成。YOLOX 仍在 CPU/PS，FPGA 只做接 bbox 後的 ROI 特徵及確認，不能說 YOLOX 已在 FPGA 推論。
+- 尚未上板：相機輸入、腳位/時脈、implementation/bitstream 與實機 MMIO 都未完成。YOLOX 仍在 CPU/PS，FPGA 只做接 bbox 後的 ROI 特徵及確認，不能說 YOLOX 已在 FPGA 推論。
+
+## 2026-11-04：PYNQ-ZU 的 PS 與 Verilog 已可一起綜合
+
+- 已建立 Zynq PS→AXI SmartConnect→自訂 YOLOX mailbox 的 Vivado Block Design；PYNQ Python 可使用的暫存器位址目前是 `0xA000_0000`。
+- 補上同步 reset 後，Block Design 驗證通過；生成 wrapper 後，PYNQ-ZU 目標的 Vivado 綜合完成，結果為 0 error、0 critical warning。
+- Windows 的專題資料夾路徑過長且含中文會造成 Zynq IP 生成失敗；腳本已改成預設把可丟棄的 Vivado 生成物放在短的 `%TEMP%/pynq_zu_rtl`，不影響 GitHub 原始碼。
+- 尚未做相機輸入、腳位/XDC、implementation/bitstream、PYNQ overlay 或實機讀寫。因此這是「可綜合的硬體結構」，不是已經能在板子上看見雙鏡頭結果。
 
 ## 2026-11-04：PYNQ-ZU Vivado board file 已驗證
 

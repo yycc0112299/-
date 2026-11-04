@@ -1,7 +1,14 @@
 # Create a reproducible PYNQ-ZU Vivado RTL project without committing generated output.
 set script_dir [file dirname [file normalize [info script]]]
 set repo_root [file join $script_dir board_repos XilinxBoardStore-master boards]
-set build_dir [file join $script_dir build pynq_zu_rtl]
+# Vivado IP generation cannot reliably operate below this repository's long
+# Unicode path on Windows.  Override PYNQ_ZU_BUILD_DIR when desired; otherwise
+# use the short per-user TEMP location.  Generated projects are never tracked.
+if {[info exists ::env(PYNQ_ZU_BUILD_DIR)] && $::env(PYNQ_ZU_BUILD_DIR) ne ""} {
+ set build_dir [file normalize $::env(PYNQ_ZU_BUILD_DIR)]
+} else {
+ set build_dir [file normalize [file join $::env(TEMP) pynq_zu_rtl]]
+}
 set source_dir [file normalize [file join $script_dir .. person_tracking]]
 if {![file exists [file join $repo_root TUL pynqzu 1.1 board.xml]]} { error "Run board setup first" }
 set_param board.repoPaths [list $repo_root]

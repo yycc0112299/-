@@ -326,3 +326,8 @@
 - 可攜性稽核發現 `person_tracking/assets/yolox.onnx` 已被專案 `.gitignore` 排除，原本的新 clone 無法通過 bundle builder 的檔案檢查。`prepare_pynq_dual_bundle.py` 現在以標準函式庫 `urllib.request` 於模型不存在或 SHA-256 不符時，從 `sources.json` 記錄的 OpenCV Zoo public model URL 下載到被忽略的 assets 路徑；只有 SHA-256 `c5c2d13e59ae883e6af3b45daea64af4833a4951c92d116ec270d9ddbe998063` 符合才以原子 replace 寫入並進入 tarball。暫存 `.onnx.download` 在成功、雜湊錯誤或下載失敗時均清除。
 - 本機驗證：`prepare_pynq_dual_bundle.py` syntax compile 通過；本機現有模型 hash 與固定值一致；實際 bundle 建立並確認 `person_tracking/assets/yolox.onnx` 在 tarball 中。新電腦第一次打包必須可連網取得約 35 MB 公開模型，未在無模型的新電腦實測下載；此限制已在 README 明示。模型本體仍不進 Git。
 
+### 2026-11-05 後續：板端依賴診斷
+
+- 新增 `live_site/pynq_system_preflight.py`，僅讀取板端狀態：輸出 Python/platform，強制檢查 `numpy`、`cv2`、非空 YOLOX ONNX；另嘗試載入 `pynq`，缺少時輸出 `PYNQ_OVERLAY_NOTE` 但不把它誤判成 USB dashboard 的必要依賴。成功標記為 `PYNQ_SYSTEM_PREFLIGHT_PASS`。bundle builder 已納入此檔；`deploy_pynq_zu.ps1 -RunSystemPreflight` 會在 optional UVC preflight 前以板端 Python 執行它。
+- 本機驗證：syntax compile、實際 Python 執行（NumPy/OpenCV/model PASS、預期 PYNQ module note）、tar listing 與 PowerShell AST parse 全部通過。此為 Windows 模擬環境檢查，不是 PYNQ Linux/PYNQ package/USB 實機證據。
+

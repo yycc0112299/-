@@ -11,6 +11,7 @@ param(
     [int]$CameraA = 0,
     [int]$CameraB = 1,
     [string]$OverlayDir,
+    [switch]$RunSystemPreflight,
     [switch]$RunCameraPreflight,
     [switch]$RunBringupCheck
 )
@@ -73,6 +74,11 @@ Write-Host "Unpacking on board..."
 & ssh $target $remoteInstall
 if ($LASTEXITCODE -ne 0) { throw "Remote unpack validation failed." }
 
+if ($RunSystemPreflight) {
+    Write-Host "Running read-only board dependency and model preflight..."
+    & ssh $target "cd '$RemoteDir'; $PythonCommand live_site/pynq_system_preflight.py"
+    if ($LASTEXITCODE -ne 0) { throw "System preflight failed; deployment remains on the board for diagnosis." }
+}
 if ($RunCameraPreflight) {
     Write-Host "Running read-only UVC camera preflight..."
     & ssh $target "cd '$RemoteDir'; $PythonCommand live_site/pynq_usb_camera_preflight.py --camera-a $CameraA --camera-b $CameraB"

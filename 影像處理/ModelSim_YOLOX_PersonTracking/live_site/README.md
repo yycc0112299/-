@@ -31,10 +31,12 @@ USB 影像已走入 FPGA RTL。
 PYNQ-ZU 切至 **SD**、開機並取得 LAN IP 後，從已 clone 專案的 Windows PowerShell 執行（不會保存 SSH 密碼）：
 
 ```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File ".\影像處理\ModelSim_YOLOX_PersonTracking\live_site\deploy_pynq_zu.ps1" -BoardHost <PYNQ-IP> -RunCameraPreflight
+powershell -NoProfile -ExecutionPolicy Bypass -File ".\影像處理\ModelSim_YOLOX_PersonTracking\live_site\deploy_pynq_zu.ps1" -BoardHost <PYNQ-IP> -RunSystemPreflight -RunCameraPreflight
 ```
 
 此入口會在電腦建立 tarball、經 SSH/SCP 傳至板子、解壓並可選擇以 V4L2 開啟兩個 UVC 鏡頭各讀一張影格。
+`-RunSystemPreflight` 只讀取並列出板端 Python、NumPy、OpenCV、PYNQ 套件及模型狀態，不會啟動鏡頭；
+PYNQ 套件缺少時會列為 Overlay 提示，但雙 USB 網站仍需先以 NumPy/OpenCV 通過。
 若同時已有由相同 Vivado build 匯出的 `pynq_zu_yolox.bit/.hwh` 目錄，可加上
 `-OverlayDir C:\path\to\overlay -RunBringupCheck`，它才會下載 Overlay 並做 AXI-Lite mailbox 的
 write/readback；此檢查不會測試 USB-to-FPGA 影像路徑。部署腳本為避免刪到板上既有資料，目標

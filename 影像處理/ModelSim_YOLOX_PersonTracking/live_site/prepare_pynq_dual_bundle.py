@@ -24,7 +24,7 @@ MODEL_URL = (
 MODEL_SHA256 = "c5c2d13e59ae883e6af3b45daea64af4833a4951c92d116ec270d9ddbe998063"
 REQUIRED = [
     ROOT / "dual_server.py", ROOT / "dual_index.html", ROOT / "start_pynq_dual.sh",
-    ROOT / "pynq_usb_camera_preflight.py",
+    ROOT / "pynq_usb_camera_preflight.py", ROOT / "pynq_system_preflight.py",
     TRACKING / "pipeline.py", TRACKING / "cross_camera.py", TRACKING / "dual_camera.py",
     TRACKING / "assets" / "yolox.py", MODEL,
     TRACKING / "verify_pynq_zu_bringup.py",

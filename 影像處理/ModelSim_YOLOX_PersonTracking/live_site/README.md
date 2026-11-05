@@ -26,6 +26,24 @@ PYNQ-ZU 上執行。開發電腦先執行 `python prepare_pynq_dual_bundle.py --
 執行 YOLOX / tracker 網站；目前 FPGA bitstream 的 video inputs 尚未接到 USB capture，不可宣稱
 USB 影像已走入 FPGA RTL。
 
+### SD 開機後的一鍵部署（Windows 開發電腦）
+
+PYNQ-ZU 切至 **SD**、開機並取得 LAN IP 後，從已 clone 專案的 Windows PowerShell 執行（不會保存 SSH 密碼）：
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File ".\影像處理\ModelSim_YOLOX_PersonTracking\live_site\deploy_pynq_zu.ps1" -BoardHost <PYNQ-IP> -RunCameraPreflight
+```
+
+此入口會在電腦建立 tarball、經 SSH/SCP 傳至板子、解壓並可選擇以 V4L2 開啟兩個 UVC 鏡頭各讀一張影格。
+若同時已有由相同 Vivado build 匯出的 `pynq_zu_yolox.bit/.hwh` 目錄，可加上
+`-OverlayDir C:\path\to\overlay -RunBringupCheck`，它才會下載 Overlay 並做 AXI-Lite mailbox 的
+write/readback；此檢查不會測試 USB-to-FPGA 影像路徑。部署腳本為避免刪到板上既有資料，目標
+`~/pynq_dual_dashboard` 已存在時會停止；請改用新的 `-RemoteDir`，或由操作者確認後自行處理舊目錄。
+成功後在板端執行輸出的 `start_pynq_dual.sh` 指令，再於電腦開啟 `http://<PYNQ-IP>:8766/`。
+此命令只要求 clone 內已追蹤的程式與模型、Windows 的 Python 3/內建 OpenSSH；不讀取本開發電腦的
+Vivado 暫存、使用者資料夾或已產生的 tarball。缺少 Python 時先安裝 Python 3；缺少 `ssh`/`scp` 時在
+Windows「選用功能」安裝 OpenSSH Client。板端帳號預設為 `xilinx`，可用 `-BoardUser` 覆寫。
+
 ### 兩台電腦協作
 
 GitHub 只同步程式，不傳即時影像。把本目錄同步到有 USB 鏡頭的電腦後，在該電腦執行：

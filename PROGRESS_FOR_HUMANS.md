@@ -178,6 +178,12 @@
 - 為了可產生安全 bitstream，暫時把尚未接好的影像輸入固定為 idle，且不把輸出接到未設定腳位；PS、20 MHz PL clock 與 AXI-Lite mailbox 都在設計內。
 - 尚未完成真正的雙攝影機：仍要決定 CSI、HDMI 或 DMA/USB 的影像來源，加入對應硬體/IP/XDC，並在 PYNQ Linux 驗證 Overlay/MMIO 與影像資料流。
 
+## 2026-11-05：換電腦也可直接部署到 PYNQ-ZU
+
+- 新增一條可直接貼到新 Windows 電腦 PowerShell 的部署命令：從 GitHub clone 後，填入 PYNQ 的 IP，即可打包、SSH/SCP 傳送與解壓雙 USB 網站；不依賴目前電腦的 Vivado 暫存或既有 tarball。
+- 可選擇立刻檢查兩支 USB 鏡頭各能讀取一張影格；若另有相符的 Overlay 檔，也可執行 AXI-Lite mailbox 的寫入／讀回檢查。
+- 本機已實際驗證部署包可建立，內含網站、YOLOX ONNX、追蹤程式與板端驗證程式；尚未因板子仍未 SD 開機而進行 SSH、USB、Overlay 或瀏覽器實機驗證。
+
 ### 2026-11-05：準備 SD 開機後的驗證包
 
 - 已產出 PYNQ Overlay 要用的 `.bit` 與 `.hwh` 配對檔，並加入板端 AXI-Lite 讀寫驗證程式；開發電腦的 Python 語法檢查通過。

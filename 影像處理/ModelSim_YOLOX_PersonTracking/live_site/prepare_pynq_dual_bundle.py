@@ -19,6 +19,7 @@ REQUIRED = [
     ROOT / "pynq_usb_camera_preflight.py",
     TRACKING / "pipeline.py", TRACKING / "cross_camera.py", TRACKING / "dual_camera.py",
     TRACKING / "assets" / "yolox.py", TRACKING / "assets" / "yolox.onnx",
+    TRACKING / "verify_pynq_zu_bringup.py",
 ]
 
 

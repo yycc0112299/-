@@ -314,3 +314,10 @@
 - `live_site/dual_server.py` 現會依平台使用 Windows DirectShow 或 Linux V4L2，新增 `pynq_usb_camera_preflight.py`、`start_pynq_dual.sh` 和 `prepare_pynq_dual_bundle.py`。後者可把既有雙鏡頭網站、YOLOX ONNX、追蹤程式與可選 Overlay 打成 PYNQ 可傳送 tarball。本機已成功產生 `C:\\pynq_irq_build\\pynq_zu_dual_deploy.tar.gz`（33,467,184 bytes），列出的 12 個檔包含 `overlay/pynq_zu_yolox.bit/.hwh`；不把模型/bitstream 產物提交到 Git。
 - 未驗證且仍必須完成：PYNQ SD-boot Linux 的 Python/OpenCV/V4L2 相依、兩支實際 USB webcam `/dev/video*`、YOLOX 推論、LAN 網站畫面、Overlay/MMIO/IRQ 實機事件。現行 FPGA bring-up 沒有 USB capture-to-RTL 資料路徑；雙 USB 網站是由 PYNQ PS CPU 取 UVC 影像、執行既有 YOLOX/Tracker，這符合原 Python 網站資料流但不能稱 USB frame 已進 FPGA ROI core。
 
+## 2026-11-05 變更紀錄：可攜的 PYNQ-ZU SD-boot 一鍵部署
+
+- 新增 `live_site/deploy_pynq_zu.ps1`。它以參數取得 `-BoardHost`、可選 `-BoardUser`（預設 `xilinx`）、`-RemoteDir`、兩個 camera index、板端 Python 指令與可選 Overlay 目錄；沒有硬編碼任何電腦 IP、使用者資料夾、Vivado build 或密碼。它先要求本機 Python/Windows OpenSSH `ssh`/`scp`，再呼叫 bundle builder，SSH 探測板端、SCP 上傳、解壓並驗證 ONNX 已到位。目標目錄存在即失敗，刻意不覆寫或遞迴刪除板上資料。
+- `prepare_pynq_dual_bundle.py` 現也納入 `person_tracking/verify_pynq_zu_bringup.py`，所以同一個 tarball 可供板端 Overlay/MMIO bring-up；Overlay 仍是選配，只有指定 `-OverlayDir` 才隨包傳送。`-RunCameraPreflight` 在解壓後以 V4L2 檢查兩支 UVC；`-RunBringupCheck` 會將同包的 bit/hwh 複製到驗證程式旁、下載 Overlay，並檢查 mailbox `FRAME_ID` write/readback。兩種開關都會在失敗時保留部署資料供診斷。
+- `live_site/README.md` 已提供從 clone 根目錄直接貼上的 PowerShell 命令。資料流程是：Git tracked source+YOLOX ONNX → 暫時 tarball → SSH/SCP → `~/pynq_dual_dashboard` → 可選 preflight/MMIO → 板端 `start_pynq_dual.sh`。此入口不讀取 `C:\pynq_*`、`%TEMP%` 既有產物或目前使用者的設定；暫時 tarball 僅在執行電腦的暫存區生成。
+- 本機驗證：三支 Python 腳本 `py_compile` 通過；實際建立 tarball 並以 `tar -tzf` 核對 11 個必要檔（網站、YOLOX ONNX、追蹤程式、preflight、bring-up verifier）皆在包內；PowerShell AST parse 與 `git diff --check` 通過。未驗證：不同電腦的 Python/OpenSSH 安裝、板端 SSH 認證、PYNQ Linux/OpenCV/V4L2、USB 鏡頭、Overlay/MMIO 及 LAN dashboard；不可據此宣稱上板成功。
+

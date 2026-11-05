@@ -165,3 +165,8 @@
 - 已成功產生並透過 JTAG 下載 bring-up bitstream；Hardware Manager 顯示 `Programmed`。此設定斷電會消失，沒有改寫 SD 卡。
 - 為了可產生安全 bitstream，暫時把尚未接好的影像輸入固定為 idle，且不把輸出接到未設定腳位；PS、20 MHz PL clock 與 AXI-Lite mailbox 都在設計內。
 - 尚未完成真正的雙攝影機：仍要決定 CSI、HDMI 或 DMA/USB 的影像來源，加入對應硬體/IP/XDC，並在 PYNQ Linux 驗證 Overlay/MMIO 與影像資料流。
+
+### 2026-11-05：準備 SD 開機後的驗證包
+
+- 已產出 PYNQ Overlay 要用的 `.bit` 與 `.hwh` 配對檔，並加入板端 AXI-Lite 讀寫驗證程式；開發電腦的 Python 語法檢查通過。
+- 現在 PYNQ 網頁 `192.168.3.1` 無法連線，因板子仍在 JTAG 階段且這台電腦目前是 `192.168.50.x` 網段。下一步必須切回 SD、重新開機，才可啟動 PYNQ Linux 並上傳/執行驗證。

@@ -287,3 +287,9 @@
 - 本機 `C:\\pynq_zu_bringup` 的實作/bitgen 已完成（0 errors、0 critical warnings）；產物為 `C:\\pynq_zu_bringup\\pynq_zu_rtl.runs\\impl_1\\pynq_zu_yolox_wrapper.bit`。2026-11-05 已在 Vivado Hardware Manager 對實機 `xczu5_0` 成功下載；狀態顯示 `Programmed`，Tcl console 回報該 JTAG device is programmed。這是易失性的 JTAG PL 設定，不會寫入 SD 或開機 flash，斷電後消失。
 - 尚未驗證：PYNQ Linux 下的 Overlay/HWH + MMIO 存取、AXI mailbox 實際讀寫，以及相機/DMA/CSI/HDMI 影像路徑。要啟用真實 video ports，必須先選定介面並提供對應 IP、clock/reset/CDC、XDC，再以 `PYNQ_ZU_EXPORT_VIDEO_PORTS=1` 重建；不可把此 bring-up 成功誤稱為雙鏡頭功能完成。
 
+### 2026-11-05 後續：SD-boot overlay 部署準備
+
+- 新增 `fpga/prepare_pynq_zu_overlay.ps1`，從完成的短 ASCII build directory 複製 `.bit` 與 handoff `.hwh`，並統一命名成 PYNQ Overlay 所需的同 stem `pynq_zu_yolox.bit` / `pynq_zu_yolox.hwh`。本機已以 `C:\\pynq_zu_bringup` 實跑，輸出目錄 `C:\\pynq_zu_bringup\\overlay` 包含 7,797,817-byte bitstream 與 182,680-byte HWH；兩者是可部署產物，沒有加入 Git。
+- 新增 `person_tracking/verify_pynq_zu_bringup.py`：在 PYNQ Linux 下載 Overlay，對 mailbox `0xA000_0000` 的 frame-ID 做 write/readback，再清回 0。已在開發電腦通過 Python syntax compile；尚未在板上執行，因此不能當成 MMIO 實機 PASS。
+- 板子目前仍因 JTAG 模式/目前電腦網段為 `192.168.50.x` 而無法存取既有 `http://192.168.3.1/lab`（瀏覽器為 `ERR_CONNECTION_RESET`，ICMP 亦沒有回覆）。下一個實機步驟需切回 **SD**、重新上電使 PYNQ Linux 開機，再把 overlay 檔案與驗證腳本上傳到板端；這與已完成的 JTAG PL 下載是兩個不同階段。
+

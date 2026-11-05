@@ -104,6 +104,22 @@ ports 都有刻意的板級 XDC 後才容許產生 bitstream，不會為了產�
 未設定時產出的 bring-up bitstream 可驗證 PYNQ-ZU PS、PL clock、AXI-Lite mailbox 及 JTAG
 下載，但沒有相機影像輸入，不能當作雙鏡頭功能完成。
 
+### PYNQ Linux overlay 部署與板端 AXI-Lite 驗證
+
+JTAG 的 PL 下載是易失性的；要在 PYNQ Linux（SD boot）載入同一設計，先在開發電腦執行
+`prepare_pynq_zu_overlay.ps1`。它會從已完成的 build 複製出同 stem 的
+`pynq_zu_yolox.bit` / `pynq_zu_yolox.hwh`，這是 PYNQ Overlay 所需的命名規則。它不會自行
+上傳或改寫 SD 卡。把兩個檔案及 `person_tracking/verify_pynq_zu_bringup.py` 複製到 PYNQ 上的
+同一資料夾後，在板子上執行：
+
+```text
+python3 verify_pynq_zu_bringup.py
+```
+
+檢查會下載 overlay、從 `0xA000_0000` 讀取控制暫存器，對 frame-ID 寫入/讀回固定測試值，再
+清回 0。只有輸出 `PYNQ_ZU_BRINGUP_PASS` 才能證明 PYNQ Linux 的 Overlay 與 AXI-Lite 實機通。
+它不提交 pending command，因此 idle-video bring-up 不會留下未消耗的 mailbox 指令。
+
 ## 通用雙鏡頭 AXI-Stream 入口（2026-11-04）
 
 `axis_dual_rgb_stream_adapter.v` 接一條 64-bit AXI4-Stream：每個 word 的 A RGB888 位於

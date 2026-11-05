@@ -341,3 +341,8 @@
 - 新增 `fpga/open_xsim_yolox_command_path.ps1`，將 `yolox_bbox_axilite.v`、`yolox_frame_command_adapter.v` 與 testbench stage 至 `%TEMP%/project_xsim_yolox_command_path`，用 `xvlog`、`xelab`、`xsim` 執行。可傳 `-Batch` 供 CI/終端 PASS/FAIL，省略則開 GUI；`VIVADO_XSIM_BIN` 可覆寫 Vivado bin。這使新電腦能重跑 AXI-Lite payload commit、overrun、frame-ID 對齊、bbox latch／consume、result/overrun IRQ/W1C clear 測試，不需接 PYNQ。
 - 本機實跑 Vivado 2024.2 結果為 `YOLOX_COMMAND_PATH_PASS checks=9`。更正先前文件誤載的 `checks=5`；目前 testbench 的 9 個 assert 才是可重現的實際輸出。此測試不包含 PS Block Design、Overlay 或硬體 IRQ 電氣連線。
 
+### 2026-11-05 後續：乾淨 GitHub clone 的可攜部署驗證
+
+- 使用 `git clone --depth 1 https://github.com/yycc0112299/-.git` 至全新 `%TEMP%/pynq_portable_clone_<GUID>/repo`，在該 clone 直接執行 `live_site/prepare_pynq_dual_bundle.py --output <temp>/pynq_dual_dashboard.tar.gz`。clone 內原本沒有 `.onnx`（ignore 規則生效），輸出明確顯示從 OpenCV Zoo URL 下載 YOLOX，並成功建立 tarball；`tar -tzf` 列出 11 個必要項目。這直接驗證了新電腦所需的 Git tracked source → model bootstrap → bundle 資料流，而不依賴原開發工作樹的模型或 Vivado 產物。
+- 驗證界線：此為同一台 Windows 的全新目錄／遠端 clone 模擬，證明 GitHub snapshot 和公開模型來源可用；尚未驗證另一台實體電腦、Windows OpenSSH、PYNQ SSH 認證、Linux package、UVC、Overlay 或 LAN dashboard。暫存 clone、下載模型與 tarball 位於 `%TEMP%`，非專案原始碼，不納入 Git。
+

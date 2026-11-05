@@ -1,5 +1,5 @@
 """Run the project YOLOX detector on EPFL annotated multi-view images."""
-import argparse, json, re, time
+import argparse, json, math, re, time
 from pathlib import Path
 
 import cv2
@@ -16,7 +16,8 @@ def iou(a, b):
 
 def run(images, annotations, output, threshold=0.5):
     detector = pipeline.Detector()
-    rows, total_gt, total_pred, matches, misses, false_positives, ious, position_errors = [], 0, 0, 0, 0, 0, [], []
+    rows, total_gt, total_pred, matches, misses, false_positives = [], 0, 0, 0, 0, 0
+    ious, position_errors, center_errors = [], [], []
     start = time.perf_counter()
     for annotation in sorted(Path(annotations).glob("det_frame*_cam*.txt")):
         match = re.fullmatch(r"det_frame(\d+)_cam(\d+)\.txt", annotation.name)
@@ -38,14 +39,17 @@ def run(images, annotations, output, threshold=0.5):
         predictions = detector.detect(pipeline.fit(source))
         predicted_boxes = [row["box"] for row in predictions]
         used = set()
-        local_ious, local_position_errors = [], []
+        local_ious, local_position_errors, local_center_errors = [], [], []
         for target in ground_truth:
             candidates = [(iou(target, box), index) for index, box in enumerate(predicted_boxes) if index not in used]
             best = max(candidates, default=(0.0, None))
             if best[0] >= threshold:
                 used.add(best[1]); matches += 1; ious.append(best[0]); local_ious.append(best[0])
                 error = max(abs(a - b) for a, b in zip(target, predicted_boxes[best[1]]))
+                center = math.hypot((target[0] + target[2] - predicted_boxes[best[1]][0] - predicted_boxes[best[1]][2]) / 2,
+                                    (target[1] + target[3] - predicted_boxes[best[1]][1] - predicted_boxes[best[1]][3]) / 2)
                 position_errors.append(error); local_position_errors.append(error)
+                center_errors.append(center); local_center_errors.append(center)
             else:
                 misses += 1
         total_gt += len(ground_truth); total_pred += len(predicted_boxes); false_positives += len(predicted_boxes) - len(used)
@@ -54,7 +58,9 @@ def run(images, annotations, output, threshold=0.5):
                      "misses": len(ground_truth) - len(local_ious),
                      "false_positives": len(predicted_boxes) - len(used),
                      "minimum_iou": round(min(local_ious), 4) if local_ious else None,
-                     "maximum_coordinate_error_px": max(local_position_errors) if local_position_errors else None})
+                     "maximum_coordinate_error_px": max(local_position_errors) if local_position_errors else None,
+                     "maximum_center_error_px": round(max(local_center_errors), 4) if local_center_errors else None,
+                     "ground_truth_boxes": ground_truth, "predicted_boxes": predicted_boxes})
     summary = {"dataset": "EPFL Multi-view Multi-class", "cases": len(rows),
                "ground_truth_boxes": total_gt, "predicted_boxes": total_pred, "matches": matches,
                "misses": misses, "false_positives": false_positives,
@@ -66,6 +72,10 @@ def run(images, annotations, output, threshold=0.5):
                "mean_coordinate_error_px": round(sum(position_errors) / len(position_errors), 4) if position_errors else None,
                "coordinate_error_threshold_px": 20,
                "coordinate_error_pass": all(error < 20 for error in position_errors),
+               "maximum_center_error_px": round(max(center_errors), 4) if center_errors else None,
+               "mean_center_error_px": round(sum(center_errors) / len(center_errors), 4) if center_errors else None,
+               "center_error_threshold_px": 20,
+               "center_error_pass": all(error < 20 for error in center_errors),
                "iou_threshold": threshold, "seconds": round(time.perf_counter() - start, 2),
                "status": "PASS" if misses == 0 else "PARTIAL", "cases_detail": rows}
     Path(output).write_text(json.dumps(summary, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")

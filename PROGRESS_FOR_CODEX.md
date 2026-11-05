@@ -277,6 +277,12 @@
 - `live_site/README.md` 明確說明服務可在沒有相機時保持 `stopped`，只有 `/api/start`／網頁連接動作才會碰相機；Quick Tunnel 連結、token、模型和相機相片屬本機私密資料，不入 Git。
 - 2026-11-03 已在此電腦以 CameraA 0／CameraB -1 的等待設定啟動新 Quick Tunnel；未呼叫 `/api/start`，因此沒有相機實測或照片產生。透過新 HTTPS URL 的首頁回應 HTTP 200，`/api/health` 回傳應用程式/版本，`/api/live` 回報 `stopped`、`enabled=false` 和 cameras `[0, -1]`；當時 cloudflared 程序仍在執行。連結、log 與 `cloudflared.exe` 均只在使用者本機，不加入此倉庫。
 
+## 2026-11-05：對話／進度同步紀錄
+
+- 新增根目錄 `CONVERSATION_PROGRESS_LOG.md`，以精簡、可交接方式記錄每次已完成進度的需求、變更、驗證界線、Git 提交／推送結果和未完成事項；不保存逐字聊天、帳密、私人連結、個人影像或模型權重。
+- `AGENTS.md` 已規定未來每次可交付進度均須追加該紀錄，並與相關檔案同次 commit + push 至 `main`。純討論、沒有檔案變更或未完成工作不製造完成紀錄。
+- 本次稽核時 `main` 與 `origin/main` 同為 `5fe1467`；最近的 PYNQ-ZU/IRQ/USB 部署工作已有遠端提交。沒有發現既有對話紀錄檔，故不能由 Git 判斷或還原未曾落檔的舊聊天內容。未追蹤的 Vivado/XSim 與本機網站日誌維持排除，並非待上傳的專案原始碼。
+
 ## 2026-11-05 變更紀錄：PYNQ-ZU 可重建 bring-up bitstream 與 JTAG 實機下載
 
 - PYNQ 目標已確認為 **PYNQ-ZU**（`XCZU5EG-SFVC784-1-E`），不是 PYNQ-Z1。Vivado Hardware Manager 實機枚舉為 `XUPJTAG` 下的 `xczu5_0`；板子供電恢復後可讀到裝置。依 PYNQ-ZU 官方手冊，直接由 Vivado JTAG 下載時 boot switch 使用 **JTAG（左側）**；SD 是從 SD card 開機 PYNQ Linux 的模式，兩者用途不同。

@@ -159,6 +159,12 @@
 
 詳細交接與數據見 [PROGRESS_FOR_CODEX.md](PROGRESS_FOR_CODEX.md)。
 
+## 2026-11-05：以後每次進度都記錄並上傳
+
+- 新增 `CONVERSATION_PROGRESS_LOG.md`：每次完成一個可交付進度，都會留下精簡摘要並與變更一起上傳 GitHub；不會上傳私人連結、帳密、個人影像或逐字聊天。
+- 已確認目前本機 `main` 與 GitHub `main` 同步。最近的 PYNQ-ZU、IRQ 與雙 USB 部署工作都已有提交。
+- 現有未追蹤檔是 Vivado/XSim 與本機網站的暫存日誌，不是漏傳的原始碼，會維持不公開。
+
 ## 2026-11-05：PYNQ-ZU bring-up 已燒入
 
 - 已確認板子是 PYNQ-ZU，Vivado 透過 JTAG 看得到 `xczu5_0`。

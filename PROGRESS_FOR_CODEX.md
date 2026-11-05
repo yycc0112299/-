@@ -331,3 +331,8 @@
 - 新增 `live_site/pynq_system_preflight.py`，僅讀取板端狀態：輸出 Python/platform，強制檢查 `numpy`、`cv2`、非空 YOLOX ONNX；另嘗試載入 `pynq`，缺少時輸出 `PYNQ_OVERLAY_NOTE` 但不把它誤判成 USB dashboard 的必要依賴。成功標記為 `PYNQ_SYSTEM_PREFLIGHT_PASS`。bundle builder 已納入此檔；`deploy_pynq_zu.ps1 -RunSystemPreflight` 會在 optional UVC preflight 前以板端 Python 執行它。
 - 本機驗證：syntax compile、實際 Python 執行（NumPy/OpenCV/model PASS、預期 PYNQ module note）、tar listing 與 PowerShell AST parse 全部通過。此為 Windows 模擬環境檢查，不是 PYNQ Linux/PYNQ package/USB 實機證據。
 
+### 2026-11-05 後續：離線端到端回歸
+
+- 在工作樹乾淨且不接 PYNQ 的條件下執行 `python -m unittest discover -s person_tracking -p test_*.py -v`，結果 18 tests OK；覆蓋本地 tracker 交叉／遮擋、跨鏡頭候選連續確認／互斥、衣著特徵與相機 index 防護。於 `live_site` 執行 `python -m unittest test_dual_server.py -v`，結果 6 tests OK；覆蓋人物快照、人工配對、審核凍結、拒絕 pair 排除、照片清除與特徵歷史。
+- 另實跑 `person_tracking/open_xsim_regression.ps1 -Batch`（Vivado 2024.2），XSim 編譯、elaborate 及模擬成功，輸出 `RTL_REGRESSION_PASS frames=7 checks=89`。暫存 XSim 輸出位於 `%TEMP%`，未納入 Git。上述皆為 host 模擬／合成測試；沒有呼叫 USB 相機、SSH、PYNQ Linux、Overlay/MMIO 或硬體 IRQ。
+

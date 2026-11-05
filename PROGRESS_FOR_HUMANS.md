@@ -158,3 +158,10 @@
 論文 PDF、模型權重、個人相機影像、模擬暫存與私人/無關檔案沒有上傳。
 
 詳細交接與數據見 [PROGRESS_FOR_CODEX.md](PROGRESS_FOR_CODEX.md)。
+
+## 2026-11-05：PYNQ-ZU bring-up 已燒入
+
+- 已確認板子是 PYNQ-ZU，Vivado 透過 JTAG 看得到 `xczu5_0`。
+- 已成功產生並透過 JTAG 下載 bring-up bitstream；Hardware Manager 顯示 `Programmed`。此設定斷電會消失，沒有改寫 SD 卡。
+- 為了可產生安全 bitstream，暫時把尚未接好的影像輸入固定為 idle，且不把輸出接到未設定腳位；PS、20 MHz PL clock 與 AXI-Lite mailbox 都在設計內。
+- 尚未完成真正的雙攝影機：仍要決定 CSI、HDMI 或 DMA/USB 的影像來源，加入對應硬體/IP/XDC，並在 PYNQ Linux 驗證 Overlay/MMIO 與影像資料流。

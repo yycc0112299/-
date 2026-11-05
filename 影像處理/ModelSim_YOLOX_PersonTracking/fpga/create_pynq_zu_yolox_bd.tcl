@@ -20,6 +20,9 @@ create_bd_design pynq_zu_yolox
 create_bd_cell -type ip -vlnv xilinx.com:ip:zynq_ultra_ps_e:3.5 zynq_ultra_ps_e_0
 apply_bd_automation -rule xilinx.com:bd_rule:zynq_ultra_ps_e -config {apply_board_preset "1"} [get_bd_cells zynq_ultra_ps_e_0]
 set_property -dict [list CONFIG.PSU__USE__M_AXI_GP0 {1} CONFIG.PSU__USE__M_AXI_GP1 {0}] [get_bd_cells zynq_ultra_ps_e_0]
+# The ROI feature datapath is deliberately single-cycle rather than deeply
+# pipelined.  20 MHz exceeds 640*480*30 fps while meeting the current RTL path.
+set_property CONFIG.PSU__CRL_APB__PL0_REF_CTRL__FREQMHZ {20} [get_bd_cells zynq_ultra_ps_e_0]
 create_bd_cell -type ip -vlnv xilinx.com:ip:smartconnect:1.0 axi_smc_0
 set_property -dict [list CONFIG.NUM_SI {1} CONFIG.NUM_MI {1}] [get_bd_cells axi_smc_0]
 create_bd_cell -type ip -vlnv xilinx.com:ip:util_vector_logic:2.0 reset_invert_0
@@ -39,9 +42,30 @@ connect_bd_net [get_bd_pins reset_locked_0/dout] [get_bd_pins proc_sys_reset_0/d
 connect_bd_net [get_bd_pins proc_sys_reset_0/peripheral_reset] [get_bd_pins yolox_rtl_0/reset]
 connect_bd_net [get_bd_pins proc_sys_reset_0/peripheral_aresetn] [get_bd_pins axi_smc_0/aresetn] [get_bd_pins yolox_rtl_0/s_axi_aresetn]
 
-# Pixel/video ports remain external until the selected PYNQ-ZU capture path is known.
-foreach port {pixel_valid frame_start stream_frame_id pixel_rgb_a pixel_rgb_b command_overrun frame_command_missing feature_valid_a feature_valid_b person_valid_a person_valid_b feature_a feature_b feature_similar candidate_valid confirmed consecutive_hits} {
- make_bd_pins_external [get_bd_pins yolox_rtl_0/$port]
+# A hardware-safe bring-up image must not leave video signals on unassigned PL
+# pins.  Until CSI/HDMI/DMA is selected, hold the RTL video inputs idle and keep
+# its result signals inside the BD.  Set PYNQ_ZU_EXPORT_VIDEO_PORTS=1 only when a
+# corresponding XDC/capture design will be added before bitstream generation.
+set export_video_ports 0
+if {[info exists ::env(PYNQ_ZU_EXPORT_VIDEO_PORTS)] && $::env(PYNQ_ZU_EXPORT_VIDEO_PORTS) eq "1"} {
+ set export_video_ports 1
+}
+if {$export_video_ports} {
+ foreach port {pixel_valid frame_start stream_frame_id pixel_rgb_a pixel_rgb_b command_overrun frame_command_missing feature_valid_a feature_valid_b person_valid_a person_valid_b feature_a feature_b feature_similar candidate_valid confirmed consecutive_hits} {
+  make_bd_pins_external [get_bd_pins yolox_rtl_0/$port]
+ }
+} else {
+ foreach {cell width port} {
+  video_idle_valid 1 pixel_valid
+  video_idle_frame_start 1 frame_start
+  video_idle_frame_id 32 stream_frame_id
+  video_idle_rgb_a 24 pixel_rgb_a
+  video_idle_rgb_b 24 pixel_rgb_b
+ } {
+  create_bd_cell -type ip -vlnv xilinx.com:ip:xlconstant:1.1 $cell
+  set_property -dict [list CONFIG.CONST_WIDTH $width CONFIG.CONST_VAL {0}] [get_bd_cells $cell]
+  connect_bd_net [get_bd_pins $cell/dout] [get_bd_pins yolox_rtl_0/$port]
+ }
 }
 assign_bd_address
 validate_bd_design

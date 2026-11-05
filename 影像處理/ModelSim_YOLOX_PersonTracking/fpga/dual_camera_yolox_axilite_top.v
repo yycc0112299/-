@@ -6,7 +6,7 @@
 module dual_camera_yolox_axilite_top #(
  parameter AXI_ADDR_WIDTH=6
 )(
- (* X_INTERFACE_PARAMETER = "XIL_INTERFACENAME clk, ASSOCIATED_BUSIF S_AXI, ASSOCIATED_RESET reset:s_axi_aresetn, FREQ_HZ 100000000", X_INTERFACE_INFO = "xilinx.com:signal:clock:1.0 clk CLK" *) input wire clk,
+(* X_INTERFACE_PARAMETER = "XIL_INTERFACENAME clk, ASSOCIATED_BUSIF S_AXI, ASSOCIATED_RESET reset:s_axi_aresetn, FREQ_HZ 20000000", X_INTERFACE_INFO = "xilinx.com:signal:clock:1.0 clk CLK" *) input wire clk,
  (* X_INTERFACE_PARAMETER = "XIL_INTERFACENAME reset, POLARITY ACTIVE_HIGH", X_INTERFACE_INFO = "xilinx.com:signal:reset:1.0 reset RST" *) input wire reset,
  input wire pixel_valid, input wire frame_start, input wire [31:0] stream_frame_id,
  input wire [23:0] pixel_rgb_a, input wire [23:0] pixel_rgb_b,

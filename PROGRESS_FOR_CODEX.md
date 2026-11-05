@@ -277,3 +277,13 @@
 - `live_site/README.md` 明確說明服務可在沒有相機時保持 `stopped`，只有 `/api/start`／網頁連接動作才會碰相機；Quick Tunnel 連結、token、模型和相機相片屬本機私密資料，不入 Git。
 - 2026-11-03 已在此電腦以 CameraA 0／CameraB -1 的等待設定啟動新 Quick Tunnel；未呼叫 `/api/start`，因此沒有相機實測或照片產生。透過新 HTTPS URL 的首頁回應 HTTP 200，`/api/health` 回傳應用程式/版本，`/api/live` 回報 `stopped`、`enabled=false` 和 cameras `[0, -1]`；當時 cloudflared 程序仍在執行。連結、log 與 `cloudflared.exe` 均只在使用者本機，不加入此倉庫。
 
+## 2026-11-05 變更紀錄：PYNQ-ZU 可重建 bring-up bitstream 與 JTAG 實機下載
+
+- PYNQ 目標已確認為 **PYNQ-ZU**（`XCZU5EG-SFVC784-1-E`），不是 PYNQ-Z1。Vivado Hardware Manager 實機枚舉為 `XUPJTAG` 下的 `xczu5_0`；板子供電恢復後可讀到裝置。依 PYNQ-ZU 官方手冊，直接由 Vivado JTAG 下載時 boot switch 使用 **JTAG（左側）**；SD 是從 SD card 開機 PYNQ Linux 的模式，兩者用途不同。
+- 新增 `fpga/implement_pynq_zu_yolox.tcl`，會驗證 project/BD/wrapper，執行 `impl_1` 至 `write_bitstream`，並只在 `write_bitstream Complete!` 及 `.bit` 實際存在時回報成功。腳本沒有降低 UCIO/NSTD DRC 嚴重度。
+- Windows 原始路徑含中文使 Vivado 子綜合程序無法解析來源；`create_pynq_zu_rtl_project.tcl` 現將八個必要 HDL 檔 stage 到可設定短 ASCII build directory 的 `rtl_src/` 後再加入 project。`synthesize_pynq_zu_yolox.tcl` 會先 reset 舊 `synth_1` run，避免重用 run 時的 reset 要求。
+- 100 MHz 設計實作時 WNS 約 -32.945 ns，未下載至板。時脈降至 20 MHz 後，完整 external-video 版本 route WNS +0.013 ns，但因外部 video/result ports 沒有 XDC 而被 UCIO-1 正確阻止 bitgen；沒有繞過該 DRC。
+- 預設 bring-up Block Design 使用 PS→SmartConnect→AXI4-Lite mailbox（`0xA000_0000`，4 KiB）、20 MHz PL clock。尚未指定板級來源的 video inputs 以常數 idle 驅動，result ports 不外拉至未約束的 PL pins。這版可驗證 PS/PL clock、AXI-Lite 與 JTAG，不是雙攝影機資料流。
+- 本機 `C:\\pynq_zu_bringup` 的實作/bitgen 已完成（0 errors、0 critical warnings）；產物為 `C:\\pynq_zu_bringup\\pynq_zu_rtl.runs\\impl_1\\pynq_zu_yolox_wrapper.bit`。2026-11-05 已在 Vivado Hardware Manager 對實機 `xczu5_0` 成功下載；狀態顯示 `Programmed`，Tcl console 回報該 JTAG device is programmed。這是易失性的 JTAG PL 設定，不會寫入 SD 或開機 flash，斷電後消失。
+- 尚未驗證：PYNQ Linux 下的 Overlay/HWH + MMIO 存取、AXI mailbox 實際讀寫，以及相機/DMA/CSI/HDMI 影像路徑。要啟用真實 video ports，必須先選定介面並提供對應 IP、clock/reset/CDC、XDC，再以 `PYNQ_ZU_EXPORT_VIDEO_PORTS=1` 重建；不可把此 bring-up 成功誤稱為雙鏡頭功能完成。
+

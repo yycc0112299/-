@@ -74,22 +74,35 @@ bitstream 或硬體 MMIO；YOLOX 仍是 CPU/PS 推論，不是 Verilog 神經網
 
 ## PYNQ-ZU PS Block Design 與綜合（2026-11-04）
 
-依序以 Vivado batch 執行下列三個腳本：
+依序以 Vivado batch 執行下列四個腳本：
 
 1. `create_pynq_zu_rtl_project.tcl`
 2. `create_pynq_zu_yolox_bd.tcl`
 3. `synthesize_pynq_zu_yolox.tcl`
+4. `implement_pynq_zu_yolox.tcl`
 
-第二步建立 `Zynq UltraScale+ PS → SmartConnect → yolox_rtl_0`，以 100 MHz PL clock
-與同步 reset 連接 AXI4-Lite，並保留 video pixel/feature 訊號為 BD 外部 ports。Address
+第二步建立 `Zynq UltraScale+ PS → SmartConnect → yolox_rtl_0`，以 20 MHz PL clock
+與同步 reset 連接 AXI4-Lite。預設 bring-up 設計把尚未選定實體來源的 RGB/video 輸入拉為 idle，
+且不把結果輸出到未約束的 PL pins，因此可安全產生基礎 bitstream；Address
 Editor 自動配置 mailbox 為 `0xA000_0000`、4 KiB。第三步生成 BD wrapper 並綜合；本機
 Vivado 2024.2 的結果為 `synth_design completed successfully`、0 error、0 critical warning，
 checkpoint 位於所選 build directory 的 `pynq_zu_rtl.runs/synth_1/`。
 
-Windows 上原始碼資料夾含中文且路徑很長，Vivado 會在產生 Zynq IP 時失敗。因此三個腳本
+Windows 上原始碼資料夾含中文且路徑很長，Vivado 會在產生 Zynq IP 時失敗。因此這些腳本
 預設把**生成物**放到 `%TEMP%/pynq_zu_rtl`；可設定環境變數 `PYNQ_ZU_BUILD_DIR` 指向另一個
-短的 ASCII 絕對路徑。這不改動或提交原始碼。雖已綜合，外部 pixel ports 尚未指定攝影機
-來源/腳位/XDC，故實作、bitstream、overlay 和板端測試仍不是已完成項目。
+短的 ASCII 絕對路徑。建立專案時也會把八個 HDL 輸入複製到該 build 目錄的 `rtl_src/`，避免
+Windows 子綜合程序無法解析中文來源路徑；這不改動或提交原始碼。20 MHz bring-up 設計已完成
+implementation/bitgen，且於 2026-11-05 透過 JTAG 成功下載到 PYNQ-ZU `xczu5_0`
+（Hardware Manager 顯示 `Programmed`）。這只驗證 JTAG/PS/PL clock/AXI-Lite bring-up；外部
+pixel ports 仍未指定攝影機來源/腳位/XDC，故 Overlay/MMIO、相機串流和雙鏡頭板端功能仍不是已完成項目。
+
+`implement_pynq_zu_yolox.tcl` 保留 Vivado 的 UCIO/NSTD DRC 為 error；只有所有 external
+ports 都有刻意的板級 XDC 後才容許產生 bitstream，不會為了產檔而降低 DRC。
+
+若已選定並完成 CSI、HDMI 或 DMA 的板級設計與 XDC，才設定
+`PYNQ_ZU_EXPORT_VIDEO_PORTS=1` 重新建立 BD，使 video/result signals 成為 external ports。
+未設定時產出的 bring-up bitstream 可驗證 PYNQ-ZU PS、PL clock、AXI-Lite mailbox 及 JTAG
+下載，但沒有相機影像輸入，不能當作雙鏡頭功能完成。
 
 ## 通用雙鏡頭 AXI-Stream 入口（2026-11-04）
 

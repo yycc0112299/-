@@ -20,6 +20,7 @@ if {![file exists $wrapper]} { error "Block-design wrapper was not generated" }
 if {[llength [get_files -quiet $wrapper]] == 0} { add_files -norecurse $wrapper }
 set_property top pynq_zu_yolox_wrapper [current_fileset]
 update_compile_order -fileset sources_1
+reset_run synth_1
 launch_runs synth_1 -jobs 4
 wait_on_run synth_1
 set run_status [get_property STATUS [get_runs synth_1]]

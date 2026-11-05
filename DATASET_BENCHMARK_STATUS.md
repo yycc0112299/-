@@ -10,3 +10,9 @@
 | MOTChallenge | 未跑模型 | 單鏡頭 benchmark，與跨鏡頭目標不完全相同；未另下載大型資料 |
 
 所有已跑模型的結果都保留總數、IoU、precision、recall、漏抓、誤抓與逐案例明細。`PARTIAL` 結果不改寫成 `PASS`。
+
+## 框穩定化算法比較
+
+在同一份 EPFL 預測輸出上比較 Raw、EMA 0.25/0.5/0.75 與 median3。Raw 最好：中心最大誤差 `19.5256 px`、mean IoU `0.7963`；EMA 與 median3 因 EPFL 標註影格非連續而把框拖偏，中心最大誤差分別為 `35.1283`、`38.5811`、`28.0401`、`43.5115 px`，因此沒有把它們併入主程式。完整數字見 `person_tracking/box_stabilizer_benchmark.json`。
+
+研究上常見的 ByteTrack、OC-SORT、BoT-SORT 主要改善 detection-to-track association、遮擋與 ID 維持，不會自動修正單幀 detector 的 bounding-box 邊界；因此本次先以同一 detector 輸出的定位誤差比較，不把公開論文的 MOT 分數直接當成這份 EPFL 的 px 誤差。

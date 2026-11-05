@@ -57,6 +57,7 @@
 - IoU>=0.5 配對 1,035，漏抓 267，誤抓 530；recall=0.7949、precision=0.6613、平均 IoU=0.7963、最低 IoU=0.5007，執行 133.84 秒。
 - 另計算框座標誤差：平均 5.7932 px、最大 37 px；`<20 px` 門檻為 FAIL，不能宣稱全部人物框都在 20 px 內。
 - 若依「物體位置」採用 matched box center 的 Euclidean distance，最大中心誤差為 19.5256 px、平均 2.9939 px，`center_error_pass=true`；報告同時保留嚴格四邊最大誤差 37 px，兩種指標不可混稱。
+- 比較 Raw、EMA 0.25/0.5/0.75、median3 後，Raw YOLOX 最好；平滑法在非連續 EPFL 標註影格上使中心最大誤差升至 28.0401–43.5115 px，已排除。
 - 結果為 `EPFL_DATASET_PARTIAL`，完整逐案例數字保存在 `person_tracking/epfl_dataset_evaluation.json`；這是外部資料實測，不是合成回歸。
 ## 2026-11-04：雙鏡頭候選確認 Verilog 核心
 

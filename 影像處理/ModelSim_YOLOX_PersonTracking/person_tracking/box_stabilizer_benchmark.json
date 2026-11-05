@@ -1,0 +1,65 @@
+{
+  "source": "epfl_dataset_evaluation.json",
+  "results": {
+    "raw": {
+      "matches": 1035,
+      "misses": 267,
+      "false_positives": 530,
+      "recall": 0.7949,
+      "precision": 0.6613,
+      "mean_iou": 0.7963,
+      "max_center_error_px": 19.5256,
+      "mean_center_error_px": 2.9939,
+      "max_edge_error_px": 37,
+      "center_under_20": true
+    },
+    "ema0.25": {
+      "matches": 177,
+      "misses": 1125,
+      "false_positives": 1388,
+      "recall": 0.1359,
+      "precision": 0.1131,
+      "mean_iou": 0.6843,
+      "max_center_error_px": 35.1283,
+      "mean_center_error_px": 8.299,
+      "max_edge_error_px": 39,
+      "center_under_20": false
+    },
+    "ema0.5": {
+      "matches": 399,
+      "misses": 903,
+      "false_positives": 1166,
+      "recall": 0.3065,
+      "precision": 0.255,
+      "mean_iou": 0.6718,
+      "max_center_error_px": 38.5811,
+      "mean_center_error_px": 8.0656,
+      "max_edge_error_px": 45,
+      "center_under_20": false
+    },
+    "ema0.75": {
+      "matches": 702,
+      "misses": 600,
+      "false_positives": 863,
+      "recall": 0.5392,
+      "precision": 0.4486,
+      "mean_iou": 0.7002,
+      "max_center_error_px": 28.0401,
+      "mean_center_error_px": 6.8429,
+      "max_edge_error_px": 43,
+      "center_under_20": false
+    },
+    "median3": {
+      "matches": 479,
+      "misses": 823,
+      "false_positives": 1086,
+      "recall": 0.3679,
+      "precision": 0.3061,
+      "mean_iou": 0.714,
+      "max_center_error_px": 43.5115,
+      "mean_center_error_px": 6.5775,
+      "max_edge_error_px": 63,
+      "center_under_20": false
+    }
+  }
+}

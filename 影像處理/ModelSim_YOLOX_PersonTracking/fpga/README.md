@@ -73,7 +73,16 @@ PYNQ PS / Python YOLOX → AXI4-Lite bbox mailbox → frame command adapter
 `pynq_yolox_mmio.py` 提供 `set_irq_enable()`、`irq_status()` 和 `clear_irq()`。
 
 本機 Vivado 2024.2 的 `tb_yolox_command_path.v` 模擬通過
-`YOLOX_COMMAND_PATH_PASS checks=5`，整個 `dual_camera_yolox_axilite_top.v` 也已編譯。
+`YOLOX_COMMAND_PATH_PASS checks=9`，整個 `dual_camera_yolox_axilite_top.v` 也已編譯。
+可在任何已安裝 Vivado 的 Windows 電腦重跑：
+
+```powershell
+.\open_xsim_yolox_command_path.ps1 -Batch
+```
+
+腳本把三個所需 HDL 暫存到 ASCII 的 `%TEMP%` 路徑，避免含中文的 repository 路徑影響
+XSim；可用 `VIVADO_XSIM_BIN` 指向其他 Vivado 的 `bin` 目錄。它只驗證 AXI-Lite mailbox、
+frame-ID 接收與 IRQ 的合成 testbench，不接觸 PYNQ、JTAG 或任何相機。
 Python fake-MMIO 合約測試確認 packet 會先寫五筆 payload，最後才寫 control。這不是 PYNQ-ZU
 上板結果：尚未完成 PS Block Design、MIPI/USB frame buffer、clock-domain crossing、XDC、
 bitstream 或硬體 MMIO；YOLOX 仍是 CPU/PS 推論，不是 Verilog 神經網路。

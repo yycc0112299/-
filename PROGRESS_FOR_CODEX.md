@@ -21,7 +21,7 @@
 - 新增 `fpga/yolox_bbox_axilite.v`，提供同一 PL clock 的 AXI4-Lite command mailbox。PS 先寫 frame ID 和 A/B bbox，最後 CONTROL.bit0 commit；matching frame 接收後清除 pending，未消耗前再 commit 會置 `overrun` 且保留舊命令。
 - 新增 `fpga/yolox_frame_command_adapter.v`，只在 video `frame_start` 與 command frame ID 相同時鎖住 bbox；`fpga/dual_camera_yolox_axilite_top.v` 將此 adapter、mailbox 與既有 dual ROI top 串接。`create_pynq_zu_rtl_project.tcl` 已新增 sources 並將該整合 top 設為 top。
 - 新增 `person_tracking/pynq_yolox_mmio.py`，可驗證和送出 `dual_camera.py` 的 `rtl-yolox-bbox-v1` packet 到 PYNQ MMIO；硬體 base address 必須由最終 Block Design 的 Address Editor 提供，不寫死在共享程式碼。
-- 此電腦驗證：Vivado 2024.2 `xvlog` 成功編譯完整整合 top；`tb_yolox_command_path.v` 的 commit、錯影格保留、正確影格 latch 與 consume 模擬通過，輸出 `YOLOX_COMMAND_PATH_PASS checks=5`。Python fake-MMIO 合約測試也通過，產生正確的 6 次 payload/control 寫入。
+- 此電腦驗證：Vivado 2024.2 `xvlog` 成功編譯完整整合 top；`tb_yolox_command_path.v` 的 commit、錯影格保留、正確影格 latch 與 consume 模擬通過，輸出 `YOLOX_COMMAND_PATH_PASS checks=9`。Python fake-MMIO 合約測試也通過，產生正確的 6 次 payload/control 寫入。
 - 當時尚未驗證項目已由下一節更新；目前仍未驗證 PYNQ-ZU 的 PYNQ image/network、camera/MIPI 或 USB frame-buffer、XDC、implementation、bitstream、實機 MMIO。YOLOX 仍在 CPU/PS Python；RTL 只接收已選 pair 的 bbox，不能宣稱 YOLOX 神經網路已用 Verilog 實現。
 
 ## 2026-11-04：PYNQ-ZU Zynq PS Block Design 與綜合
@@ -309,7 +309,7 @@
 ## 2026-11-05 變更紀錄：PS IRQ 與 PYNQ-ZU 雙 USB 鏡頭網站部署包
 
 - 盤點後確認先前設計沒有任何 RTL IRQ 或 PS IRQ 接線，故「中斷問題」是未實作而非 JTAG 連線故障。`yolox_bbox_axilite.v` 新增 `IRQ_STATUS` (`0x18`, W1C) 和 `IRQ_ENABLE` (`0x1c`)；bit 0=雙路 feature 完成、bit 1=confirmed、bit 2=frame command missing、bit 3=mailbox overrun。只要 enable 的 sticky bit 尚未清除，`irq` 維持 level high。
-- `dual_camera_yolox_axilite_top.v` 匯出 annotated `irq`，`create_pynq_zu_yolox_bd.tcl` 啟用 PS `IRQ0` 並接到 `pl_ps_irq0`。`dual_camera_yolox_axis_top.v` 同步匯出 irq；`pynq_yolox_mmio.py` 加入 set/read/clear IRQ helpers。XSim `tb_yolox_command_path.v` 以 result 和 overrun 事件驗證 enable、assert、W1C clear，輸出 `YOLOX_COMMAND_PATH_PASS checks=5`。
+- `dual_camera_yolox_axilite_top.v` 匯出 annotated `irq`，`create_pynq_zu_yolox_bd.tcl` 啟用 PS `IRQ0` 並接到 `pl_ps_irq0`。`dual_camera_yolox_axis_top.v` 同步匯出 irq；`pynq_yolox_mmio.py` 加入 set/read/clear IRQ helpers。XSim `tb_yolox_command_path.v` 以 result 和 overrun 事件驗證 enable、assert、W1C clear，輸出 `YOLOX_COMMAND_PATH_PASS checks=9`。
 - 在乾淨 `C:\\pynq_irq_build` 做了完整 project/BD/synth/impl：synthesis 0 error/0 critical warning；implementation 的 DRC 0 error，bitgen 0 warning/0 critical warning，post-placement WNS +47.095 ns。產物 `C:\\pynq_irq_build\\pynq_zu_rtl.runs\\impl_1\\pynq_zu_yolox_wrapper.bit` 已在 Hardware Manager 對實機 `xczu5_0` 成功下載，Tcl console 回報 device programmed。
 - `live_site/dual_server.py` 現會依平台使用 Windows DirectShow 或 Linux V4L2，新增 `pynq_usb_camera_preflight.py`、`start_pynq_dual.sh` 和 `prepare_pynq_dual_bundle.py`。後者可把既有雙鏡頭網站、YOLOX ONNX、追蹤程式與可選 Overlay 打成 PYNQ 可傳送 tarball。本機已成功產生 `C:\\pynq_irq_build\\pynq_zu_dual_deploy.tar.gz`（33,467,184 bytes），列出的 12 個檔包含 `overlay/pynq_zu_yolox.bit/.hwh`；不把模型/bitstream 產物提交到 Git。
 - 未驗證且仍必須完成：PYNQ SD-boot Linux 的 Python/OpenCV/V4L2 相依、兩支實際 USB webcam `/dev/video*`、YOLOX 推論、LAN 網站畫面、Overlay/MMIO/IRQ 實機事件。現行 FPGA bring-up 沒有 USB capture-to-RTL 資料路徑；雙 USB 網站是由 PYNQ PS CPU 取 UVC 影像、執行既有 YOLOX/Tracker，這符合原 Python 網站資料流但不能稱 USB frame 已進 FPGA ROI core。
@@ -335,4 +335,9 @@
 
 - 在工作樹乾淨且不接 PYNQ 的條件下執行 `python -m unittest discover -s person_tracking -p test_*.py -v`，結果 18 tests OK；覆蓋本地 tracker 交叉／遮擋、跨鏡頭候選連續確認／互斥、衣著特徵與相機 index 防護。於 `live_site` 執行 `python -m unittest test_dual_server.py -v`，結果 6 tests OK；覆蓋人物快照、人工配對、審核凍結、拒絕 pair 排除、照片清除與特徵歷史。
 - 另實跑 `person_tracking/open_xsim_regression.ps1 -Batch`（Vivado 2024.2），XSim 編譯、elaborate 及模擬成功，輸出 `RTL_REGRESSION_PASS frames=7 checks=89`。暫存 XSim 輸出位於 `%TEMP%`，未納入 Git。上述皆為 host 模擬／合成測試；沒有呼叫 USB 相機、SSH、PYNQ Linux、Overlay/MMIO 或硬體 IRQ。
+
+### 2026-11-05 後續：可重跑的 mailbox／IRQ XSim 回歸
+
+- 新增 `fpga/open_xsim_yolox_command_path.ps1`，將 `yolox_bbox_axilite.v`、`yolox_frame_command_adapter.v` 與 testbench stage 至 `%TEMP%/project_xsim_yolox_command_path`，用 `xvlog`、`xelab`、`xsim` 執行。可傳 `-Batch` 供 CI/終端 PASS/FAIL，省略則開 GUI；`VIVADO_XSIM_BIN` 可覆寫 Vivado bin。這使新電腦能重跑 AXI-Lite payload commit、overrun、frame-ID 對齊、bbox latch／consume、result/overrun IRQ/W1C clear 測試，不需接 PYNQ。
+- 本機實跑 Vivado 2024.2 結果為 `YOLOX_COMMAND_PATH_PASS checks=9`。更正先前文件誤載的 `checks=5`；目前 testbench 的 9 個 assert 才是可重現的實際輸出。此測試不包含 PS Block Design、Overlay 或硬體 IRQ 電氣連線。
 

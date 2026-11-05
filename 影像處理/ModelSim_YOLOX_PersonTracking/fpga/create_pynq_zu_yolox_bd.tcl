@@ -19,7 +19,7 @@ create_bd_design pynq_zu_yolox
 
 create_bd_cell -type ip -vlnv xilinx.com:ip:zynq_ultra_ps_e:3.5 zynq_ultra_ps_e_0
 apply_bd_automation -rule xilinx.com:bd_rule:zynq_ultra_ps_e -config {apply_board_preset "1"} [get_bd_cells zynq_ultra_ps_e_0]
-set_property -dict [list CONFIG.PSU__USE__M_AXI_GP0 {1} CONFIG.PSU__USE__M_AXI_GP1 {0}] [get_bd_cells zynq_ultra_ps_e_0]
+set_property -dict [list CONFIG.PSU__USE__M_AXI_GP0 {1} CONFIG.PSU__USE__M_AXI_GP1 {0} CONFIG.PSU__USE__IRQ0 {1}] [get_bd_cells zynq_ultra_ps_e_0]
 # The ROI feature datapath is deliberately single-cycle rather than deeply
 # pipelined.  20 MHz exceeds 640*480*30 fps while meeting the current RTL path.
 set_property CONFIG.PSU__CRL_APB__PL0_REF_CTRL__FREQMHZ {20} [get_bd_cells zynq_ultra_ps_e_0]
@@ -41,6 +41,9 @@ connect_bd_net [get_bd_pins reset_invert_0/Res] [get_bd_pins proc_sys_reset_0/ex
 connect_bd_net [get_bd_pins reset_locked_0/dout] [get_bd_pins proc_sys_reset_0/dcm_locked]
 connect_bd_net [get_bd_pins proc_sys_reset_0/peripheral_reset] [get_bd_pins yolox_rtl_0/reset]
 connect_bd_net [get_bd_pins proc_sys_reset_0/peripheral_aresetn] [get_bd_pins axi_smc_0/aresetn] [get_bd_pins yolox_rtl_0/s_axi_aresetn]
+# PL-to-PS IRQ0 is level-sensitive. The RTL holds it high until software clears
+# the matching W1C IRQ_STATUS bit through AXI-Lite.
+connect_bd_net [get_bd_pins yolox_rtl_0/irq] [get_bd_pins zynq_ultra_ps_e_0/pl_ps_irq0]
 
 # A hardware-safe bring-up image must not leave video signals on unassigned PL
 # pins.  Until CSI/HDMI/DMA is selected, hold the RTL video inputs idle and keep

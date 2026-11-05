@@ -293,3 +293,11 @@
 - 新增 `person_tracking/verify_pynq_zu_bringup.py`：在 PYNQ Linux 下載 Overlay，對 mailbox `0xA000_0000` 的 frame-ID 做 write/readback，再清回 0。已在開發電腦通過 Python syntax compile；尚未在板上執行，因此不能當成 MMIO 實機 PASS。
 - 板子目前仍因 JTAG 模式/目前電腦網段為 `192.168.50.x` 而無法存取既有 `http://192.168.3.1/lab`（瀏覽器為 `ERR_CONNECTION_RESET`，ICMP 亦沒有回覆）。下一個實機步驟需切回 **SD**、重新上電使 PYNQ Linux 開機，再把 overlay 檔案與驗證腳本上傳到板端；這與已完成的 JTAG PL 下載是兩個不同階段。
 
+## 2026-11-05 變更紀錄：PS IRQ 與 PYNQ-ZU 雙 USB 鏡頭網站部署包
+
+- 盤點後確認先前設計沒有任何 RTL IRQ 或 PS IRQ 接線，故「中斷問題」是未實作而非 JTAG 連線故障。`yolox_bbox_axilite.v` 新增 `IRQ_STATUS` (`0x18`, W1C) 和 `IRQ_ENABLE` (`0x1c`)；bit 0=雙路 feature 完成、bit 1=confirmed、bit 2=frame command missing、bit 3=mailbox overrun。只要 enable 的 sticky bit 尚未清除，`irq` 維持 level high。
+- `dual_camera_yolox_axilite_top.v` 匯出 annotated `irq`，`create_pynq_zu_yolox_bd.tcl` 啟用 PS `IRQ0` 並接到 `pl_ps_irq0`。`dual_camera_yolox_axis_top.v` 同步匯出 irq；`pynq_yolox_mmio.py` 加入 set/read/clear IRQ helpers。XSim `tb_yolox_command_path.v` 以 result 和 overrun 事件驗證 enable、assert、W1C clear，輸出 `YOLOX_COMMAND_PATH_PASS checks=5`。
+- 在乾淨 `C:\\pynq_irq_build` 做了完整 project/BD/synth/impl：synthesis 0 error/0 critical warning；implementation 的 DRC 0 error，bitgen 0 warning/0 critical warning，post-placement WNS +47.095 ns。產物 `C:\\pynq_irq_build\\pynq_zu_rtl.runs\\impl_1\\pynq_zu_yolox_wrapper.bit` 已在 Hardware Manager 對實機 `xczu5_0` 成功下載，Tcl console 回報 device programmed。
+- `live_site/dual_server.py` 現會依平台使用 Windows DirectShow 或 Linux V4L2，新增 `pynq_usb_camera_preflight.py`、`start_pynq_dual.sh` 和 `prepare_pynq_dual_bundle.py`。後者可把既有雙鏡頭網站、YOLOX ONNX、追蹤程式與可選 Overlay 打成 PYNQ 可傳送 tarball。本機已成功產生 `C:\\pynq_irq_build\\pynq_zu_dual_deploy.tar.gz`（33,467,184 bytes），列出的 12 個檔包含 `overlay/pynq_zu_yolox.bit/.hwh`；不把模型/bitstream 產物提交到 Git。
+- 未驗證且仍必須完成：PYNQ SD-boot Linux 的 Python/OpenCV/V4L2 相依、兩支實際 USB webcam `/dev/video*`、YOLOX 推論、LAN 網站畫面、Overlay/MMIO/IRQ 實機事件。現行 FPGA bring-up 沒有 USB capture-to-RTL 資料路徑；雙 USB 網站是由 PYNQ PS CPU 取 UVC 影像、執行既有 YOLOX/Tracker，這符合原 Python 網站資料流但不能稱 USB frame 已進 FPGA ROI core。
+

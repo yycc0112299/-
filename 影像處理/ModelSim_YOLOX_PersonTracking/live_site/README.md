@@ -13,6 +13,19 @@ $env:PROJECT_PYTHON = 'C:\path\to\python.exe'
 
 預設使用鏡頭 0 與 1，頁面可改選兩個不同編號。A/B 影像、各自的本地 Track ID 與候選配對狀態會同時更新。候選必須連續三個處理循環符合衣著外觀門檻才有 P 標籤，並不代表身分辨識或硬體同步。
 
+### PYNQ-ZU 的兩支 USB 鏡頭
+
+`dual_server.py` 現在會在 Windows 使用 DirectShow、在 PYNQ Linux 使用 V4L2；同一套網站可在
+PYNQ-ZU 上執行。開發電腦先執行 `python prepare_pynq_dual_bundle.py --output C:\\pynq_zu_bringup\\pynq_dual_dashboard.tar.gz`，
+再把 tarball 複製到 PYNQ SD-boot Linux。解壓後，在 PYNQ 執行
+`python3 live_site/pynq_usb_camera_preflight.py` 先確認兩支 UVC 鏡頭，再執行
+`bash live_site/start_pynq_dual.sh <電腦的LAN IP>`；電腦以 `http://<PYNQ-IP>:8766/` 開啟。
+
+板上需要 Python 3、`numpy`、含 V4L2 的 `opencv-python`，且兩支 UVC 鏡頭必須可列為
+`/dev/video0`、`/dev/video1`（或以 `PYNQ_CAMERA_A/B` 指定其他 index）。這是 PYNQ 的 CPU
+執行 YOLOX / tracker 網站；目前 FPGA bitstream 的 video inputs 尚未接到 USB capture，不可宣稱
+USB 影像已走入 FPGA RTL。
+
 ### 兩台電腦協作
 
 GitHub 只同步程式，不傳即時影像。把本目錄同步到有 USB 鏡頭的電腦後，在該電腦執行：

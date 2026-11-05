@@ -3,6 +3,7 @@ import argparse
 import base64
 import json
 import re
+import os
 import sys
 import threading
 import time
@@ -24,6 +25,14 @@ from dual_camera import appearance
 
 FACE_CASCADE = p.cv2.CascadeClassifier(
     str(Path(p.cv2.data.haarcascades) / "haarcascade_frontalface_default.xml"))
+
+
+def open_usb_camera(index):
+    """Open a UVC camera on either the Windows development PC or PYNQ Linux."""
+    if os.name == "nt":
+        return p.cv2.VideoCapture(index, p.cv2.CAP_DSHOW)
+    backend = getattr(p.cv2, "CAP_V4L2", p.cv2.CAP_ANY)
+    return p.cv2.VideoCapture(index, backend)
 
 
 def snapshot_quality(frame, box, confidence, check_face=True):
@@ -331,7 +340,7 @@ class DualEngine:
             last_encoded = 0.0
             try:
                 for index in indexes:
-                    cap = p.cv2.VideoCapture(index, p.cv2.CAP_DSHOW)
+                    cap = open_usb_camera(index)
                     caps.append(cap)
                     if not cap.isOpened():
                         raise RuntimeError(f"鏡頭 {index} 無法開啟；請確認沒有被其他程式使用")

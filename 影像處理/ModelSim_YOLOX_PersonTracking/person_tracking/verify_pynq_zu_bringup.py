@@ -14,6 +14,8 @@ from pynq import MMIO, Overlay
 MAILBOX_BASE = 0xA000_0000
 MAILBOX_LENGTH = 0x1000
 FRAME_ID = 0x04
+IRQ_STATUS = 0x18
+IRQ_ENABLE = 0x1C
 TEST_FRAME_ID = 0x5A17_C0DE
 
 
@@ -37,6 +39,9 @@ def main() -> None:
             f"AXI-Lite mailbox readback failed: wrote 0x{TEST_FRAME_ID:08x}, "
             f"read 0x{observed:08x}"
         )
+    mailbox.write(IRQ_ENABLE, 0)
+    if mailbox.read(IRQ_STATUS) & 0xF:
+        raise RuntimeError("IRQ status unexpectedly asserted in idle bring-up image")
     print(
         "PYNQ_ZU_BRINGUP_PASS "
         f"base=0x{MAILBOX_BASE:08x} initial_control=0x{initial_control:08x}"

@@ -170,3 +170,10 @@
 
 - 已產出 PYNQ Overlay 要用的 `.bit` 與 `.hwh` 配對檔，並加入板端 AXI-Lite 讀寫驗證程式；開發電腦的 Python 語法檢查通過。
 - 現在 PYNQ 網頁 `192.168.3.1` 無法連線，因板子仍在 JTAG 階段且這台電腦目前是 `192.168.50.x` 網段。下一步必須切回 SD、重新開機，才可啟動 PYNQ Linux 並上傳/執行驗證。
+
+### 2026-11-05：中斷與雙 USB 鏡頭網站
+
+- 已補上 PS IRQ：feature 完成、跨鏡頭確認、命令遺失與 mailbox 覆寫都能觸發；程式可讀取並清除中斷。RTL 模擬通過，包含中斷拉高與清除。
+- IRQ 版 bitstream 已完成時序/DRC/bitgen 檢查，並再次經 JTAG 成功燒入 PYNQ-ZU。
+- 已製作 PYNQ Linux 用的雙 USB 鏡頭網站部署包；它包含現有 YOLOX、雙鏡頭網站、USB 鏡頭檢查程式與 overlay。
+- 尚未在板上驗證：SD Linux、兩支已插入的 USB 鏡頭、YOLOX 推論與電腦瀏覽器畫面。USB 網站會先由 PYNQ 的 CPU 執行原本 Python 流程；目前影像尚未進 FPGA RTL。

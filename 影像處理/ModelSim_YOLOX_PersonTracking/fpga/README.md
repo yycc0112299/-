@@ -66,6 +66,12 @@ PYNQ PS / Python YOLOX → AXI4-Lite bbox mailbox → frame command adapter
   PYNQ overlay 完成後以 `open_pynq_mmio(<Address Editor 的 base address>)` 建立 MMIO；
   base address 不能硬編碼，必須取自最終 Vivado Block Design。
 
+2026-11-05 起 mailbox 另提供 PL→PS 的 level IRQ：`IRQ_STATUS` 位於 `0x18`（write-one-to-clear）
+而 `IRQ_ENABLE` 位於 `0x1c`。bit 0=雙路 feature frame 完成、bit 1=跨鏡頭 confirmed、bit 2=影格
+開始時缺少相同 frame ID command、bit 3=覆寫尚未消耗 command。`irq` 已接到 PYNQ-ZU PS
+`pl_ps_irq0`；只有已 enable 的 sticky source 會把 IRQ 拉高，PS 必須先讀 status、再寫相同 bit 清除。
+`pynq_yolox_mmio.py` 提供 `set_irq_enable()`、`irq_status()` 和 `clear_irq()`。
+
 本機 Vivado 2024.2 的 `tb_yolox_command_path.v` 模擬通過
 `YOLOX_COMMAND_PATH_PASS checks=5`，整個 `dual_camera_yolox_axilite_top.v` 也已編譯。
 Python fake-MMIO 合約測試確認 packet 會先寫五筆 payload，最後才寫 control。這不是 PYNQ-ZU
@@ -119,6 +125,11 @@ python3 verify_pynq_zu_bringup.py
 檢查會下載 overlay、從 `0xA000_0000` 讀取控制暫存器，對 frame-ID 寫入/讀回固定測試值，再
 清回 0。只有輸出 `PYNQ_ZU_BRINGUP_PASS` 才能證明 PYNQ Linux 的 Overlay 與 AXI-Lite 實機通。
 它不提交 pending command，因此 idle-video bring-up 不會留下未消耗的 mailbox 指令。
+
+如要把 Overlay 和 PYNQ 雙 USB 網站合成單一傳送檔，可先執行
+`prepare_pynq_zu_overlay.ps1 -BuildDir C:\\pynq_irq_build -OutputDir C:\\pynq_irq_build\\overlay`，再執行
+`live_site/prepare_pynq_dual_bundle.py --overlay-dir C:\\pynq_irq_build\\overlay`。tarball 的 `overlay/`
+含同 stem `.bit/.hwh`；仍必須由 PYNQ Linux 的 `Overlay()` 載入，USB 影像目前不會直接進 RTL。
 
 ## 通用雙鏡頭 AXI-Stream 入口（2026-11-04）
 

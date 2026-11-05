@@ -20,7 +20,7 @@ module dual_camera_yolox_axis_top #(
  output wire stream_frame_boundary_error, output wire command_overrun, output wire frame_command_missing,
  output wire feature_valid_a, feature_valid_b, person_valid_a, person_valid_b,
  output wire [23:0] feature_a, feature_b, output wire feature_similar, candidate_valid, confirmed,
- output wire [1:0] consecutive_hits
+ output wire [1:0] consecutive_hits, output wire irq
 );
  wire pixel_valid, frame_start;
  wire [23:0] pixel_rgb_a, pixel_rgb_b;
@@ -30,5 +30,5 @@ module dual_camera_yolox_axis_top #(
  dual_camera_yolox_axilite_top #(.AXI_ADDR_WIDTH(AXI_ADDR_WIDTH)) core(
   .clk(clk),.reset(reset),.pixel_valid(pixel_valid),.frame_start(frame_start),.stream_frame_id(stream_frame_id),.pixel_rgb_a(pixel_rgb_a),.pixel_rgb_b(pixel_rgb_b),
   .s_axi_aresetn(s_axi_aresetn),.s_axi_awaddr(s_axi_awaddr),.s_axi_awvalid(s_axi_awvalid),.s_axi_awready(s_axi_awready),.s_axi_wdata(s_axi_wdata),.s_axi_wstrb(s_axi_wstrb),.s_axi_wvalid(s_axi_wvalid),.s_axi_wready(s_axi_wready),.s_axi_bresp(s_axi_bresp),.s_axi_bvalid(s_axi_bvalid),.s_axi_bready(s_axi_bready),.s_axi_araddr(s_axi_araddr),.s_axi_arvalid(s_axi_arvalid),.s_axi_arready(s_axi_arready),.s_axi_rdata(s_axi_rdata),.s_axi_rresp(s_axi_rresp),.s_axi_rvalid(s_axi_rvalid),.s_axi_rready(s_axi_rready),
-  .command_overrun(command_overrun),.frame_command_missing(frame_command_missing),.feature_valid_a(feature_valid_a),.feature_valid_b(feature_valid_b),.person_valid_a(person_valid_a),.person_valid_b(person_valid_b),.feature_a(feature_a),.feature_b(feature_b),.feature_similar(feature_similar),.candidate_valid(candidate_valid),.confirmed(confirmed),.consecutive_hits(consecutive_hits));
+  .command_overrun(command_overrun),.frame_command_missing(frame_command_missing),.feature_valid_a(feature_valid_a),.feature_valid_b(feature_valid_b),.person_valid_a(person_valid_a),.person_valid_b(person_valid_b),.feature_a(feature_a),.feature_b(feature_b),.feature_similar(feature_similar),.candidate_valid(candidate_valid),.confirmed(confirmed),.consecutive_hits(consecutive_hits),.irq(irq));
 endmodule

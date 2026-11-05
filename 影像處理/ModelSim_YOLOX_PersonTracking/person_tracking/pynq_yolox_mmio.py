@@ -27,6 +27,12 @@ STATUS = CONTROL
 PENDING = 0x1
 PAIR_PRESENT = 0x2
 OVERRUN = 0x4
+IRQ_STATUS = 0x18
+IRQ_ENABLE = 0x1C
+IRQ_RESULT = 0x1
+IRQ_CONFIRMED = 0x2
+IRQ_MISSING_COMMAND = 0x4
+IRQ_OVERRUN = 0x8
 
 
 def _validate_box(box: list[int], name: str) -> tuple[int, int, int, int]:
@@ -79,6 +85,25 @@ def submit_json_packet(mmio: MMIOWriter, packet: dict[str, Any]) -> YoloxRtlPack
     parsed = YoloxRtlPacket.from_json(packet)
     submit_packet(mmio, parsed)
     return parsed
+
+
+def set_irq_enable(mmio: MMIOWriter, mask: int) -> None:
+    """Enable selected level IRQ sources (result, confirmed, missing, overrun)."""
+    if mask & ~0xF:
+        raise ValueError("IRQ mask uses only bits 0..3")
+    mmio.write(IRQ_ENABLE, mask)
+
+
+def irq_status(mmio: MMIOWriter) -> int:
+    """Return sticky asserted IRQ causes without clearing them."""
+    return mmio.read(IRQ_STATUS) & 0xF
+
+
+def clear_irq(mmio: MMIOWriter, mask: int) -> None:
+    """Acknowledge selected sticky causes using the hardware W1C register."""
+    if mask & ~0xF:
+        raise ValueError("IRQ mask uses only bits 0..3")
+    mmio.write(IRQ_STATUS, mask)
 
 
 def load_packets(path: str | Path) -> list[YoloxRtlPacket]:

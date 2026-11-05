@@ -1,0 +1,88 @@
+{
+  "results": {
+    "None": {
+      "matches": 215,
+      "misses": 54,
+      "false_positives": 99,
+      "recall": 0.7993,
+      "precision": 0.6847,
+      "mean_iou": 0.8145,
+      "max_center_error_px": 11.5,
+      "max_edge_error_px": 20,
+      "center_under_20": true,
+      "edge_under_20": false
+    },
+    "420": {
+      "matches": 215,
+      "misses": 54,
+      "false_positives": 99,
+      "recall": 0.7993,
+      "precision": 0.6847,
+      "mean_iou": 0.8119,
+      "max_center_error_px": 26.5424,
+      "max_edge_error_px": 53,
+      "center_under_20": false,
+      "edge_under_20": false
+    },
+    "430": {
+      "matches": 215,
+      "misses": 54,
+      "false_positives": 99,
+      "recall": 0.7993,
+      "precision": 0.6847,
+      "mean_iou": 0.8143,
+      "max_center_error_px": 26.5424,
+      "max_edge_error_px": 51,
+      "center_under_20": false,
+      "edge_under_20": false
+    },
+    "440": {
+      "matches": 215,
+      "misses": 54,
+      "false_positives": 99,
+      "recall": 0.7993,
+      "precision": 0.6847,
+      "mean_iou": 0.8153,
+      "max_center_error_px": 18.1728,
+      "max_edge_error_px": 30,
+      "center_under_20": true,
+      "edge_under_20": false
+    },
+    "450": {
+      "matches": 215,
+      "misses": 54,
+      "false_positives": 99,
+      "recall": 0.7993,
+      "precision": 0.6847,
+      "mean_iou": 0.8155,
+      "max_center_error_px": 14.8071,
+      "max_edge_error_px": 28,
+      "center_under_20": true,
+      "edge_under_20": false
+    },
+    "460": {
+      "matches": 215,
+      "misses": 54,
+      "false_positives": 99,
+      "recall": 0.7993,
+      "precision": 0.6847,
+      "mean_iou": 0.8164,
+      "max_center_error_px": 10.7355,
+      "max_edge_error_px": 19,
+      "center_under_20": true,
+      "edge_under_20": true
+    },
+    "470": {
+      "matches": 215,
+      "misses": 54,
+      "false_positives": 99,
+      "recall": 0.7993,
+      "precision": 0.6847,
+      "mean_iou": 0.8153,
+      "max_center_error_px": 11.5,
+      "max_edge_error_px": 20,
+      "center_under_20": true,
+      "edge_under_20": false
+    }
+  }
+}

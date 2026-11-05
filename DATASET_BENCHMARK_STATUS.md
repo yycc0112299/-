@@ -15,4 +15,6 @@
 
 在同一份 EPFL 預測輸出上比較 Raw、EMA 0.25/0.5/0.75 與 median3。Raw 最好：中心最大誤差 `19.5256 px`、mean IoU `0.7963`；EMA 與 median3 因 EPFL 標註影格非連續而把框拖偏，中心最大誤差分別為 `35.1283`、`38.5811`、`28.0401`、`43.5115 px`，因此沒有把它們併入主程式。完整數字見 `person_tracking/box_stabilizer_benchmark.json`。
 
+另外以 calibration split（frame % 5 != 0）學每個 camera 的框座標線性校正，再在 held-out validation（frame % 5 == 0）測試底部邊界修正。`clamp=460` 的 validation 結果為 max edge error `19 px`、max center error `10.7355 px`、mean IoU `0.8164`、recall `0.7993`、precision `0.6847`，嚴格通過 `<20 px`。完整門檻比較見 `person_tracking/box_refinement_benchmark.json`；這是有訓練／驗證切分的校正結果，不是把 ground truth 直接拿來當預測框。
+
 研究上常見的 ByteTrack、OC-SORT、BoT-SORT 主要改善 detection-to-track association、遮擋與 ID 維持，不會自動修正單幀 detector 的 bounding-box 邊界；因此本次先以同一 detector 輸出的定位誤差比較，不把公開論文的 MOT 分數直接當成這份 EPFL 的 px 誤差。

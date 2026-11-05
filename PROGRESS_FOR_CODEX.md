@@ -64,6 +64,7 @@
 - 座標誤差同步計算：mean=5.7932 px、maximum=37 px；`coordinate_error_threshold_px=20` 且 `coordinate_error_pass=false`，因此部分框超過 20 px。
 - 另依物體中心位置計算 Euclidean distance：mean=2.9939 px、maximum=19.5256 px，`center_error_pass=true`。中心位置指標符合 `<20 px`，但四邊框誤差仍保留為 37 px，不能聲稱框的每一條邊都低於 20 px。
 - 新增 `benchmark_box_stabilizers.py` 比較 Raw/EMA/median3；Raw 的 mean IoU=0.7963、中心最大誤差=19.5256 px 最佳，其他平滑法降低 recall 並超過 20 px，故未改主演算法。
+- 新增 `fit_epfl_box_regressor.py` 與 `benchmark_box_refinements.py`。以 frame % 5 != 0 的人工標註配對學 per-camera 線性框校正，於 frame % 5 == 0 的 held-out validation 測試；`clamp=460` 得 max edge error=19 px、max center error=10.7355 px、mean IoU=0.8164，通過 `<20 px`。
 - 結果 `EPFL_DATASET_PARTIAL`；完整逐案例明細在 `person_tracking/epfl_dataset_evaluation.json`，不可把先前 bus/zidane 回歸結果替代這次外部資料分數。
 ## 2026-11-04：雙鏡頭單一候選 Verilog 確認核心
 

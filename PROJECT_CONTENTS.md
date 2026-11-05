@@ -32,3 +32,9 @@
 - `影像處理/ModelSim_YOLOX_PersonTracking/person_tracking/tests/tracking_results.json`：既有追蹤測試的精簡結果檔，記載 6 項、0 failures、0 errors、PASS；僅保存摘要，不納入旁邊被忽略的逐次輸出資料夾。
 - 目前版本的雙鏡頭網站、人工審核、照片五秒淡出、停止後清除照片，以及詳細限制，已在最新版程式、`live_site/README.md` 與兩份進度文件中保留；本次是增量提交，不改寫或覆蓋既有 Git 歷史。
 - 仍不共享 `live_captures/` 人物照片／審核 manifest、模型權重、波形、相機影格和大型生成報告。這些資料含個人影像或為本機產物，不因「同步全部進度」而強制加入 Git。
+
+## 2026-11-05 交接前最終本機盤點
+
+- `main` 與 `origin/main` 已先以 `git fetch origin` 核對，均指向 `46e9371`；本次新增的交接文件與忽略規則會另行提交並推送。受版本控制的 124 個檔案已涵蓋目前的 RTL、Python、網站、啟動器、可重跑腳本、文件、測試摘要與交付簡報。
+- 新發現的未追蹤內容不是漏掉的原始碼：根目錄的 Vivado/XSim `.jou`、`.log`、`.pb`、`.wdb` 與 `xsim.dir/` 為工具執行產物；`live_site/*-server*.log` 是本機服務日誌；`output/` 和 `tmp/` 含已簽名企劃 PDF、簽名／頁面預覽、暫時 C# 桌面啟動器、診斷資訊與硬體照片。它們不是跨電腦重建專題所需的程式，且可能含本機路徑、簽名或私人素材，故不推送。
+- `.gitignore` 已明確涵蓋上述根目錄暫存產物；可攜的替代入口仍在版本控制：網站用 `影像處理/ModelSim_YOLOX_PersonTracking/live_site/start_dual.ps1` 或上層 `啟動即時追蹤網站.cmd`，RTL 回歸用 `person_tracking/open_xsim_regression.ps1`／`開啟VivadoXSim驗證.cmd`。下一台電腦應依 `PROGRESS_FOR_CODEX.md` 的環境段落安裝 Python、相依套件與模型資產，而非複製本機暫存檔。

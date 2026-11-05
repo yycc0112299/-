@@ -1,5 +1,12 @@
 # 專題狀態與交接記錄（供 Codex）
 
+## 2026-11-05：換機前 GitHub 交接盤點
+
+- 使用者要求讓下一台電腦可直接以 GitHub 接續。本次先執行 `git fetch origin`，確認本機 `main` 和 `origin/main` 同為 `46e9371`，且工作樹沒有已修改但未提交的版本控制檔；倉庫中已有 124 個受追蹤檔案，包括目前 PYNQ-ZU RTL/腳本、Python/YOLOX 網站、測試、啟動器與交接文件。
+- 新增根目錄 `.gitignore` 規則以排除這台電腦本次遺留的 Vivado/XSim `.jou`、`.log`、`.pb`、`.wdb`、`.Xil/`、`xsim.dir/`，以及 `output/`、`tmp/` 和本機網站啟動／伺服器日誌。這些皆是可重建暫存、簽名文件預覽、硬體照片或含本機路徑的診斷資料，並非未同步的專題來源；不可將它們未上傳誤報為進度遺失。
+- `tmp/LaunchVisionSite.cs`／`.exe` 是臨時 C# 桌面啟動器，假定特定本機目錄和 `%LOCALAPPDATA%\\Programs\\Python\\Python312`，不作共享入口。跨電腦請使用已追蹤、會避開 Windows Store Python alias 的 `live_site/start_dual.ps1` 或 `啟動即時追蹤網站.cmd`；透過 `PROJECT_PYTHON` 指定不同 Python 路徑。RTL 回歸使用已追蹤的 `person_tracking/open_xsim_regression.ps1`／`開啟VivadoXSim驗證.cmd`。
+- 本次僅完成 Git 交接整理，沒有重跑相機、PYNQ Linux、Overlay/MMIO、FPGA 或網站實機測試；已驗證狀態仍以本檔較早的明確日期記錄為準。下一台電腦最小接手順序：clone `main` → 依 `person_tracking/requirements.txt` 建 Python 環境 → 執行 `setup_assets.ps1` 下載／核對 YOLOX → 先跑合成／XSim 回歸 → 再依實機有無設定相機、PYNQ 與 Vivado。相機索引、模型位置與工具路徑保持可設定，勿硬編碼。
+
 ## 2026-11-05：PYNQ-ZU 上板後的畫面與配對結果展示方案（僅規劃）
 
 - 使用者指定先把下列方案存入 GitHub，暫不實作；未來收到明確指示「讀／做」時再依此執行。目標展示為電腦瀏覽器同時顯示 A/B 即時鏡頭畫面、YOLOX 人物框與各自 Track ID、A/B 候選配對分數／連續命中數，以及 FPGA 回傳的 candidate/confirmed 狀態。

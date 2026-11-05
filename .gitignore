@@ -1,3 +1,26 @@
 影像處理/ModelSim_YOLOX_PersonTracking/work/remote_site/
 影像處理/ModelSim_YOLOX_PersonTracking/fpga/board_repos/
 影像處理/ModelSim_YOLOX_PersonTracking/fpga/build/
+
+# Local Vivado/XSim execution products (rebuildable; may contain local paths).
+/.Xil/
+/xsim.dir/
+/output/
+/tmp/
+/*.jou
+/*.log
+/*.pb
+/*.wdb
+/xsim*.jou
+/xsim*.log
+/xsim_*.backup.jou
+/xsim_*.backup.log
+/vivado*.jou
+/vivado*.log
+/xelab.*
+/xvlog.*
+
+# Detached local web-server launch diagnostics; source and startup scripts are tracked.
+影像處理/ModelSim_YOLOX_PersonTracking/live_site/desktop-launch.log
+影像處理/ModelSim_YOLOX_PersonTracking/live_site/dual-server.log
+影像處理/ModelSim_YOLOX_PersonTracking/live_site/dual-server-error.log

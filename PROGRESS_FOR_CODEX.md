@@ -1,5 +1,13 @@
 # 專題狀態與交接記錄（供 Codex）
 
+## 2026-11-05：PYNQ-ZU 上板後的畫面與配對結果展示方案（僅規劃）
+
+- 使用者指定先把下列方案存入 GitHub，暫不實作；未來收到明確指示「讀／做」時再依此執行。目標展示為電腦瀏覽器同時顯示 A/B 即時鏡頭畫面、YOLOX 人物框與各自 Track ID、A/B 候選配對分數／連續命中數，以及 FPGA 回傳的 candidate/confirmed 狀態。
+- 建議最終拓撲：兩支相機接 PYNQ-ZU（先以 PS USB/OpenCV 為優先驗證路徑；CSI/HDMI 需另選定板級介面），板子 Ethernet 與觀看用電腦接同一可信任 LAN；板上 PYNQ Linux 的 Python 服務提供網頁，電腦以 `http://<板子-IP>:8766/` 觀看。原始影像留在板子/區網，FPGA 僅經 AXI/MMIO 回傳小量配對結果；JTAG/UART（目前曾見 COM7）只用於開機和除錯文字，不能作為即時雙影像傳輸通道。
+- 第一階段順序： (1) 確認 PYNQ image 開機、Ethernet IP 與電腦可連線；(2) 板上以 OpenCV 驗證一支、再兩支 USB camera 可取 640×480 影格；(3) 將既有 `live_site/dual_server.py` 與相依模型部署到板上，先由 PS Python 完整產生網頁畫面與軟體配對結果；(4) 建立 AXI DMA/HP memory、overlay 與板上 MMIO，將已配對 frame/bbox 送入現有 RTL，並把 `candidate_valid`、`confirmed`、命中數回填網頁；(5) 若展示需要實體螢幕，再另做 HDMI 疊圖輸出，這不屬現有 RTL 或網站功能。
+- 既有 `live_site/dual_server.py`/`dual_index.html` 已能在 Windows 端呈現雙 USB 畫面、人物框、Track ID、候選配對和人工核對；LAN 模式設計為由另一台電腦開 `http://<鏡頭主機-IP>:8766/`。它尚未在 PYNQ Linux 執行，也尚未接讀 FPGA 狀態，不能描述為板端完成。
+- 本次沒有變更 RTL、網站或 PYNQ 環境，沒有接板、沒有網路/相機/bitstream/DMA/MMIO 實測；本項只是後續上板與展示的可追溯規劃。硬體介面、IP 位址、相機索引及套件相容性須於目標第三台電腦／實際板子現場設定，不能硬編碼。
+
 ## 2026-11-04：YOLOX 到 PYNQ-ZU RTL 的 AXI4-Lite bbox 資料邊界
 
 - 已核對並沿用既有 Verilog 提交：`6317be2` 跨鏡頭確認 matcher、`83cbdfe` 雙路 ROI 串接、`df14947` 完整 640×480 testbench；本次不重寫已驗證的 ROI/matcher 核心。

@@ -321,3 +321,8 @@
 - `live_site/README.md` 已提供從 clone 根目錄直接貼上的 PowerShell 命令。資料流程是：Git tracked source+YOLOX ONNX → 暫時 tarball → SSH/SCP → `~/pynq_dual_dashboard` → 可選 preflight/MMIO → 板端 `start_pynq_dual.sh`。此入口不讀取 `C:\pynq_*`、`%TEMP%` 既有產物或目前使用者的設定；暫時 tarball 僅在執行電腦的暫存區生成。
 - 本機驗證：三支 Python 腳本 `py_compile` 通過；實際建立 tarball 並以 `tar -tzf` 核對 11 個必要檔（網站、YOLOX ONNX、追蹤程式、preflight、bring-up verifier）皆在包內；PowerShell AST parse 與 `git diff --check` 通過。未驗證：不同電腦的 Python/OpenSSH 安裝、板端 SSH 認證、PYNQ Linux/OpenCV/V4L2、USB 鏡頭、Overlay/MMIO 及 LAN dashboard；不可據此宣稱上板成功。
 
+### 2026-11-05 後續：新 clone 的 YOLOX 模型取得與完整性
+
+- 可攜性稽核發現 `person_tracking/assets/yolox.onnx` 已被專案 `.gitignore` 排除，原本的新 clone 無法通過 bundle builder 的檔案檢查。`prepare_pynq_dual_bundle.py` 現在以標準函式庫 `urllib.request` 於模型不存在或 SHA-256 不符時，從 `sources.json` 記錄的 OpenCV Zoo public model URL 下載到被忽略的 assets 路徑；只有 SHA-256 `c5c2d13e59ae883e6af3b45daea64af4833a4951c92d116ec270d9ddbe998063` 符合才以原子 replace 寫入並進入 tarball。暫存 `.onnx.download` 在成功、雜湊錯誤或下載失敗時均清除。
+- 本機驗證：`prepare_pynq_dual_bundle.py` syntax compile 通過；本機現有模型 hash 與固定值一致；實際 bundle 建立並確認 `person_tracking/assets/yolox.onnx` 在 tarball 中。新電腦第一次打包必須可連網取得約 35 MB 公開模型，未在無模型的新電腦實測下載；此限制已在 README 明示。模型本體仍不進 Git。
+

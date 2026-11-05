@@ -41,8 +41,10 @@ write/readback；此檢查不會測試 USB-to-FPGA 影像路徑。部署腳本�
 `~/pynq_dual_dashboard` 已存在時會停止；請改用新的 `-RemoteDir`，或由操作者確認後自行處理舊目錄。
 成功後在板端執行輸出的 `start_pynq_dual.sh` 指令，再於電腦開啟 `http://<PYNQ-IP>:8766/`。
 此命令只要求 clone 內已追蹤的程式與模型、Windows 的 Python 3/內建 OpenSSH；不讀取本開發電腦的
-Vivado 暫存、使用者資料夾或已產生的 tarball。缺少 Python 時先安裝 Python 3；缺少 `ssh`/`scp` 時在
-Windows「選用功能」安裝 OpenSSH Client。板端帳號預設為 `xilinx`，可用 `-BoardUser` 覆寫。
+Vivado 暫存、使用者資料夾或已產生的 tarball。YOLOX ONNX 依授權及容量規則不存 Git：第一次執行時會從
+專案已記錄的 OpenCV Zoo 公開來源下載，並核對 SHA-256 後才打包，故該次電腦需要網路。缺少 Python 時先
+安裝 Python 3；缺少 `ssh`/`scp` 時在 Windows「選用功能」安裝 OpenSSH Client。板端帳號預設為 `xilinx`，
+可用 `-BoardUser` 覆寫。
 
 ### 兩台電腦協作
 

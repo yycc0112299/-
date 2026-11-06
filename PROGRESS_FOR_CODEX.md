@@ -427,3 +427,7 @@
 
 - 實際搜尋完整 Vitis Embedded 2024.2 的 `embeddedsw` 後，未找到 UVC/USB Video Class host middleware；USB driver examples 為 storage、mouse、keyboard、microphone。故 standalone ELF 已驗證的角色是 A53 control/DMA，不能誤稱為 Logitech C270 UVC capture driver。
 - 真實 C270 路線應改為 Vitis Linux A53 application：使用 PYNQ Linux 的 kernel UVC/V4L2 取得影格，再以 CMA/contiguous buffer、cache ownership 與 AXI DMA 餵給 PL。這仍符合「Vivado 硬體檔 + Vitis 控制檔」，但需要 Linux sysroot 和板端 DMA-buffer interface，不能用不存在的 PL USB camera pins 取代。
+### 2026-11-06：Vitis Linux UVC frame packing component
+
+- 新增 `vitis/pynq_zu_usb_video/linux/uvc_v4l2_packer.c`：以 Linux V4L2 MMAP 開啟兩個 YUYV UVC device，要求 640×480，dequeue 一張 frame 後轉成 RTL 合約的 uint64 words（A RGB 在 [23:0]、B RGB 在 [55:32]）。輸出普通檔案是刻意的安全 bring-up 路徑，不會把 heap/file pointer 冒充 DMA physical address。
+- 嘗試用 Vitis 2024.2 隨附 `aarch64-xilinx-linux-gcc.exe` 和 AArch64 Linux sysroot 編譯，但 Windows host compiler 以 `0xC0000135`（loader dependency 缺失）在產生 ELF 前結束，即使載入 `settings64.bat` 亦相同；因此尚未把 source 誤列為 compiler-verified。尚未在 PYNQ Linux 執行，因板子目前停在 JTAG standalone 狀態；production handoff 仍需 Linux 的 CMA/dma-heap/udmabuf 或專用 driver 分配連續 buffer，之後才可把 physical address 交給已驗證的 AXI DMA。

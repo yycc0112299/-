@@ -178,3 +178,9 @@
 - 實際完成：搜尋完整 Vitis Embedded 2024.2 `embeddedsw`；USB driver examples 僅見 storage/mouse/keyboard/microphone，沒有 UVC/USB Video Class host middleware。
 - 結論／未完成：standalone A53 ELF 保留為已實證的 DMA/PL controller。真實 UVC 必須用 PYNQ Linux UVC/V4L2，下一步為 Vitis Linux A53 app 加 CMA contiguous DMA buffer；板端目前 USB 網路在 standalone reset 後未回來，尚無法做 UVC 實測。
 - Git／同步：待本輪文件提交與 push 後補上結果。
+## 2026-11-06 — Vitis Linux UVC/V4L2 frame-packing 元件
+
+- 需求／決策：在不存在 bare-metal UVC middleware 的前提下，實作 Vitis Linux A53 route 的真實 UVC 輸入端，而不退回 Jupyter 或虛構 PL pins。
+- 實際完成：新增 `linux/uvc_v4l2_packer.c`，兩路 V4L2 YUYV MMAP capture 會產生與 PL `S_AXIS_VIDEO` 相符的 640×480 packed dual-RGB uint64 frame。
+- 驗證界線／未完成：嘗試隨附 AArch64 Linux cross compiler + sysroot 時，compiler 在產生 ELF 前以 `0xC0000135`（Windows loader dependency 缺失）結束，即使載入 `settings64.bat` 相同，因此尚未交叉編譯或在 PYNQ Linux 執行。輸出檔不是 DMA buffer；仍需板端 Linux boot、穩定兩路 UVC、以及 CMA/dma-heap/udmabuf/driver 的 contiguous physical memory allocation，才可接到 AXI DMA。
+- Git／同步：待本輪提交與 push 後補上結果。

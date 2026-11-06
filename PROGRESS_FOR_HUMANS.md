@@ -291,3 +291,7 @@
 
 - Vitis standalone 可以控制 FPGA 與 DMA，但安裝的工具沒有 C270 需要的 UVC 驅動。
 - 真實 USB 相機要由 Linux 的 UVC/V4L2 驅動取像；之後 Vitis Linux 程式再把 DDR 影格送進 FPGA。這不需要、也不能把 USB 相機線接到 FPGA 的一般影像腳位。
+## 2026-11-06：Vitis Linux UVC 程式元件
+
+- 已新增 A53 Linux 程式原始碼：可從兩支 UVC 相機讀取 640×480 YUYV 影格，轉成 FPGA 使用的雙 RGB packed 格式。
+- 本機 Vitis Linux compiler 目前缺 Windows loader dependency，尚未產生 ELF；也尚未放上板子跑。最後還需要 Linux 提供可給 DMA 使用的連續記憶體，再把影格交給已驗證的 FPGA DMA 通路。

@@ -1,0 +1,24 @@
+# Vitis Linux UVC frame source
+
+`uvc_v4l2_packer.c` is the Linux counterpart to the bare-metal DMA smoke test.
+It uses two V4L2 UVC YUYV capture devices, converts them to packed 64-bit words
+(`A RGB[23:0]`, `B RGB[55:32]`), and writes exactly 640×480 words.  Build it
+with the Vitis AArch64 Linux cross compiler, then run it on the PYNQ Linux
+image with `/dev/video*` paths.  Its output is a safe format-contract check;
+it is deliberately not a DMA allocation.  The production handoff must replace
+the output file with a PYNQ Linux contiguous DMA buffer and submit that physical
+address to the AXI DMA already verified through JTAG.
+
+The intended host command is:
+
+```powershell
+$gcc = 'C:\Xilinx_Embedded_2024_2\Vitis\2024.2\gnu\aarch64\nt\aarch64-linux\x86_64-petalinux-mingw32\usr\bin\aarch64-xilinx-linux\aarch64-xilinx-linux-gcc.exe'
+$sysroot = 'C:\Xilinx_Embedded_2024_2\Vitis\2024.2\gnu\aarch64\nt\aarch64-linux\aarch64-xilinx-linux'
+& $gcc --sysroot=$sysroot -std=c11 -Wall -Wextra -Werror -O2 uvc_v4l2_packer.c -o uvc_v4l2_packer
+```
+
+On this Windows host the shipped Linux cross-compiler currently exits with
+`0xC0000135` (a missing loader dependency) before producing an ELF, even after
+loading `settings64.bat`.  This source is therefore not yet compiler-verified;
+the required next step is to repair that host toolchain or compile it within a
+matching Linux SDK/sysroot.

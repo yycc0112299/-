@@ -95,7 +95,7 @@
 - 需求／決策：依 USB 實際拓撲以 PS UVC→DDR→AXI DMA→PL→Vitis 重建，而不將 USB D+/D- 偽裝成 PL 影像腳位。
 - 實際完成：100 MHz implementation 的 post-placement WNS 約 -35 ns，關鍵位置在既有 YOLOX ROI feature accumulator；已將 PL0 與 RTL 匯流排 clock metadata 同步改為 20 MHz。合約測試 2/2 PASS，未產生或使用時序違反的 bitstream。
 - 驗證界線／未完成：乾淨 project staging PASS；Vivado 2024.2 在 module-reference GUI customization 出現 `rodin:slave11`，因此新 BD validation、implementation、XSA、Vitis build 和硬體控制均未完成。暫存 build 僅在 `%TEMP%`，不進 Git。
-- Git／同步：本紀錄與時脈修改尚待完成可重現封裝後一併提交、推送；此處不宣稱已同步。
+- Git／同步：已提交為 `a360398`（`Record USB DMA timing constraint`）並成功推送至 `origin/main`；封裝／XSA 工作仍未完成。
 
 - 需求：在已 SD 開機的 PYNQ-ZU 裝好可用 Linux 環境，讓接在板上的兩支 USB 鏡頭能接入專題網站。
 - 實際完成：JupyterLab 可達；板端 Python、NumPy、OpenCV、PYNQ、YOLOX ONNX 均驗證可用。網站 bundle 已傳到板子，系統 preflight PASS；相機 index 0/2 都曾讀到 640×480 frame，專案 UVC preflight PASS。修正舊 OpenCV 無 `cv2.data` 的啟動崩潰、PYNQ Host allow-list 參數與 API 覆蓋相機 index 的問題；`/api/health` 已由開發電腦實測成功。

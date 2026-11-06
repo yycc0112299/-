@@ -21,6 +21,7 @@ class PynqZuUsbVideoBdContractTests(unittest.TestCase):
             "PSU__USB1__PERIPHERAL__ENABLE {1}",
             "PSU__USE__S_AXI_GP2 {1}",
             "xilinx.com:ip:axi_dma",
+            "CONFIG.c_sg_length_width {23}",
             "CONFIG.c_m_axis_mm2s_tdata_width {64}",
             "project.local:video:dual_camera_yolox_axis:1.0",
             "validate_bd_design",
@@ -37,6 +38,11 @@ class PynqZuUsbVideoBdContractTests(unittest.TestCase):
         self.assertIn("MIO 52 .. 63", source)
         self.assertIn("MIO 64 .. 75", source)
         self.assertNotIn("make_bd_pins_external [get_bd_pins zynq_ultra_ps_e_0/USB", source)
+
+    def test_dma_can_carry_one_complete_packed_frame(self):
+        """A 640x480 packed dual-RGB frame needs more than the old 14-bit limit."""
+        source = SCRIPT.read_text(encoding="utf-8")
+        self.assertIn("CONFIG.c_sg_length_width {23}", source)
 
 
 if __name__ == "__main__":

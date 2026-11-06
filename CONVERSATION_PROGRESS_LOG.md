@@ -166,3 +166,9 @@
 - 實機驗證：透過 `localhost:3121` JTAG 完成 reset、PS init、PL bitstream 與 ELF download。執行後 JTAG 讀回 result `0`、GPIO `42`、mailbox frame `42`、mailbox status `2`、DMA status `0x1002`；DMA register 亦為 `0x1002`（idle/IOC completion）。
 - 驗證界線／未完成：已證明 Vitis A53→DDR→AXI DMA→PL stream 及控制資料可實際完成一張 synthetic frame；尚未取得 PS USB UVC 真實 frame、未解決雙 C270 持續串流的實體 USB 資源問題，也未驗證真實 YOLOX 或 IRQ handler。
 - Git／同步：待本次程式與三份紀錄的差異檢查、提交及 push 後補上 commit 結果。
+## 2026-11-06 — full-frame DMA 契約回歸與交接文件修正
+
+- 需求／決策：防止已驗證的完整影格 DMA 設定回退，且將文件從「DMA 未驗證」更新為事實。
+- 實際完成：新增 static contract assertion，要求 BD script 保持 `CONFIG.c_sg_length_width {23}`；更新 FPGA/Vitis README，記錄 synthetic full-frame DMA 的實板結果和 UVC/雙鏡頭尚未完成的邊界。
+- 驗證範圍：待執行 unittest 後補上；本輪未接觸真實 UVC 相機或變更實板配置。
+- Git／同步：待本輪提交與 push 後補上結果。

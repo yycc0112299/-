@@ -419,3 +419,7 @@
 - `vitis/pynq_zu_usb_video/src/main.c` 現建立對齊的 640×480 synthetic packed RGB frame，flush cache 後以 `XAxiDma_SimpleTransfer` 由 DDR MM2S 送入 PL，並把結果、GPIO、mailbox、DMA status 保留在可由 JTAG 讀取的 globals。這是 bring-up 的可重現資料源，不是 USB UVC capture。
 - 以全新 `C:\pynq_dma_len_build` 完成 Vivado 2024.2 IP Catalog、BD、synthesis、implementation、bitgen 與 XSA export；bitgen 為 0 errors。以新 XSA 建立 `C:\vg` Vitis Embedded platform/app；生成 BSP 的 `XPAR_AXI_DMA_0_SG_LENGTH_WIDTH` 實際為 `0x17`，ELF 為 351,048 bytes。
 - 實板 JTAG 驗證：下載新 bitstream、A53 ELF 並執行 5 秒後，讀回 `result=0`、GPIO=`42`、mailbox frame=`42`、mailbox status=`2`、DMA status=`0x1002`；DMA MM2S status register 同為 `0x1002`（idle + IOC completion）。這已驗證 DDR→AXI DMA→PL stream 的一個完整 640×480 synthetic frame，以及 PS→PL control path。尚未驗證 PS USB UVC 擷取、雙 C270 的持續串流、真實 YOLOX inference 或 IRQ handler。
+### 2026-11-06：DMA 長度契約與 Vitis 文件同步
+
+- `fpga/tests/test_pynq_zu_usb_bd_contract.py` 現靜態鎖定 `CONFIG.c_sg_length_width {23}`，防止未來將 AXI DMA 退回不足以容納一張 640×480 packed dual-RGB frame 的 14-bit transfer-length 設定。
+- 更新 FPGA/Vitis README，將已實證的 A53→DDR→AXI DMA→PL full-frame synthetic DMA 與未實證的 UVC capture／雙鏡頭／YOLOX／IRQ 清楚分開；避免文件仍誤稱 DMA/PL streaming 未上板。

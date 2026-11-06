@@ -151,7 +151,9 @@ python3 verify_pynq_zu_bringup.py
 PS USB/CSI capture 後的 DMA、HDMI frame buffer 或其他能輸出相同 AXI stream 格式的來源連接。
 `pynq_yolox_mmio.py` 的 `pack_dual_rgb888_frames()` 會把兩個**已轉成 RGB** 的 NumPy `uint8`
 H×W×3 frame 打成 `uint64` word；`copy_dual_frame_to_dma_buffer()` 可填入 PYNQ allocated DMA
-buffer 並在支援時 flush。實際 DMA IP、camera driver 與 physical pin path 尚未選定/上板。
+buffer 並在支援時 flush。2026-11-06 已以 Vivado Block Design 的 AXI DMA 和
+Vitis A53 在 PYNQ-ZU 上送出一張完整合成影格；真實 USB UVC driver、雙鏡頭穩定性與
+physical USB topology 仍待驗證。
 
 本機 XSim `tb_axis_dual_rgb_stream_adapter.v` 為
 `AXIS_DUAL_RGB_STREAM_ADAPTER_PASS checks=7`；Python packing 合約測試的單一 word 為

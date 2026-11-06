@@ -13,7 +13,7 @@
 #ifndef XPAR_FRAME_ID_GPIO_0_BASEADDR
 #error "The Vitis platform must be generated from pynq_zu_usb_video.xsa"
 #endif
-#ifndef XPAR_YOLOX_VIDEO_RTL_0_S_AXI_BASEADDR
+#ifndef XPAR_YOLOX_VIDEO_RTL_0_BASEADDR
 #error "The Vitis platform must expose the RTL AXI-Lite mailbox"
 #endif
 #ifndef XPAR_AXI_DMA_0_BASEADDR
@@ -30,7 +30,7 @@ int main(void) {
     const struct video_control_addresses addresses = {
         .dma_base = XPAR_AXI_DMA_0_BASEADDR,
         .frame_id_base = XPAR_FRAME_ID_GPIO_0_BASEADDR,
-        .mailbox_base = XPAR_YOLOX_VIDEO_RTL_0_S_AXI_BASEADDR,
+        .mailbox_base = XPAR_YOLOX_VIDEO_RTL_0_BASEADDR,
     };
     /* USB/UVC frame acquisition and XAxiDma_SimpleTransfer belong here. */
     return video_control_validate(&io, &addresses) == VIDEO_CONTROL_OK ? 0 : 1;

@@ -7,8 +7,9 @@ It is intentionally not a Jupyter/PYNQ control path.
 
 1. In Vivado, run `create_pynq_zu_usb_video_project.tcl`,
    `create_pynq_zu_usb_video_bd.tcl`, then `export_pynq_zu_usb_video_xsa.tcl`.
-2. Create a Vitis 2024.2 platform from the resulting `.xsa` for the PYNQ-ZU
-   A53 standalone domain, then add these `src/` files to an application.
+2. Set `PYNQ_ZU_USB_VIDEO_XSA` to the resulting `.xsa`, then run
+   `build_vitis_embedded.py` through Vitis Embedded 2024.2. It creates an A53
+   standalone platform and `pynq_zu_usb_video_app.elf`.
 3. Let Vitis generate `xparameters.h`; `main.c` uses those generated base
    addresses and deliberately fails compilation if the expected IP is absent.
 
@@ -35,11 +36,10 @@ software flow, including `xsct`, the `embeddedsw` repository, and a working
 Lopper installation.  The Vitis Python CLI uses `VITIS_LOPPER_INSTALL_LOC`
 for the Lopper root and `ESW_REPO` for the embedded-software repository.
 
-On 2026-11-06 this computer successfully exported the XSA and started the
-Vitis platform creation, but its Vitis 2024.2 installation had no `xsct` and
-its bundled Lopper requirements link was absent.  A local Lopper virtual
-environment could be made runnable, yet Vitis still failed while generating
-the system device tree.  Therefore this repository does **not** claim a Vitis
-BSP/application compile or board download.  Repair or install the complete
-Vitis Embedded Development flow, then create an A53 `standalone` platform
-from the XSA before compiling `src/`.
+On 2026-11-06, complete Vitis Embedded Development 2024.2 was installed and
+used to build the platform, FSBL and A53 ELF from the exported XSA. The actual
+generated mailbox macro is `XPAR_YOLOX_VIDEO_RTL_0_BASEADDR`, which this source
+uses. The workspace must use a short Windows path (such as `C:\pynq_vitis`): a
+long `%TEMP%` path made GCC fail while creating dependency files. This is a
+host build verification only; no new XSA/ELF has been JTAG-downloaded to the
+board and no UVC/DMA/PL data path has been verified on hardware.

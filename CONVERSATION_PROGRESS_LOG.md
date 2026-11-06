@@ -126,6 +126,13 @@
 
 ## 2026-11-06 — Vitis XSA platform 建置環境診斷
 
+## 2026-11-06 — 完整 Vitis Embedded platform／A53 控制程式 host build
+
+- 需求／決策：使用已完成的 PYNQ-ZU USB/DMA XSA 建立可重現的 A53 standalone 控制程式，並避免原先一般 Vitis 安裝缺少 Embedded 工具鏈的問題。
+- 實際完成：安裝 Vitis Embedded Development 2024.2 至本機隔離路徑；`xsct` 與 Vitis Embedded client 均實測可啟動。使用短 Windows workspace 從 XSA 產生 platform、BSP、ZynqMP FSBL，platform export 回報 `SUCCESS`；再編譯現有控制程式為 `pynq_zu_usb_video_app.elf`（265,944 bytes）。實際 `xparameters.h` 證實 mailbox 基址宏為 `XPAR_YOLOX_VIDEO_RTL_0_BASEADDR`，已修正程式碼。新增可重建腳本 `build_vitis_embedded.py`。
+- 驗證範圍：已完成 host-side Vitis platform/ELF build；沒有 JTAG 下載新 XSA/ELF、沒有 PYNQ-ZU USB UVC、DDR DMA、PL stream、mailbox 或 IRQ 實機驗證。安裝映像、Vitis 目錄與 temporary workspaces 屬本機工具／產物，不進 Git；第三台尚未安裝或驗證。
+- Git／同步：本次會連同進度文件提交並推送 `origin/main`；實際提交與推送結果以下一筆終端回報為準。
+
 - 需求／決策：使用已完成的 PYNQ-ZU USB/DMA XSA 建立 Vitis A53 standalone platform，讓 Vitis 取代 Jupyter 擔任 AXI DMA、GPIO 與 mailbox 的控制端。
 - 實際驗證：Vitis 2024.2 Python CLI 已實際啟動並讀取 XSA。初始 Lopper installation path 為 `null`；確認隨附 Lopper 包缺失 requirements link 後，以該安裝包的離線 wheels 建立本機 Lopper virtualenv，並驗證 `lopper -h`、YAML 與 libfdt imports。設定 `VITIS_LOPPER_INSTALL_LOC` 後，Vitis 已進一步嘗試從 XSA 產生 SDT。
 - 驗證界線／阻礙：本機 Vitis 安裝未提供 `xsct`，也沒有 Vitis-side embedded software tree。即使 `ESW_REPO` 指向已存在的 Vivado `data/embeddedsw`，Vitis 仍在 SDT generation 失敗；未產生 platform、BSP、`xparameters.h`、ELF 或 JTAG application。Lopper virtualenv、Vitis temporary workspaces 和 logs 是此電腦本機工具產物，不上傳。

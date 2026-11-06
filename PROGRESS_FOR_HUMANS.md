@@ -223,3 +223,9 @@
 - IRQ 版 bitstream 已完成時序/DRC/bitgen 檢查，並再次經 JTAG 成功燒入 PYNQ-ZU。
 - 已製作 PYNQ Linux 用的雙 USB 鏡頭網站部署包；它包含現有 YOLOX、雙鏡頭網站、USB 鏡頭檢查程式與 overlay。
 - 尚未在板上驗證：SD Linux、兩支已插入的 USB 鏡頭、YOLOX 推論與電腦瀏覽器畫面。USB 網站會先由 PYNQ 的 CPU 執行原本 Python 流程；目前影像尚未進 FPGA RTL。
+
+### 2026-11-06：SD 卡已重新燒錄並驗證
+
+- 已用 balenaEtcher 將官方 PYNQ-ZU v3.1.1 的 `pynq_zu_2025_09_25.img` 寫入確認過的 16 GB SD 卡；寫入後 Etcher 完整跑過驗證並顯示「燒錄成功」。
+- 官方最新版的映像檔名就是 2025-09-25，且和電腦原有 v3.1.1 下載檔完全相同；因此不是因為下載到更舊／更新版本。
+- Etcher 完成後已自動卸載 SD 卡。下一步是把卡插回板子、切到 SD、重新上電，確認紅色 PS ERR 是否消失；網站、相機與 FPGA overlay 尚未驗證。

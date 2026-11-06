@@ -349,3 +349,10 @@
 - 使用 `git clone --depth 1 https://github.com/yycc0112299/-.git` 至全新 `%TEMP%/pynq_portable_clone_<GUID>/repo`，在該 clone 直接執行 `live_site/prepare_pynq_dual_bundle.py --output <temp>/pynq_dual_dashboard.tar.gz`。clone 內原本沒有 `.onnx`（ignore 規則生效），輸出明確顯示從 OpenCV Zoo URL 下載 YOLOX，並成功建立 tarball；`tar -tzf` 列出 11 個必要項目。這直接驗證了新電腦所需的 Git tracked source → model bootstrap → bundle 資料流，而不依賴原開發工作樹的模型或 Vivado 產物。
 - 驗證界線：此為同一台 Windows 的全新目錄／遠端 clone 模擬，證明 GitHub snapshot 和公開模型來源可用；尚未驗證另一台實體電腦、Windows OpenSSH、PYNQ SSH 認證、Linux package、UVC、Overlay 或 LAN dashboard。暫存 clone、下載模型與 tarball 位於 `%TEMP%`，非專案原始碼，不納入 Git。
 
+### 2026-11-06：PYNQ-ZU 官方 SD 映像重新燒錄（Etcher 驗證完成）
+
+- 官方 AMD download 的 `pynq_zu_v3.1.1.zip`（2,250,235,183 bytes）SHA-256 為 `7F61F9F7D9B74DB2DE64B8AC443CE472894C3FA70426906367A4386928F5A810`，與本機既有同名 ZIP 完全一致。ZIP 中的唯一映像為 `pynq_zu_2025_09_25.img`（9,840,650,240 bytes），所以既有「2025-09」映像實際上就是目前官方 v3.1.1，不是另外一個舊版本。
+- 使用 balenaEtcher 重新選取該 `.img` 與人工核對的 `Generic- Multi-Card USB Device`（15.9 GB；先前 Windows disk inventory 為 Disk 2），而非沿用 Etcher 的舊成功畫面。新一輪流程完成寫入後進入 Verify；即時觀察到驗證 6%、22%、37%、52%，速度約 19.5–19.8 MB/s，最後 Etcher 對本輪的 `pynq_zu_2025_09_25.img` 顯示「燒錄成功」，完成速度 23.2 MB/s。這是工具的整體寫入與驗證 PASS 證據。
+- Etcher 成功後自動卸載目標；Windows 隨後對 Disk 2 顯示 `No Media`／0 bytes，故未把先前舊卡的分割區列舉誤當作本輪後驗證。需重新插回板子後，才能驗證 PS-STATUS、DONE/LED、USB Composite 網卡、`192.168.3.1/lab`、SSH、Overlay/MMIO 及 UVC；本次不宣稱這些板端功能已通過。
+- 官方 ZIP、解壓 `.img` 和重複下載副本位於 `C:\Users\dsic\Downloads\`，是大型可重新取得的本機部署媒體，未加入 Git；本次只同步程式交接紀錄。
+

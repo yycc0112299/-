@@ -87,5 +87,5 @@
 - 實際完成：JupyterLab 可達；板端 Python、NumPy、OpenCV、PYNQ、YOLOX ONNX 均驗證可用。網站 bundle 已傳到板子，系統 preflight PASS；相機 index 0/2 都曾讀到 640×480 frame，專案 UVC preflight PASS。修正舊 OpenCV 無 `cv2.data` 的啟動崩潰、PYNQ Host allow-list 參數與 API 覆蓋相機 index 的問題；`/api/health` 已由開發電腦實測成功。
 - 驗證界線與未完成：網站開始雙鏡頭擷取後，kernel 記錄 USB reset、`Not enough bandwidth for new device state/altsetting 7`、device 3/4 disconnect，且 `/dev/video*` 消失。未驗證持續影像串流、YOLOX 偵測、網頁畫面或 FPGA video data path；需先改善 USB 供電／分流或降低 UVC 傳輸需求。
 - 未上傳項目：部署 tarball、模型和板上 `/root/pynq_dual_dashboard_v*` 都是可重建的本機／板端部署產物，不進 Git；不含帳密、私人影像或連結。
-- Git／同步：本次程式、文件與此紀錄將以新提交推送至 `origin/main`；提交與推送結果在完成後補實際狀態。
+- Git／同步：已提交為 `0b8b768`（`Fix PYNQ dual camera dashboard bring-up`）並成功推送至 `origin/main`；本機與遠端 `main` 已同步。
 

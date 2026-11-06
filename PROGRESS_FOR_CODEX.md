@@ -436,3 +436,7 @@
 
 - 釐清上一項的 wrapper 問題：`x86_64-petalinux-mingw32/.../aarch64-xilinx-linux-gcc.exe` 確實以 `0xC0000135` 失敗，但同一 Vitis 安裝的直接 GNU binary `gnu/aarch64/nt/aarch64-linux/bin/aarch64-linux-gnu-gcc.exe` 可正常執行（target `aarch64-xilinx-linux`）。將其 `bin` 加到 PATH 後，以 `-std=c11 -Wall -Wextra -Werror -O2` 編譯 `linux/uvc_v4l2_packer.c` 成功。
 - 以同工具鏈 `aarch64-linux-gnu-readelf -h` 驗證產物為 74,624-byte ELF64 little-endian AArch64 PIE。這只證明 cross compile；尚未在板端開 V4L2、未配置 contiguous DMA memory、未送到 AXI DMA。
+### 2026-11-06：PYNQ-ZU SD boot 與 JTAG 可並用的板端操作確認
+
+- 查閱 PYNQ-ZU Reference Manual v1.2 的 boot-mode selection：板上 `JTAG SD` switch 向左為 JTAG，向右為 MicroSD。要恢復 Linux UVC/V4L2，需將 switch 切至右側 SD、插入既有 PYNQ SD card 後 power-cycle。
+- 這不表示之後不能使用 Vivado/Vitis JTAG；SD boot 的 Linux 可保留 JTAG 作除錯/下載。先前 network 消失是因載入 standalone ELF 後 system reset，而非 Vivado Block Design 無法與 Linux 共存。

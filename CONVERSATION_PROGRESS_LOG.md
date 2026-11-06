@@ -188,3 +188,9 @@
 - 實際完成：新增 `linux/uvc_v4l2_packer.c`，兩路 V4L2 YUYV MMAP capture 會產生與 PL `S_AXIS_VIDEO` 相符的 640×480 packed dual-RGB uint64 frame。
 - 驗證界線／未完成：嘗試隨附 AArch64 Linux cross compiler + sysroot 時，compiler 在產生 ELF 前以 `0xC0000135`（Windows loader dependency 缺失）結束，即使載入 `settings64.bat` 相同，因此尚未交叉編譯或在 PYNQ Linux 執行。輸出檔不是 DMA buffer；仍需板端 Linux boot、穩定兩路 UVC、以及 CMA/dma-heap/udmabuf/driver 的 contiguous physical memory allocation，才可接到 AXI DMA。
 - Git／同步：待本輪提交與 push 後補上結果。
+## 2026-11-06 — PYNQ-ZU SD boot/JTAG 操作邊界確認
+
+- 需求／決策：釐清真實 UVC Linux 測試是否會排斥 Vivado/Vitis JTAG，避免將 boot switch 留在 standalone JTAG 而失去 UVC。
+- 實際確認：官方 PYNQ-ZU Reference Manual v1.2 指出 `JTAG SD` boot switch 向左為 JTAG、向右為 MicroSD。切至 SD 並 power-cycle 可恢復 PYNQ Linux；SD boot 後仍可使用 JTAG 除錯。
+- 驗證界線／未完成：這是官方操作規格確認，尚未因實體 switch/power-cycle 在目前回合再次取得 Linux、V4L2 或 UVC runtime 證據。
+- Git／同步：待本輪文件提交與 push 後補上結果。

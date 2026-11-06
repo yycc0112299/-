@@ -61,6 +61,11 @@ and programs this Block Design's AXI DMA.  It needs a Linux sysroot plus a
 board-side contiguous DMA-buffer interface; neither may be replaced by fake PL
 camera pins or an unsupported bare-metal USB class driver.
 
+For real UVC work, use the board's physical `JTAG SD` boot-mode switch in the
+**SD (right)** position and power-cycle with the prepared PYNQ SD card.  This
+boots Linux/V4L2; it does not prevent later Vivado/Vitis JTAG debugging.  The
+PYNQ-ZU reference manual documents JTAG on the left and MicroSD on the right.
+
 `linux/uvc_v4l2_packer.c` now supplies the first Linux application component:
 it V4L2-captures two 640×480 YUYV frames and produces the RTL's packed
 64-bit A/B RGB format.  It is compiler-verified as a 74,624-byte AArch64

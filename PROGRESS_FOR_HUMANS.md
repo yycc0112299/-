@@ -295,3 +295,7 @@
 
 - 已新增 A53 Linux 程式原始碼：可從兩支 UVC 相機讀取 640×480 YUYV 影格，轉成 FPGA 使用的雙 RGB packed 格式。
 - 已找到正確的 Vitis Linux compiler，成功產生 AArch64 ELF；也尚未放上板子跑。最後還需要 Linux 提供可給 DMA 使用的連續記憶體，再把影格交給已驗證的 FPGA DMA 通路。
+## 2026-11-06：切回 Linux 的板子操作
+
+- 板子上的 `JTAG SD` 開關切到右側 `SD`，插著已燒好的 PYNQ SD 卡後重新上電，就能回到 Linux/UVC。
+- SD 開機後仍然能接 JTAG，所以之後可同時使用 Linux 相機驅動和 Vivado/Vitis 除錯。

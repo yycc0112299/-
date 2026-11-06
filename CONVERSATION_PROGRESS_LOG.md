@@ -81,3 +81,11 @@
 - 驗證範圍：此證據涵蓋 Etcher 的寫入與內建驗證；Etcher 完成後自動卸載媒體，Windows 顯示 `No Media`，未對卸載後的 Disk 2 做無效的分割區宣稱。尚未在板子上重新開機，故 PS ERR、Linux、USB 網路、Jupyter、SSH、相機、Overlay 及 FPGA 皆仍未驗證。
 - 未上傳項目：官方 ZIP、9.84 GB `.img` 和重複下載副本均在 `C:\Users\dsic\Downloads\`，為大型可重建部署媒體，未上傳 Git；不含帳密或私人資料。
 - Git／同步：初次推送因遠端已有新提交而被拒絕；已 `fetch`、成功 rebase 至 `origin/main` 後，以 `65c36f8`（`Record verified PYNQ-ZU SD imaging`）成功推送至 `origin/main`。此同步結果隨後續文件提交保留。
+## 2026-11-06 — PYNQ Linux 環境與雙 USB dashboard 實機 bring-up
+
+- 需求：在已 SD 開機的 PYNQ-ZU 裝好可用 Linux 環境，讓接在板上的兩支 USB 鏡頭能接入專題網站。
+- 實際完成：JupyterLab 可達；板端 Python、NumPy、OpenCV、PYNQ、YOLOX ONNX 均驗證可用。網站 bundle 已傳到板子，系統 preflight PASS；相機 index 0/2 都曾讀到 640×480 frame，專案 UVC preflight PASS。修正舊 OpenCV 無 `cv2.data` 的啟動崩潰、PYNQ Host allow-list 參數與 API 覆蓋相機 index 的問題；`/api/health` 已由開發電腦實測成功。
+- 驗證界線與未完成：網站開始雙鏡頭擷取後，kernel 記錄 USB reset、`Not enough bandwidth for new device state/altsetting 7`、device 3/4 disconnect，且 `/dev/video*` 消失。未驗證持續影像串流、YOLOX 偵測、網頁畫面或 FPGA video data path；需先改善 USB 供電／分流或降低 UVC 傳輸需求。
+- 未上傳項目：部署 tarball、模型和板上 `/root/pynq_dual_dashboard_v*` 都是可重建的本機／板端部署產物，不進 Git；不含帳密、私人影像或連結。
+- Git／同步：本次程式、文件與此紀錄將以新提交推送至 `origin/main`；提交與推送結果在完成後補實際狀態。
+

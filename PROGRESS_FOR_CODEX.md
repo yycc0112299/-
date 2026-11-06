@@ -357,3 +357,11 @@
 - 官方 ZIP、解壓 `.img` 和重複下載副本位於 `C:\Users\dsic\Downloads\`，是大型可重新取得的本機部署媒體，未加入 Git；本次只同步程式交接紀錄。
 - 這次紀錄已在整合共享 `main` 的新增提交後，以 `65c36f8` 成功推送至 `origin/main`；沒有覆寫其他電腦先行推送的校正／benchmark 變更。
 
+### 2026-11-06：PYNQ SD-boot 實機環境、UVC 與 dashboard bring-up
+
+- 板端透過 USB 網路 `192.168.3.1` 的 JupyterLab 可操作；實測 Linux `6.6.10-xilinx-v2024.1`、Python 3.10.4、NumPy 2.1.5、OpenCV 4.5.4、PYNQ 3.1.1。部署 tarball（含 35,858,002-byte YOLOX ONNX）由開發電腦臨時 HTTP server 傳至板子，不含帳密或私密資料。
+- `pynq_system_preflight.py` 實板 PASS；`pynq_usb_camera_preflight.py --camera-a 0 --camera-b 2` 實板 PASS，index 0、2 都實際讀回 640×480 BGR frame。
+- 修正 `live_site/dual_server.py`：PYNQ 內建 OpenCV 4.5.4 沒有 `cv2.data`，現在 Haar cascade 會依序找 pip 和系統路徑，找不到時回傳空 cascade，不會阻擋網站。另修正 Host 白名單的無 Origin 首頁導覽，以及 `/api/start`／`/api/stop` 未傳 camera 欄位時保留命令列設定。
+- 修正 `start_pynq_dual.sh`、README、PowerShell 部署訊息：參數是瀏覽器使用的 PYNQ 位址（本次 `192.168.3.1`），不是觀看網站的電腦 IP；開發電腦對 `/api/health` 實測成功。
+- 驗證限制：啟動後內核記錄 `Not enough bandwidth for new device state/altsetting 7`，接著 USB device 3/4 disconnect；重查 `/dev/video*` 已不存在。這是 USB bus 頻寬／供電或相機協商中斷的實機問題，不可宣稱持續雙鏡頭、YOLOX 或 FPGA video path 已完成。
+

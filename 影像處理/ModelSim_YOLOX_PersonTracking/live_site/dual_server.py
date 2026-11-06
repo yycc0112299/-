@@ -23,8 +23,33 @@ import pipeline as p
 from cross_camera import CrossCameraMatcher
 from dual_camera import appearance
 
-FACE_CASCADE = p.cv2.CascadeClassifier(
-    str(Path(p.cv2.data.haarcascades) / "haarcascade_frontalface_default.xml"))
+def load_face_cascade():
+    """Load an optional frontal-face cascade across OpenCV package layouts.
+
+    Recent pip wheels expose ``cv2.data.haarcascades``.  The PYNQ-ZU image's
+    OpenCV 4.5 build does not, so look in its distro paths as well.  Face
+    detection only improves the choice of a review snapshot; an empty cascade
+    must never prevent the dual-camera service from starting.
+    """
+    filename = "haarcascade_frontalface_default.xml"
+    candidates = []
+    cv2_data = getattr(p.cv2, "data", None)
+    haar_dir = getattr(cv2_data, "haarcascades", None)
+    if haar_dir:
+        candidates.append(Path(haar_dir) / filename)
+    candidates.extend([
+        Path("/usr/share/opencv4/haarcascades") / filename,
+        Path("/usr/share/opencv/haarcascades") / filename,
+    ])
+    for candidate in candidates:
+        if candidate.is_file():
+            cascade = p.cv2.CascadeClassifier(str(candidate))
+            if not cascade.empty():
+                return cascade
+    return p.cv2.CascadeClassifier()
+
+
+FACE_CASCADE = load_face_cascade()
 
 
 def open_usb_camera(index):
@@ -450,8 +475,13 @@ class Handler(BaseHTTPRequestHandler):
 
     def allowed(self):
         hosts = self.server.allowed_hosts or {f"127.0.0.1:{self.server.server_port}", f"localhost:{self.server.server_port}"}
-        origin = self.headers.get("Origin", f"http://127.0.0.1:{self.server.server_port}")
-        if self.headers.get("Host") in hosts and origin in {"http://" + host for host in hosts}:
+        origin = self.headers.get("Origin")
+        # Direct navigation to the dashboard sends a permitted Host but often
+        # no Origin header.  Permit that same-host navigation, while fetches
+        # that do include Origin must remain same-origin.
+        if self.headers.get("Host") in hosts and (
+            origin is None or origin in {"http://" + host for host in hosts}
+        ):
             return True
         # Quick Tunnels have an unpredictable HTTPS hostname.  This opt-in is
         # deliberately limited to Cloudflare's temporary tunnel domain, so a
@@ -512,7 +542,11 @@ class Handler(BaseHTTPRequestHandler):
             if not isinstance(data, dict):
                 raise ValueError()
             if self.path in {"/api/start", "/api/stop"}:
-                camera_a, camera_b = data.get("camera_a", 0), data.get("camera_b", 1)
+                # Keep the server's configured camera pair when the browser
+                # simply asks to start/stop.  This matters on PYNQ where a
+                # UVC camera can occupy video0/video1 while its image stream
+                # is video2; command-line ``--camera-b 2`` must not be reset.
+                camera_a, camera_b = data.get("camera_a", self.server.engine.cameras[0]), data.get("camera_b", self.server.engine.cameras[1])
                 if type(camera_a) is not int or type(camera_b) is not int or not all(0 <= item <= 9 for item in (camera_a, camera_b)):
                     raise ValueError()
                 if self.path == "/api/start":

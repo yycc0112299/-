@@ -91,4 +91,4 @@ if ($RunBringupCheck) {
 }
 
 Write-Host "PYNQ_DEPLOY_PASS host=$BoardHost remote_dir=~/$RemoteDir"
-Write-Host "Start dashboard on board: cd ~/$RemoteDir && bash live_site/start_pynq_dual.sh <YOUR-PC-LAN-IP>"
+Write-Host "Start dashboard on board: cd ~/$RemoteDir && bash live_site/start_pynq_dual.sh <PYNQ-IP-USED-IN-BROWSER>"

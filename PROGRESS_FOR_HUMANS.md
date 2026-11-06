@@ -259,3 +259,9 @@
 - 新的 PYNQ-ZU Block Design 已完整通過 Vivado 實作、DRC 和 bitstream，並成功輸出 Vitis 要用的 XSA；時序為正裕量。
 - 這是硬體檔完成，不是雙鏡頭影像已跑通。下一步是用 XSA 建 Vitis 控制程式並以 JTAG 上板測試；USB 雙鏡頭同時串流的實體頻寬問題仍待解決。
 
+## 2026-11-06：Vitis 工具環境阻礙已定位
+
+- 已用新的 XSA 實際啟動 Vitis 建 platform，但本機 Vitis 2024.2 缺少完整 embedded flow（包含 `xsct`），且原本的 Lopper 安裝不完整。
+- 補齊 Lopper 後，Vitis 已能繼續到 SDT 生成，但仍無法建立 platform；所以 Vitis 控制程式尚未編譯、更沒有上板。
+- 下一步是修復／補安裝完整 Vitis Embedded Development 環境，再用同一份已驗證的 XSA 建立 A53 standalone 控制程式。
+

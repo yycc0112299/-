@@ -27,3 +27,19 @@ The C controller writes the frame ID, then all bbox payload registers, and
 commits with CONTROL=`0x3` last.  The host unit test checks this contract.
 Actual Logitech C270 UVC capture, DMA cache maintenance, interrupt setup and
 bandwidth/USB-root-hub validation remain board-dependent integration work.
+
+## Vitis 2024.2 Windows environment check
+
+The first platform build must use a Vitis installation with the embedded
+software flow, including `xsct`, the `embeddedsw` repository, and a working
+Lopper installation.  The Vitis Python CLI uses `VITIS_LOPPER_INSTALL_LOC`
+for the Lopper root and `ESW_REPO` for the embedded-software repository.
+
+On 2026-11-06 this computer successfully exported the XSA and started the
+Vitis platform creation, but its Vitis 2024.2 installation had no `xsct` and
+its bundled Lopper requirements link was absent.  A local Lopper virtual
+environment could be made runnable, yet Vitis still failed while generating
+the system device tree.  Therefore this repository does **not** claim a Vitis
+BSP/application compile or board download.  Repair or install the complete
+Vitis Embedded Development flow, then create an A53 `standalone` platform
+from the XSA before compiling `src/`.

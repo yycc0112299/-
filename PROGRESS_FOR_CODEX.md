@@ -379,6 +379,12 @@
 - 以全新 `%TEMP%` build 實跑封裝與 `validate_bd_design` 成功。完整 Vivado 2024.2 synthesis、implementation、DRC、bitstream 和 `write_hw_platform -include_bit` 均完成：bitgen DRC 為 0 errors；routing 估算 WNS `+0.193 ns`、WHS `+0.012 ns`；XSA 已成功匯出。暫存 build/XSA/bitstream 位於 `%TEMP%`，可由 tracked TCL 重建，不納入 Git。
 - 這證明可重建的硬體交付物包含 PS USB 設定、DDR HP0、AXI DMA MM2S、64-bit AXI4-Stream、AXI-Lite mailbox、frame-ID GPIO 與 PS IRQ 接線；不代表兩支 UVC 鏡頭、DDR frame producer、DMA 啟動、PL 演算法或 IRQ 已在實板端端驗證。下一階段須用此 XSA 建立 Vitis platform/BSP/application，再以 JTAG 對板端下載和觀察控制路徑。
 
+### 2026-11-06：Vitis platform 建置環境診斷
+
+- 以匯出的 XSA 實跑 Vitis 2024.2 Python CLI 建立 `psu_cortexa53_0` / `standalone` platform。初始錯誤為 Lopper installation path `null`；盤點確認隨附 Lopper 離線安裝包的 `requirements.txt` 失效，且系統不存在 `C:\Xilinx\lopper_package`。以隨附 wheels 建立本機 virtualenv 並驗證 `lopper -h`、YAML 與 libfdt imports 可執行後，Vitis 已能越過該空路徑檢查。
+- 但平台仍在「generate SDT for XSA」階段失敗。此安裝沒有 `xsct`，也缺 Vitis 內的 embedded-software tree；已明確設定 `VITIS_LOPPER_INSTALL_LOC` 與指向 Vivado 隨附 `data/embeddedsw` 的 `ESW_REPO` 重試，結果相同。因此還沒有 Vitis-generated `xparameters.h`、BSP、ELF、JTAG application download 或實機 DMA 控制結果。
+- 本機 Lopper virtualenv、Vitis workspace 與診斷暫存均不入 Git；它們是此電腦工具修復產物，不可當作第三台已完成的環境。下一步是在完整安裝 Vitis Embedded Development flow 後以相同 XSA 重跑 platform/app build。
+
 ### 2026-11-06：PYNQ SD-boot 實機環境、UVC 與 dashboard bring-up
 
 - 板端透過 USB 網路 `192.168.3.1` 的 JupyterLab 可操作；實測 Linux `6.6.10-xilinx-v2024.1`、Python 3.10.4、NumPy 2.1.5、OpenCV 4.5.4、PYNQ 3.1.1。部署 tarball（含 35,858,002-byte YOLOX ONNX）由開發電腦臨時 HTTP server 傳至板子，不含帳密或私密資料。

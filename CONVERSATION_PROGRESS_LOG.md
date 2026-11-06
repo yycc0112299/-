@@ -124,3 +124,10 @@
 - 驗證範圍：bitstream 前 DRC 為 0 errors；routing 估算 WNS `+0.193 ns`、WHS `+0.012 ns`；含 bitstream 的 XSA 確實建立。暫存 build、bitstream、XSA 和 logs 位於 `%TEMP%`，為可重建產物，不上傳 Git。尚未建立/編譯 Vitis BSP/application，也尚未以此設計 JTAG 上板、啟動 DMA、接收 UVC frame 或驗證雙鏡頭資料流。
 - Git／同步：本輪會連同三份進度文件做 whitespace/合約檢查、建立本機提交並推送 `origin/main`；實際 commit 與推送結果將由後續紀錄補上。
 
+## 2026-11-06 — Vitis XSA platform 建置環境診斷
+
+- 需求／決策：使用已完成的 PYNQ-ZU USB/DMA XSA 建立 Vitis A53 standalone platform，讓 Vitis 取代 Jupyter 擔任 AXI DMA、GPIO 與 mailbox 的控制端。
+- 實際驗證：Vitis 2024.2 Python CLI 已實際啟動並讀取 XSA。初始 Lopper installation path 為 `null`；確認隨附 Lopper 包缺失 requirements link 後，以該安裝包的離線 wheels 建立本機 Lopper virtualenv，並驗證 `lopper -h`、YAML 與 libfdt imports。設定 `VITIS_LOPPER_INSTALL_LOC` 後，Vitis 已進一步嘗試從 XSA 產生 SDT。
+- 驗證界線／阻礙：本機 Vitis 安裝未提供 `xsct`，也沒有 Vitis-side embedded software tree。即使 `ESW_REPO` 指向已存在的 Vivado `data/embeddedsw`，Vitis 仍在 SDT generation 失敗；未產生 platform、BSP、`xparameters.h`、ELF 或 JTAG application。Lopper virtualenv、Vitis temporary workspaces 和 logs 是此電腦本機工具產物，不上傳。
+- Git／同步：本次把可重現的環境診斷及限制同步至文件；完成檢查後會建立提交並推送 `origin/main`，實際結果由下一筆紀錄承接。
+

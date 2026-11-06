@@ -413,3 +413,9 @@
 - 重新插拔的複測：兩支 C270 再次列為 `/dev/video0`–`/dev/video3`；`pynq_usb_camera_preflight.py --camera-a 0 --camera-b 2` 再次 PASS（皆 640×480）。以 v5 dashboard 啟動並由電腦 POST `/api/start` 後，API 正確保留 `[0,2]`，但約 7 秒內狀態變為「雙鏡頭擷取中斷」、frame_id=0。這排除先前 API fallback 到 0/1 的程式錯誤，仍指向兩路同時 UVC 串流的實體 USB 資源問題。
 - 為降低 bus load，Linux dashboard 現會協商 MJPEG、預設 320×240、10 FPS（可用 `PYNQ_UVC_FPS/WIDTH/HEIGHT` 覆寫）；preflight 同樣使用該設定。v7 實板仍於雙路開始擷取後 `frame_id=0` 且中斷，故尚未得到網站實際畫面。
 
+### 2026-11-06：完整影格 AXI DMA 實板驗證（Vivado + Vitis + JTAG）
+
+- 修正 `fpga/create_pynq_zu_usb_video_bd.tcl` 的 AXI DMA Simple Mode transfer-length width：由 14 (`0x0e`，單筆約 16 KiB) 提高至 23 (`0x17`，足以承載 640×480×8-byte = 2,457,600-byte packed stream)。先前 14-bit DMA 對完整合成影格回傳 halted (`DMA status=0x1`)，這是設定限制而非板子/JTAG 故障。
+- `vitis/pynq_zu_usb_video/src/main.c` 現建立對齊的 640×480 synthetic packed RGB frame，flush cache 後以 `XAxiDma_SimpleTransfer` 由 DDR MM2S 送入 PL，並把結果、GPIO、mailbox、DMA status 保留在可由 JTAG 讀取的 globals。這是 bring-up 的可重現資料源，不是 USB UVC capture。
+- 以全新 `C:\pynq_dma_len_build` 完成 Vivado 2024.2 IP Catalog、BD、synthesis、implementation、bitgen 與 XSA export；bitgen 為 0 errors。以新 XSA 建立 `C:\vg` Vitis Embedded platform/app；生成 BSP 的 `XPAR_AXI_DMA_0_SG_LENGTH_WIDTH` 實際為 `0x17`，ELF 為 351,048 bytes。
+- 實板 JTAG 驗證：下載新 bitstream、A53 ELF 並執行 5 秒後，讀回 `result=0`、GPIO=`42`、mailbox frame=`42`、mailbox status=`2`、DMA status=`0x1002`；DMA MM2S status register 同為 `0x1002`（idle + IOC completion）。這已驗證 DDR→AXI DMA→PL stream 的一個完整 640×480 synthetic frame，以及 PS→PL control path。尚未驗證 PS USB UVC 擷取、雙 C270 的持續串流、真實 YOLOX inference 或 IRQ handler。

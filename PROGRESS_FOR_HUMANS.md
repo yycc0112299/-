@@ -278,3 +278,8 @@
 - 補齊 Lopper 後，Vitis 已能繼續到 SDT 生成，但仍無法建立 platform；所以 Vitis 控制程式尚未編譯、更沒有上板。
 - 下一步是修復／補安裝完整 Vitis Embedded Development 環境，再用同一份已驗證的 XSA 建立 A53 standalone 控制程式。
 
+## 2026-11-06：完整影格 DMA 已上板成功
+
+- 修正 Vivado 的 DMA 長度設定，讓一個完整 640×480 影格可一次從 DDR 傳進 FPGA。
+- 新硬體檔與 Vitis 控制程式已經由 JTAG 下載到 PYNQ-ZU，實測 DMA 完成、FPGA 回傳成功，frame ID 42 正確到達硬體。
+- 這次用的是 Vitis 產生的合成測試影格，證明硬體資料通路可用；USB 雙鏡頭同時擷取仍受實體 USB 頻寬／供電影響，尚未完成。

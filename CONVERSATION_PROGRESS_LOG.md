@@ -159,3 +159,10 @@
 - 驗證界線／阻礙：本機 Vitis 安裝未提供 `xsct`，也沒有 Vitis-side embedded software tree。即使 `ESW_REPO` 指向已存在的 Vivado `data/embeddedsw`，Vitis 仍在 SDT generation 失敗；未產生 platform、BSP、`xparameters.h`、ELF 或 JTAG application。Lopper virtualenv、Vitis temporary workspaces 和 logs 是此電腦本機工具產物，不上傳。
 - Git／同步：本次把可重現的環境診斷及限制同步至文件；完成檢查後會建立提交並推送 `origin/main`，實際結果由下一筆紀錄承接。
 
+## 2026-11-06 — Vivado/Vitis 完整影格 DMA 實板驗證
+
+- 需求／決策：依 Vivado 硬體檔 + Vitis 控制檔路線，讓一個完整影格由 DDR 經 AXI DMA 送入 PYNQ-ZU PL；不將 USB UVC 的 D+/D- 誤當成 PL camera pins。
+- 實際完成：修正 Block Design AXI DMA simple-mode transfer-length width 從 14 到 23；全新短路徑 Vivado build 的 bitstream/XSA 成功（bitgen 0 errors），新 Vitis Embedded BSP 讀到 `XPAR_AXI_DMA_0_SG_LENGTH_WIDTH=0x17`，並編譯 351,048-byte A53 ELF。Vitis 以 640×480 packed synthetic DDR frame 對 AXI DMA MM2S 發出一次完整傳輸。
+- 實機驗證：透過 `localhost:3121` JTAG 完成 reset、PS init、PL bitstream 與 ELF download。執行後 JTAG 讀回 result `0`、GPIO `42`、mailbox frame `42`、mailbox status `2`、DMA status `0x1002`；DMA register 亦為 `0x1002`（idle/IOC completion）。
+- 驗證界線／未完成：已證明 Vitis A53→DDR→AXI DMA→PL stream 及控制資料可實際完成一張 synthetic frame；尚未取得 PS USB UVC 真實 frame、未解決雙 C270 持續串流的實體 USB 資源問題，也未驗證真實 YOLOX 或 IRQ handler。
+- Git／同步：待本次程式與三份紀錄的差異檢查、提交及 push 後補上 commit 結果。

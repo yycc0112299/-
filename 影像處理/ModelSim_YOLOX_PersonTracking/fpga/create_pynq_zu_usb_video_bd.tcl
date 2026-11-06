@@ -56,7 +56,8 @@ set_property -dict [list CONFIG.NUM_SI {1} CONFIG.NUM_MI {1}] [get_bd_cells axi_
 create_bd_cell -type ip -vlnv xilinx.com:ip:axi_dma:7.1 axi_dma_0
 set_property -dict [list \
  CONFIG.c_include_mm2s {1} CONFIG.c_include_s2mm {0} \
- CONFIG.c_include_sg {0} CONFIG.c_m_axis_mm2s_tdata_width {64}] [get_bd_cells axi_dma_0]
+ CONFIG.c_include_sg {0} CONFIG.c_sg_length_width {23} \
+ CONFIG.c_m_axis_mm2s_tdata_width {64}] [get_bd_cells axi_dma_0]
 create_bd_cell -type ip -vlnv xilinx.com:ip:axi_gpio:2.0 frame_id_gpio_0
 set_property -dict [list CONFIG.C_GPIO_WIDTH {32} CONFIG.C_ALL_OUTPUTS {1}] [get_bd_cells frame_id_gpio_0]
 create_bd_cell -type ip -vlnv project.local:video:dual_camera_yolox_axis:1.0 yolox_video_rtl_0

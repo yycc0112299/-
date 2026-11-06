@@ -41,5 +41,16 @@ used to build the platform, FSBL and A53 ELF from the exported XSA. The actual
 generated mailbox macro is `XPAR_YOLOX_VIDEO_RTL_0_BASEADDR`, which this source
 uses. The workspace must use a short Windows path (such as `C:\pynq_vitis`): a
 long `%TEMP%` path made GCC fail while creating dependency files. This is a
-host build verification only; no new XSA/ELF has been JTAG-downloaded to the
-board and no UVC/DMA/PL data path has been verified on hardware.
+reproducible host build flow. The JTAG AXI smoke-test result is documented
+below; UVC/DMA/PL streaming remains unverified on hardware.
+
+## JTAG AXI smoke test
+
+`main.c` submits a frame-ID 42 bbox pair, reads the AXI GPIO and AXI-Lite
+mailbox back, and stores four volatile values (`video_control_result`, GPIO
+readback, mailbox frame readback, and mailbox status). They can be inspected
+over JTAG after the CPU is stopped. On 2026-11-06, a clean PYNQ-ZU JTAG flow
+(PS/DDR initialization, PL bitstream, then A53 ELF) read result `0`, GPIO
+`42`, mailbox frame `42`, and status `3`. Status bits 0/1 mean the one command
+is pending and pair-present; with no UVC/DMA input this is expected. This proves
+PS-to-PL AXI control only; it does not prove camera capture or DMA streaming.

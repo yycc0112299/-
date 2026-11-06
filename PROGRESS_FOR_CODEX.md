@@ -312,6 +312,13 @@
 
 - `hw_server` 在 localhost:3121 運作、Windows 也可見 FTDI USB Serial Converter A/B 與 COM5，但 XSCT 連線後沒有列出任何 JTAG target；重啟 Hardware Server 再掃描結果相同。因此未對板子寫入 bitstream 或 ELF。下一個實機步驟需先使板子供電、JTAG boot switch 和 JTAG chain 可被 Hardware Server 枚舉，再執行下載與 mailbox read/write。
 
+### 2026-11-06 後續：JTAG PL／A53 AXI 控制實機 PASS
+
+- 更正先前 JTAG 診斷：Vivado Hardware Manager 一直可開啟 `Xilinx/1234-tulA` target，並列出 `xczu5_0` / `xczu5` 和 `arm_dap_1`；XSCT 必須用 `connect -host localhost -port 3121` 才會枚舉 PS TAP、PSU、APU 與 Cortex-A53 targets，先前的 `-url tcp:...` 形式在此環境沒有取得 target tree。
+- 已以 Vivado 成功下載 `pynq_zu_usb_video.bit`（7,797,821 bytes）到實機 `xczu5_0`；Hardware Manager 回報 device programmed。再以 XSCT 實跑：system reset、`psu_init.tcl` PS/DDR init、PL bitstream、Cortex-A53 #0 ELF download/run/stop。
+- `src/main.c` 現對實機提交 frame ID 42 的 bbox command，讀回 AXI GPIO 與 mailbox frame/status，並保存 JTAG 可讀的 volatile 結果。乾淨流程實測：result `0`、GPIO readback `42`、mailbox frame readback `42`、status `3`（唯一 command 的 pending/pair-present，沒有 overrun）。這是 Vitis A53→PS AXI→PL AXI GPIO/mailbox 的硬體 PASS。
+- 限制仍明確：沒有 UVC frame producer 或 AXI DMA transfer，所以 command 停在 pending 是預期；尚未驗證 PS USB/UVC capture、DDR buffer、DMA MM2S、PL feature/result、IRQ 或雙攝影機實際影像。
+
 - `fpga/create_pynq_zu_usb_video_bd.tcl` 的 USB 路徑仍正確限定於 MPSoC PS：USB0 為 MIO 52..63、USB1 為 MIO 64..75；UVC frame 必須先落 DDR，再由 AXI DMA 的 MM2S 64-bit AXI4-Stream 餵入 PL。USB D+/D- 不是 PL 可接的獨立影像腳位。
 - 以乾淨 Vivado 2024.2 實作觀察到既有 ROI feature accumulator 在 100 MHz 的 post-placement WNS 約 -35 ns；尚未生成或下載該違反時序版本。BD 的 PL0 與 `dual_camera_yolox_axis_top.v` 介面宣告已一併改成 20 MHz，理論 AXI4-Stream 峰值為 160 MB/s。
 - 20 MHz 的乾淨 project staging PASS，但 Vivado 在 `create_bd_cell -type module -reference dual_camera_yolox_axis_top` 建立 module-reference 的 GUI interpreter 時出現 `rodin:slave11` / Customization-object 錯誤；尚未完成 BD validation、implementation、bitstream、XSA 或 Vitis BSP build。下一步須改以可重現的自訂 IP 封裝或避開 module-reference cache，再重新檢驗時序。

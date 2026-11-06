@@ -248,6 +248,12 @@
 - 尚未把這版硬體與 ELF 下載到板子；USB 雙鏡頭、DMA、FPGA 資料流和中斷都還沒有實機 PASS。
 - 目前電腦看得到 JTAG 的 FTDI USB 裝置，但掃不到 PYNQ-ZU 晶片；重啟本機 Hardware Server 後仍一樣，所以尚不能下載硬體或控制程式到板子。
 
+### 更新：Vitis 已實際控制 PYNQ-ZU
+
+- 已確認 Vivado 能打開 PYNQ-ZU 的 JTAG target，並成功下載新的 USB/DMA FPGA bitstream。
+- Vitis 已在板子的 A53 實際執行控制程式：寫入 frame ID 42 後，GPIO 與 FPGA mailbox 都讀回 42，代表 PS 到 FPGA 的控制線路真的通了。
+- 現在尚缺 USB 相機實際取像、DDR/DMA 傳影格與 FPGA 影像運算；目前的 command 會等待尚未接上的影像資料流，這是預期狀態。
+
 - USB 鏡頭會由 PYNQ-ZU 的 PS USB 接收，影格放到 DDR 後才經 DMA 送進 FPGA；不能把 USB 線直接接到 PL 影像腳位。
 - 找到既有影像 RTL 在 100 MHz 跑不動，已改為 20 MHz；尚未產生可下載的新 bitstream。
 - Vivado 目前被 module-reference 封裝快取錯誤卡住，尚未完成 Vitis 控制程式的實機建置。

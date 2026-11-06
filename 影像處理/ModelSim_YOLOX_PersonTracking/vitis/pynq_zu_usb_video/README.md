@@ -63,10 +63,11 @@ camera pins or an unsupported bare-metal USB class driver.
 
 `linux/uvc_v4l2_packer.c` now supplies the first Linux application component:
 it V4L2-captures two 640×480 YUYV frames and produces the RTL's packed
-64-bit A/B RGB format.  Its source is ready for the Vitis AArch64 Linux
-toolchain, but this host's compiler has a missing Windows loader dependency
-and has not produced an ELF yet; the board-side contiguous DMA
-allocation/handoff remains the next integration point.
+64-bit A/B RGB format.  It is compiler-verified as a 74,624-byte AArch64
+ELF64 via Vitis' direct `aarch64-linux-gnu-gcc.exe`; the similarly named
+Windows wrapper fails with a DLL loader error and must not be used. The
+board-side contiguous DMA allocation/handoff remains the next integration
+point.
 
 ## JTAG AXI and full-frame DMA test
 

@@ -172,6 +172,10 @@
 - 實際完成：新增 static contract assertion，要求 BD script 保持 `CONFIG.c_sg_length_width {23}`；更新 FPGA/Vitis README，記錄 synthetic full-frame DMA 的實板結果和 UVC/雙鏡頭尚未完成的邊界。
 - 驗證範圍：待執行 unittest 後補上；本輪未接觸真實 UVC 相機或變更實板配置。
 - Git／同步：待本輪提交與 push 後補上結果。
+
+### 編譯器修正
+
+- 先前 `0xC0000135` 只影響錯誤使用的 Windows wrapper。改用 `gnu/aarch64/nt/aarch64-linux/bin/aarch64-linux-gnu-gcc.exe` 並把其 bin 放入 PATH 後，`uvc_v4l2_packer.c` 以 `-Wall -Wextra -Werror` 成功產生 74,624-byte AArch64 ELF64 PIE；`readelf -h` 已實際確認 Machine=`AArch64`。這仍不是板端 UVC/DMA runtime 驗證。
 ## 2026-11-06 — standalone UVC middleware 可行性確認
 
 - 需求／決策：確認 Vitis standalone 是否能直接承擔 Logitech C270 UVC capture，避免在已完成 DMA 路徑上加入不存在的 driver。

@@ -12,13 +12,12 @@ address to the AXI DMA already verified through JTAG.
 The intended host command is:
 
 ```powershell
-$gcc = 'C:\Xilinx_Embedded_2024_2\Vitis\2024.2\gnu\aarch64\nt\aarch64-linux\x86_64-petalinux-mingw32\usr\bin\aarch64-xilinx-linux\aarch64-xilinx-linux-gcc.exe'
-$sysroot = 'C:\Xilinx_Embedded_2024_2\Vitis\2024.2\gnu\aarch64\nt\aarch64-linux\aarch64-xilinx-linux'
-& $gcc --sysroot=$sysroot -std=c11 -Wall -Wextra -Werror -O2 uvc_v4l2_packer.c -o uvc_v4l2_packer
+$bin = 'C:\Xilinx_Embedded_2024_2\Vitis\2024.2\gnu\aarch64\nt\aarch64-linux\bin'
+$env:PATH = "$bin;$env:PATH"
+& "$bin\aarch64-linux-gnu-gcc.exe" -std=c11 -Wall -Wextra -Werror -O2 uvc_v4l2_packer.c -o uvc_v4l2_packer
 ```
 
-On this Windows host the shipped Linux cross-compiler currently exits with
-`0xC0000135` (a missing loader dependency) before producing an ELF, even after
-loading `settings64.bat`.  This source is therefore not yet compiler-verified;
-the required next step is to repair that host toolchain or compile it within a
-matching Linux SDK/sysroot.
+On 2026-11-06 this command produced a 74,624-byte AArch64 ELF64 PIE with
+`-Wall -Wextra -Werror`.  Do not use the adjacent
+`x86_64-petalinux-mingw32/.../aarch64-xilinx-linux-gcc.exe` wrapper on this
+Windows installation: it exits with `0xC0000135` before launching GCC.

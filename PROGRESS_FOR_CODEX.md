@@ -431,3 +431,8 @@
 
 - 新增 `vitis/pynq_zu_usb_video/linux/uvc_v4l2_packer.c`：以 Linux V4L2 MMAP 開啟兩個 YUYV UVC device，要求 640×480，dequeue 一張 frame 後轉成 RTL 合約的 uint64 words（A RGB 在 [23:0]、B RGB 在 [55:32]）。輸出普通檔案是刻意的安全 bring-up 路徑，不會把 heap/file pointer 冒充 DMA physical address。
 - 嘗試用 Vitis 2024.2 隨附 `aarch64-xilinx-linux-gcc.exe` 和 AArch64 Linux sysroot 編譯，但 Windows host compiler 以 `0xC0000135`（loader dependency 缺失）在產生 ELF 前結束，即使載入 `settings64.bat` 亦相同；因此尚未把 source 誤列為 compiler-verified。尚未在 PYNQ Linux 執行，因板子目前停在 JTAG standalone 狀態；production handoff 仍需 Linux 的 CMA/dma-heap/udmabuf 或專用 driver 分配連續 buffer，之後才可把 physical address 交給已驗證的 AXI DMA。
+
+### 2026-11-06：Vitis Linux UVC component compiler 修復
+
+- 釐清上一項的 wrapper 問題：`x86_64-petalinux-mingw32/.../aarch64-xilinx-linux-gcc.exe` 確實以 `0xC0000135` 失敗，但同一 Vitis 安裝的直接 GNU binary `gnu/aarch64/nt/aarch64-linux/bin/aarch64-linux-gnu-gcc.exe` 可正常執行（target `aarch64-xilinx-linux`）。將其 `bin` 加到 PATH 後，以 `-std=c11 -Wall -Wextra -Werror -O2` 編譯 `linux/uvc_v4l2_packer.c` 成功。
+- 以同工具鏈 `aarch64-linux-gnu-readelf -h` 驗證產物為 74,624-byte ELF64 little-endian AArch64 PIE。這只證明 cross compile；尚未在板端開 V4L2、未配置 contiguous DMA memory、未送到 AXI DMA。

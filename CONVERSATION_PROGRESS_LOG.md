@@ -1,5 +1,12 @@
 # 對話與進度同步紀錄
 
+## 2026-11-06 — Vivado USB-camera Block Design 與 Vitis 控制起始實作
+
+- 需求／決策：依使用者要求改為 Vivado 建硬體、Vitis 寫控制；現有鏡頭為兩支 USB Logitech C270，故 USB0/USB1 必須保留在 PYNQ-ZU PS 的 MIO，而非虛構 PL 相機腳位。
+- 實際完成：新增可重跑的 PYNQ-ZU project/BD/XSA-export TCL、BD 合約 test，以及 Vitis C controller/host test。BD 已在 Vivado 2024.2 成功 `validate_bd_design`；設計包含 PS USB、AXI DMA、DDR HP0、AXI-Lite mailbox、frame ID GPIO、64-bit stream 和 PS IRQ。host test 驗證 mailbox 寫入順序與無效地址防護。
+- 驗證界線：XSA export 的 synthesis child jobs 尚在 Vivado queue，尚未產生 XSA/bitstream；沒有 Vitis BSP 編譯、PYNQ 上板、UVC/DMA/PL 實機影像或雙鏡頭成功證據。`%TEMP%` Vivado build/log 是可重建暫存，不上傳。
+- Git／同步：本輪待完成 diff/test 後建立本機提交並推送；最終提交與推送結果將由後續紀錄補上。
+
 本檔保留每次已完成、可交付進度的精簡對話摘要，讓後續接手者能追溯決策與 GitHub 同步狀態。它不是逐字聊天備份；不記錄密碼、私人連結、個人影像、模型權重或機器特有的敏感資訊。
 
 ## 紀錄格式

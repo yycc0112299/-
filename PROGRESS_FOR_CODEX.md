@@ -1,5 +1,15 @@
 # 專題狀態與交接記錄（供 Codex）
 
+## 2026-11-06：PYNQ-ZU USB Vivado Block Design 與 Vitis 控制骨架（進行中）
+
+- 使用者決策：不再以 Jupyter 作為主控制流程，改採 Vivado 硬體檔（Block Design/XSA）與 Vitis C/C++ 控制檔。
+- 新增 `fpga/create_pynq_zu_usb_video_project.tcl`：以 `tul.com.tw:pynqzu:part0:1.1` 建 project，並將 HDL stage 到短 ASCII build path。新增 `create_pynq_zu_usb_video_bd.tcl`：PS USB0/USB1 分別保留為 MIO 52–63/MIO 64–75，PS M_AXI_HPM0_FPD 經 SmartConnect 控制 AXI DMA、frame-id GPIO 與 `dual_camera_yolox_axis_top` mailbox；DMA MM2S 經 S_AXI_HP0_FPD 讀 DDR，輸出 64-bit AXI stream 至 RTL，DMA/mailbox IRQ OR 後送 `pl_ps_irq0`。
+- 重要架構限制：Logitech C270 為 USB/UVC，D+/D− 由 PS 固定 USB MIO 和 USB host driver 處理；不能且不應在 PL XDC 把它假裝成 PCLK/VSYNC/D[ ]。Vitis/USB host 將 UVC frame 放入 DDR，再由 AXI DMA 送入 PL。
+- 驗證：`fpga/tests/test_pynq_zu_usb_bd_contract.py` 2/2 PASS；本機 Vivado 2024.2 成功 `validate_bd_design` 並生成 wrapper/HWH。PS DMA mapping 修正為 `PSU__USE__S_AXI_GP2` 對應 `S_AXI_HP0_FPD`，此為 Vivado 3.5 PS IP 實際可用設定。
+- 新增 `fpga/export_pynq_zu_usb_video_xsa.tcl`，僅在 synth、implementation 和 bitstream 成功後執行 `write_hw_platform -fixed -include_bit`。目前同一個 XSA export process 已啟動，但 synthesis child jobs 未產生 `runme.log`、仍在 Vivado queue；沒有 XSA/bitstream 成功證據。
+- 新增 `vitis/pynq_zu_usb_video/src/video_control.[ch]`、`main.c` 和 host test。controller 拒絕缺少 base address，固定寫入順序為 frame-ID GPIO、mailbox frame ID、四個 bbox word、CONTROL=0x3；host test 以 Vitis bundled MinGW 編譯/執行。`main.c` 必須用已由 XSA 生成的 `xparameters.h`，且刻意不偽造 UVC host driver/DMA transfer。
+- 未完成：XSA 產生、Vitis platform/BSP/application build、板端 USB UVC buffer/DMA/cache/IRQ 整合、兩鏡頭實機串流。未提交產物：`%TEMP%/pynq_zu_usb_video_test` 為可重建 Vivado 生成物與 log，不進 Git。
+
 ## 2026-11-05：換機前 GitHub 交接盤點
 
 - 使用者要求讓下一台電腦可直接以 GitHub 接續。本次先執行 `git fetch origin`，確認本機 `main` 和 `origin/main` 同為 `46e9371`，且工作樹沒有已修改但未提交的版本控制檔；倉庫中已有 124 個受追蹤檔案，包括目前 PYNQ-ZU RTL/腳本、Python/YOLOX 網站、測試、啟動器與交接文件。

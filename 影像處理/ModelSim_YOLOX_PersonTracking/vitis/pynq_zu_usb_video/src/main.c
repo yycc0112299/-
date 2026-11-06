@@ -1,0 +1,37 @@
+/* Vitis standalone control entry point for pynq_zu_usb_video.xsa.
+ *
+ * Import the generated XSA into a Vitis platform first.  xparameters.h then
+ * supplies the assigned AXI addresses; do not substitute fixed literals here.
+ * UVC capture needs an application-selected USB host/UVC middleware layer.
+ * Once it supplies a DDR buffer containing packed 64-bit A/B RGB words, start
+ * the generated AXI DMA driver, then submit the matching bbox pair below.
+ */
+#include "xil_io.h"
+#include "xparameters.h"
+#include "video_control.h"
+
+#ifndef XPAR_FRAME_ID_GPIO_0_BASEADDR
+#error "The Vitis platform must be generated from pynq_zu_usb_video.xsa"
+#endif
+#ifndef XPAR_YOLOX_VIDEO_RTL_0_S_AXI_BASEADDR
+#error "The Vitis platform must expose the RTL AXI-Lite mailbox"
+#endif
+#ifndef XPAR_AXI_DMA_0_BASEADDR
+#error "The Vitis platform must expose the AXI DMA"
+#endif
+
+static void vitis_write32(uint32_t address, uint32_t value, void *context) {
+    (void)context;
+    Xil_Out32(address, value);
+}
+
+int main(void) {
+    const struct video_control_io io = { .write32 = vitis_write32, .context = 0 };
+    const struct video_control_addresses addresses = {
+        .dma_base = XPAR_AXI_DMA_0_BASEADDR,
+        .frame_id_base = XPAR_FRAME_ID_GPIO_0_BASEADDR,
+        .mailbox_base = XPAR_YOLOX_VIDEO_RTL_0_S_AXI_BASEADDR,
+    };
+    /* USB/UVC frame acquisition and XAxiDma_SimpleTransfer belong here. */
+    return video_control_validate(&io, &addresses) == VIDEO_CONTROL_OK ? 0 : 1;
+}

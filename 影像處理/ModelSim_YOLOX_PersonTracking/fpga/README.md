@@ -156,3 +156,29 @@ buffer 並在支援時 flush。實際 DMA IP、camera driver 與 physical pin pa
 本機 XSim `tb_axis_dual_rgb_stream_adapter.v` 為
 `AXIS_DUAL_RGB_STREAM_ADAPTER_PASS checks=7`；Python packing 合約測試的單一 word 為
 `0x00aabbcc00112233`。這些是介面/打包驗證，並非 USB、CSI、PYNQ DMA 或板端相機驗證。
+
+## USB C270 的 Vivado Block Design 與 Vitis 邊界（2026-11-06）
+
+現有 Logitech C270 是 USB/UVC 相機。它的實體 D+/D− 不屬於 PL camera
+pixel pins：PYNQ-ZU board preset 中 USB0 是 **MIO 52–63**、USB1 是
+**MIO 64–75**，由 Zynq PS USB host 控制器和 Vitis/Linux USB driver 處理。
+因此不要為 USB 相機新增 PL XDC 或把它接到 GPIO。
+
+新增的可重跑流程為：
+
+1. `create_pynq_zu_usb_video_project.tcl`
+2. `create_pynq_zu_usb_video_bd.tcl`
+3. `export_pynq_zu_usb_video_xsa.tcl`
+
+BD IP Catalog 對應為 `zynq_ultra_ps_e`（PS USB/DDR）、`axi_dma`（MM2S）、
+兩個 `smartconnect`、`axi_gpio`（frame ID）、`proc_sys_reset`，以及
+`dual_camera_yolox_axis_top`。Vitis 從 USB/UVC driver 取得兩張影像、轉為既有的
+64-bit A/B RGB word 後放到 DDR，AXI DMA 透過 PS `S_AXI_HP0_FPD` 讀取後送至
+custom RTL 的 AXI4-Stream；Vitis 同時經 AXI-Lite 寫 frame ID、bbox mailbox，並讀
+DMA/RTL IRQ。
+
+`vitis/pynq_zu_usb_video/` 是 Vitis C controller skeleton；必須將成功產生的 XSA
+建立為 Vitis platform，讓 `xparameters.h` 提供實際 AXI addresses。controller 的
+payload 寫入順序受 `tests/test_video_control.c` 保護。本文所記錄的 BD 已
+`validate_bd_design`，但 XSA、bitstream、Vitis BSP/UVC driver、DDR DMA 和上板影像
+仍須分別成功驗證，不能據此宣稱 USB frame 已進入 FPGA。

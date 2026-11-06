@@ -1,5 +1,12 @@
 # 專題進度（重點版）
 
+## 2026-11-06：改為 Vivado Block Design + Vitis 控制架構（進行中）
+
+- 已新增 PYNQ-ZU 的 `pynq_zu_usb_video` Vivado Block Design 腳本：保留板上 USB0（MIO 52–63）與 USB1（MIO 64–75）給 Zynq PS，並加入 AXI DMA、DDR HP0、AXI-Lite bbox mailbox、frame-ID GPIO、64-bit 雙 RGB stream 與 IRQ。USB C270 的 D+/D− 是 PS USB 控制器接腳，不是可拉進 PL 的 GPIO。
+- 本機 Vivado 2024.2 已實際完成 `validate_bd_design`；不代表相機影像、DMA、bitstream 或板端已完成。XSA 匯出已啟動，但 synthesis 子工作仍等待 Vivado queue，尚未產出 XSA。
+- 已新增 Vitis C 控制核心與 host test，確認每個 frame 會依序寫 frame ID、bbox 資料，最後才 commit mailbox CONTROL。Vitis 實際 application 必須待 XSA 完成後以產生的 `xparameters.h` 編譯。
+- 尚未完成：synthesis/implementation/XSA、Vitis BSP/application 實機編譯、USB UVC → DDR → DMA → PL 串流，以及雙 USB 鏡頭的實機頻寬問題。
+
 ## 2026-11-05：已完成換機前的 GitHub 交接整理
 
 - 已盤點目前 `main` 與 GitHub `main` 相同，專題的程式、RTL、網站、啟動腳本、測試與交接文件都已在版本控制中；這次再補上明確的交接與忽略規則。

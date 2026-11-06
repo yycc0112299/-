@@ -27,7 +27,10 @@ create_bd_cell -type ip -vlnv xilinx.com:ip:zynq_ultra_ps_e:3.5 zynq_ultra_ps_e_
 apply_bd_automation -rule xilinx.com:bd_rule:zynq_ultra_ps_e -config {apply_board_preset "1"} [get_bd_cells zynq_ultra_ps_e_0]
 # USB D+/D- are PS MIO pins (USB0 MIO 52 .. 63; USB1 MIO 64 .. 75), never
 # make them external PL ports.  Keep both preset USB host controllers enabled.
-# PG201 maps the HP0 FPD interface to configurable S_AXI_GP2.
+# PG201 maps the HP0 FPD interface to configurable S_AXI_GP2.  The imported
+# ROI feature accumulator has a measured ~45 ns critical path, so PL0 is 20
+# MHz.  The 64-bit AXI4-Stream still carries 160 MB/s, sufficient for two
+# packed RGB888 VGA-class input streams.
 set_property -dict [list \
  CONFIG.PSU__USB0__PERIPHERAL__ENABLE {1} \
  CONFIG.PSU__USB1__PERIPHERAL__ENABLE {1} \
@@ -35,7 +38,7 @@ set_property -dict [list \
  CONFIG.PSU__USE__M_AXI_GP1 {0} \
  CONFIG.PSU__USE__S_AXI_GP2 {1} \
  CONFIG.PSU__USE__IRQ0 {1} \
- CONFIG.PSU__CRL_APB__PL0_REF_CTRL__FREQMHZ {100}] [get_bd_cells zynq_ultra_ps_e_0]
+ CONFIG.PSU__CRL_APB__PL0_REF_CTRL__FREQMHZ {20}] [get_bd_cells zynq_ultra_ps_e_0]
 
 create_bd_cell -type ip -vlnv xilinx.com:ip:smartconnect:1.0 axi_ctrl_smc_0
 set_property -dict [list CONFIG.NUM_SI {1} CONFIG.NUM_MI {3}] [get_bd_cells axi_ctrl_smc_0]

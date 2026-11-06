@@ -239,6 +239,12 @@
 - 本次燒錄與驗證紀錄已同步到共享 GitHub `main`。
 ## 2026-11-06：PYNQ Linux 與雙 USB 鏡頭實機部署
 
+## 2026-11-06：Vivado USB/DMA 硬體重建（進行中）
+
+- USB 鏡頭會由 PYNQ-ZU 的 PS USB 接收，影格放到 DDR 後才經 DMA 送進 FPGA；不能把 USB 線直接接到 PL 影像腳位。
+- 找到既有影像 RTL 在 100 MHz 跑不動，已改為 20 MHz；尚未產生可下載的新 bitstream。
+- Vivado 目前被 module-reference 封裝快取錯誤卡住，尚未完成 Vitis 控制程式的實機建置。
+
 - PYNQ-ZU 已可由 `192.168.3.1` 的 JupyterLab 操作；板端確認 Python 3.10.4、NumPy 2.1.5、OpenCV 4.5.4、PYNQ 3.1.1 與 YOLOX 模型皆可用。
 - 專題雙鏡頭網站已實際部署至板子；系統與相機 preflight 曾通過，兩支鏡頭分別為 index 0 與 2，均成功讀取 640×480 影格。
 - 修正網站對舊版 PYNQ OpenCV 的相容性、PYNQ 網址白名單與相機 index 被 API 重設的問題；網站健康檢查可從開發電腦取得成功回應。

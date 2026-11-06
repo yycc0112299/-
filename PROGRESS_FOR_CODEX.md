@@ -299,6 +299,12 @@
 
 ## 2026-11-05：對話／進度同步紀錄
 
+## 2026-11-06：USB→DDR→DMA Block Design 時脈收斂工作（進行中）
+
+- `fpga/create_pynq_zu_usb_video_bd.tcl` 的 USB 路徑仍正確限定於 MPSoC PS：USB0 為 MIO 52..63、USB1 為 MIO 64..75；UVC frame 必須先落 DDR，再由 AXI DMA 的 MM2S 64-bit AXI4-Stream 餵入 PL。USB D+/D- 不是 PL 可接的獨立影像腳位。
+- 以乾淨 Vivado 2024.2 實作觀察到既有 ROI feature accumulator 在 100 MHz 的 post-placement WNS 約 -35 ns；尚未生成或下載該違反時序版本。BD 的 PL0 與 `dual_camera_yolox_axis_top.v` 介面宣告已一併改成 20 MHz，理論 AXI4-Stream 峰值為 160 MB/s。
+- 20 MHz 的乾淨 project staging PASS，但 Vivado 在 `create_bd_cell -type module -reference dual_camera_yolox_axis_top` 建立 module-reference 的 GUI interpreter 時出現 `rodin:slave11` / Customization-object 錯誤；尚未完成 BD validation、implementation、bitstream、XSA 或 Vitis BSP build。下一步須改以可重現的自訂 IP 封裝或避開 module-reference cache，再重新檢驗時序。
+
 - 新增根目錄 `CONVERSATION_PROGRESS_LOG.md`，以精簡、可交接方式記錄每次已完成進度的需求、變更、驗證界線、Git 提交／推送結果和未完成事項；不保存逐字聊天、帳密、私人連結、個人影像或模型權重。
 - `AGENTS.md` 已規定未來每次可交付進度均須追加該紀錄，並與相關檔案同次 commit + push 至 `main`。純討論、沒有檔案變更或未完成工作不製造完成紀錄。
 - 本次稽核時 `main` 與 `origin/main` 同為 `5fe1467`；最近的 PYNQ-ZU/IRQ/USB 部署工作已有遠端提交。沒有發現既有對話紀錄檔，故不能由 Git 判斷或還原未曾落檔的舊聊天內容。未追蹤的 Vivado/XSim 與本機網站日誌維持排除，並非待上傳的專案原始碼。

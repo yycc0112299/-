@@ -137,6 +137,12 @@
 
 - 已提交為 `503718d`（`Build PYNQ-ZU Vitis embedded control app`）並成功推送至 `origin/main`；工作樹與遠端 `main` 同步。
 
+## 2026-11-06 — JTAG 實機下載前的可見性掃描
+
+- 需求／決策：在 Vitis host build 完成後，以 JTAG 對 PYNQ-ZU 下載並驗證控制端；先只進行 target 枚舉，避免未偵測到晶片時寫入。
+- 實際驗證：Windows 正常列出 FTDI USB Serial Converter A/B 與 COM5，Hardware Server 正在 `localhost:3121`。XSCT 連線沒有列出 JTAG target；停止並重啟 Hardware Server 後重新掃描，仍沒有 target。
+- 驗證界線／未完成：沒有下載 XSA、bitstream 或 ELF，未修改板子。需先由實體板端恢復供電、JTAG boot switch／線材／chain 的可見性，才可進行下載、mailbox read/write 與 DMA/USB 測試。
+
 - 需求／決策：使用已完成的 PYNQ-ZU USB/DMA XSA 建立 Vitis A53 standalone platform，讓 Vitis 取代 Jupyter 擔任 AXI DMA、GPIO 與 mailbox 的控制端。
 - 實際驗證：Vitis 2024.2 Python CLI 已實際啟動並讀取 XSA。初始 Lopper installation path 為 `null`；確認隨附 Lopper 包缺失 requirements link 後，以該安裝包的離線 wheels 建立本機 Lopper virtualenv，並驗證 `lopper -h`、YAML 與 libfdt imports。設定 `VITIS_LOPPER_INSTALL_LOC` 後，Vitis 已進一步嘗試從 XSA 產生 SDT。
 - 驗證界線／阻礙：本機 Vitis 安裝未提供 `xsct`，也沒有 Vitis-side embedded software tree。即使 `ESW_REPO` 指向已存在的 Vivado `data/embeddedsw`，Vitis 仍在 SDT generation 失敗；未產生 platform、BSP、`xparameters.h`、ELF 或 JTAG application。Lopper virtualenv、Vitis temporary workspaces 和 logs 是此電腦本機工具產物，不上傳。

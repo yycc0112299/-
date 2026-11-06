@@ -246,6 +246,7 @@
 - 已安裝完整 Vitis Embedded，並把新的 PYNQ-ZU USB/DMA 硬體檔做成 A53 standalone 平台、FSBL 和控制程式 ELF；控制程式實際編譯成功。
 - 發現 Windows 工作目錄太長會讓 Vitis 編譯失敗，專案現在提供短路徑的一鍵建置腳本，之後可重現產生 ELF。
 - 尚未把這版硬體與 ELF 下載到板子；USB 雙鏡頭、DMA、FPGA 資料流和中斷都還沒有實機 PASS。
+- 目前電腦看得到 JTAG 的 FTDI USB 裝置，但掃不到 PYNQ-ZU 晶片；重啟本機 Hardware Server 後仍一樣，所以尚不能下載硬體或控制程式到板子。
 
 - USB 鏡頭會由 PYNQ-ZU 的 PS USB 接收，影格放到 DDR 後才經 DMA 送進 FPGA；不能把 USB 線直接接到 PL 影像腳位。
 - 找到既有影像 RTL 在 100 MHz 跑不動，已改為 20 MHz；尚未產生可下載的新 bitstream。

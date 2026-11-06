@@ -308,6 +308,10 @@
 - 新增 `vitis/pynq_zu_usb_video/build_vitis_embedded.py`；以 `PYNQ_ZU_USB_VIDEO_XSA` 提供 XSA，並從短、空的 `PYNQ_ZU_VITIS_WORKSPACE`（預設 `C:\pynq_vitis`）可重建 platform/app。Windows 長暫存路徑會使 GCC 無法建立相依檔，故不可使用長 `%TEMP%` workspace。
 - 驗證界線：這是本電腦 host-side Vitis build；尚未把此 XSA/ELF JTAG 下載到 PYNQ-ZU，尚未啟動 USB UVC、DDR DMA、PL stream、mailbox 或 IRQ 實機測試。Embedded 安裝和 `C:\vw`/`C:\vc` temporary build 均不入 Git，第三台也尚未安裝或驗證。
 
+### 2026-11-06 後續 JTAG 掃描
+
+- `hw_server` 在 localhost:3121 運作、Windows 也可見 FTDI USB Serial Converter A/B 與 COM5，但 XSCT 連線後沒有列出任何 JTAG target；重啟 Hardware Server 再掃描結果相同。因此未對板子寫入 bitstream 或 ELF。下一個實機步驟需先使板子供電、JTAG boot switch 和 JTAG chain 可被 Hardware Server 枚舉，再執行下載與 mailbox read/write。
+
 - `fpga/create_pynq_zu_usb_video_bd.tcl` 的 USB 路徑仍正確限定於 MPSoC PS：USB0 為 MIO 52..63、USB1 為 MIO 64..75；UVC frame 必須先落 DDR，再由 AXI DMA 的 MM2S 64-bit AXI4-Stream 餵入 PL。USB D+/D- 不是 PL 可接的獨立影像腳位。
 - 以乾淨 Vivado 2024.2 實作觀察到既有 ROI feature accumulator 在 100 MHz 的 post-placement WNS 約 -35 ns；尚未生成或下載該違反時序版本。BD 的 PL0 與 `dual_camera_yolox_axis_top.v` 介面宣告已一併改成 20 MHz，理論 AXI4-Stream 峰值為 160 MB/s。
 - 20 MHz 的乾淨 project staging PASS，但 Vivado 在 `create_bd_cell -type module -reference dual_camera_yolox_axis_top` 建立 module-reference 的 GUI interpreter 時出現 `rodin:slave11` / Customization-object 錯誤；尚未完成 BD validation、implementation、bitstream、XSA 或 Vitis BSP build。下一步須改以可重現的自訂 IP 封裝或避開 module-reference cache，再重新檢驗時序。

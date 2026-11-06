@@ -9,6 +9,17 @@ it is deliberately not a DMA allocation.  The production handoff must replace
 the output file with a PYNQ Linux contiguous DMA buffer and submit that physical
 address to the AXI DMA already verified through JTAG.
 
+After copying the AArch64 executable and `run_uvc_vitis_preflight.sh` to the
+board, run `chmod +x` on both and execute:
+
+```sh
+./run_uvc_vitis_preflight.sh /dev/video0 /dev/video2
+```
+
+It fails clearly if either device or executable is absent, then requires the
+output to be exactly `2,457,600` bytes.  This validates UVC capture plus the
+PL packing contract without programming AXI DMA yet.
+
 The intended host command is:
 
 ```powershell

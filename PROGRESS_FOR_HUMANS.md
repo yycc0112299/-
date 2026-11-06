@@ -299,3 +299,7 @@
 
 - 板子上的 `JTAG SD` 開關切到右側 `SD`，插著已燒好的 PYNQ SD 卡後重新上電，就能回到 Linux/UVC。
 - SD 開機後仍然能接 JTAG，所以之後可同時使用 Linux 相機驅動和 Vivado/Vitis 除錯。
+## 2026-11-06：下次上板的一鍵 UVC 檢查
+
+- 新增不靠 Jupyter 的 Linux 檢查腳本：會開兩支 UVC、產生一張 FPGA 格式的雙影格，並確認大小正確。
+- 下週切回 SD/Linux 後，直接執行它就能知道相機與 Vitis packing 是否真的正常。

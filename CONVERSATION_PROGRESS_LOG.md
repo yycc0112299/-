@@ -194,3 +194,9 @@
 - 實際確認：官方 PYNQ-ZU Reference Manual v1.2 指出 `JTAG SD` boot switch 向左為 JTAG、向右為 MicroSD。切至 SD 並 power-cycle 可恢復 PYNQ Linux；SD boot 後仍可使用 JTAG 除錯。
 - 驗證界線／未完成：這是官方操作規格確認，尚未因實體 switch/power-cycle 在目前回合再次取得 Linux、V4L2 或 UVC runtime 證據。
 - Git／同步：待本輪文件提交與 push 後補上結果。
+## 2026-11-06 — SD-boot 後 Vitis Linux UVC preflight
+
+- 需求／決策：在下次可切回 SD/Linux 前，準備不依賴 Jupyter 的實板 UVC runtime gate。
+- 實際完成：新增 `run_uvc_vitis_preflight.sh`；它驗證兩個 V4L2 device、執行 AArch64 packer、並要求輸出剛好為 640×480×8 = 2,457,600 bytes，PASS marker 為 `PYNQ_ZU_UVC_VITIS_PREFLIGHT_PASS`。
+- 驗證範圍／未完成：Windows host 沒有可用 Git Bash/WSL，尚未執行 POSIX shell syntax check；更尚未因板子仍為 standalone/JTAG state 在 PYNQ Linux 執行，也不含 DMA/CMA handoff。
+- Git／同步：待本輪提交與 push 後補上結果。

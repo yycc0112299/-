@@ -440,3 +440,7 @@
 
 - 查閱 PYNQ-ZU Reference Manual v1.2 的 boot-mode selection：板上 `JTAG SD` switch 向左為 JTAG，向右為 MicroSD。要恢復 Linux UVC/V4L2，需將 switch 切至右側 SD、插入既有 PYNQ SD card 後 power-cycle。
 - 這不表示之後不能使用 Vivado/Vitis JTAG；SD boot 的 Linux 可保留 JTAG 作除錯/下載。先前 network 消失是因載入 standalone ELF 後 system reset，而非 Vivado Block Design 無法與 Linux 共存。
+### 2026-11-06：SD-boot 後的 Vitis Linux UVC preflight
+
+- 新增 `vitis/pynq_zu_usb_video/linux/run_uvc_vitis_preflight.sh`。它不使用 Jupyter：檢查兩個指定 V4L2 character devices 和 packer executable，執行一次兩路 UVC capture/packing，並強制輸出為 2,457,600 bytes（640×480×8-byte dual-RGB words）。成功標記 `PYNQ_ZU_UVC_VITIS_PREFLIGHT_PASS`，可作為下週 SD boot 後的第一個 runtime gate。
+- 此 Windows host 沒有 Git Bash/WSL 的可用 POSIX shell，故尚未做 shell syntax execution；尚未在板端 Linux 執行，也尚未做 AXI DMA/CMA handoff。

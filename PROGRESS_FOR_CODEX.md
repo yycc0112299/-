@@ -423,3 +423,7 @@
 
 - `fpga/tests/test_pynq_zu_usb_bd_contract.py` 現靜態鎖定 `CONFIG.c_sg_length_width {23}`，防止未來將 AXI DMA 退回不足以容納一張 640×480 packed dual-RGB frame 的 14-bit transfer-length 設定。
 - 更新 FPGA/Vitis README，將已實證的 A53→DDR→AXI DMA→PL full-frame synthetic DMA 與未實證的 UVC capture／雙鏡頭／YOLOX／IRQ 清楚分開；避免文件仍誤稱 DMA/PL streaming 未上板。
+### 2026-11-06：bare-metal UVC driver 可行性確認
+
+- 實際搜尋完整 Vitis Embedded 2024.2 的 `embeddedsw` 後，未找到 UVC/USB Video Class host middleware；USB driver examples 為 storage、mouse、keyboard、microphone。故 standalone ELF 已驗證的角色是 A53 control/DMA，不能誤稱為 Logitech C270 UVC capture driver。
+- 真實 C270 路線應改為 Vitis Linux A53 application：使用 PYNQ Linux 的 kernel UVC/V4L2 取得影格，再以 CMA/contiguous buffer、cache ownership 與 AXI DMA 餵給 PL。這仍符合「Vivado 硬體檔 + Vitis 控制檔」，但需要 Linux sysroot 和板端 DMA-buffer interface，不能用不存在的 PL USB camera pins 取代。

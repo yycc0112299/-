@@ -287,3 +287,7 @@
 
 - 新增保護測試，避免 DMA 傳輸長度設定被改回無法容納完整影格的值。
 - 更新 Vivado/Vitis 文件，清楚標示「完整合成影格 DMA 已成功」與「真實 USB 雙鏡頭仍未完成」的差別。
+## 2026-11-06：USB 相機控制的正確分工
+
+- Vitis standalone 可以控制 FPGA 與 DMA，但安裝的工具沒有 C270 需要的 UVC 驅動。
+- 真實 USB 相機要由 Linux 的 UVC/V4L2 驅動取像；之後 Vitis Linux 程式再把 DDR 影格送進 FPGA。這不需要、也不能把 USB 相機線接到 FPGA 的一般影像腳位。

@@ -172,3 +172,9 @@
 - 實際完成：新增 static contract assertion，要求 BD script 保持 `CONFIG.c_sg_length_width {23}`；更新 FPGA/Vitis README，記錄 synthetic full-frame DMA 的實板結果和 UVC/雙鏡頭尚未完成的邊界。
 - 驗證範圍：待執行 unittest 後補上；本輪未接觸真實 UVC 相機或變更實板配置。
 - Git／同步：待本輪提交與 push 後補上結果。
+## 2026-11-06 — standalone UVC middleware 可行性確認
+
+- 需求／決策：確認 Vitis standalone 是否能直接承擔 Logitech C270 UVC capture，避免在已完成 DMA 路徑上加入不存在的 driver。
+- 實際完成：搜尋完整 Vitis Embedded 2024.2 `embeddedsw`；USB driver examples 僅見 storage/mouse/keyboard/microphone，沒有 UVC/USB Video Class host middleware。
+- 結論／未完成：standalone A53 ELF 保留為已實證的 DMA/PL controller。真實 UVC 必須用 PYNQ Linux UVC/V4L2，下一步為 Vitis Linux A53 app 加 CMA contiguous DMA buffer；板端目前 USB 網路在 standalone reset 後未回來，尚無法做 UVC 實測。
+- Git／同步：待本輪文件提交與 push 後補上結果。

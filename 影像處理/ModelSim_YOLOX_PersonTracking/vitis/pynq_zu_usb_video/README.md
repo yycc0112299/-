@@ -45,6 +45,22 @@ long `%TEMP%` path made GCC fail while creating dependency files. This is a
 reproducible host build flow. The JTAG DMA result is documented below; actual
 UVC capture and continuous dual-camera operation remain unverified.
 
+## UVC integration boundary
+
+The installed standalone Embedded Software repository was inspected on
+2026-11-06.  Its USB examples implement storage, mouse, keyboard and
+microphone; it contains no UVC host-class implementation.  Consequently a
+standalone A53 ELF must not be represented as a Logitech C270 capture driver.
+It is valid for the tested AXI control/DMA role, but a real UVC source requires
+the PYNQ Linux kernel's UVC/V4L2 driver.
+
+The next non-Jupyter control path is therefore a Vitis **Linux A53
+application**: V4L2 dequeues the two UVC frames into kernel/CMA-backed DDR,
+the application packs the A/B RGB words, performs cache/DMA ownership changes,
+and programs this Block Design's AXI DMA.  It needs a Linux sysroot plus a
+board-side contiguous DMA-buffer interface; neither may be replaced by fake PL
+camera pins or an unsupported bare-metal USB class driver.
+
 ## JTAG AXI and full-frame DMA test
 
 `main.c` creates one 640×480 packed dual-RGB synthetic frame in aligned DDR,

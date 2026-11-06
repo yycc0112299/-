@@ -117,3 +117,10 @@
 - 驗證：本機 6 項網站測試與 syntax compile PASS；透過 SSH 將 v7 部署到板子，網站 `/api/start` 保留 camera `[0,2]`。10 秒後 `/api/live` 仍為「雙鏡頭擷取中斷」、frame_id=0。
 - 未完成：兩路畫面尚未能持續出現在電腦網站。需改變 USB root hub／外接供電或只保留一路後，再進行實機驗證。
 
+## 2026-11-06 — Vivado PS USB／DDR／DMA Block Design XSA 匯出
+
+- 需求／決策：依使用者指定的 Vivado 硬體檔加 Vitis 控制檔流程，保留 USB 鏡頭的真實 PS USB→DDR→AXI DMA→PL 架構，而非將 USB D+/D- 誤接為 PL 影像腳。
+- 實際完成：新增可重跑的 `fpga/package_pynq_zu_video_ip.tcl`，把 staged `dual_camera_yolox_axis_top.v` 包為 `project.local:video:dual_camera_yolox_axis:1.0` IP Catalog core；BD script 改由此 IP 建立自訂 RTL，排除 Windows module-reference GUI cache 的 `rodin:slave11` 失敗。乾淨 Vivado 2024.2 build 的封裝、BD validation、synthesis、implementation、bitgen 與 `write_hw_platform -include_bit` 全部完成。
+- 驗證範圍：bitstream 前 DRC 為 0 errors；routing 估算 WNS `+0.193 ns`、WHS `+0.012 ns`；含 bitstream 的 XSA 確實建立。暫存 build、bitstream、XSA 和 logs 位於 `%TEMP%`，為可重建產物，不上傳 Git。尚未建立/編譯 Vitis BSP/application，也尚未以此設計 JTAG 上板、啟動 DMA、接收 UVC frame 或驗證雙鏡頭資料流。
+- Git／同步：本輪會連同三份進度文件做 whitespace/合約檢查、建立本機提交並推送 `origin/main`；實際 commit 與推送結果將由後續紀錄補上。
+

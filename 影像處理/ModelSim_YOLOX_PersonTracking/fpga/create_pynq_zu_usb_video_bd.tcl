@@ -16,6 +16,15 @@ set project_file [file join $build_dir pynq_zu_usb_video.xpr]
 if {![file exists $project_file]} { error "Run create_pynq_zu_usb_video_project.tcl first" }
 open_project $project_file
 
+# Use a packaged IP Catalog core rather than a module-reference.  This is
+# reproducible in batch mode and avoids the Windows module-reference GUI cache.
+set ip_repo [file join $build_dir ip_repo]
+if {![file exists [file join $ip_repo dual_camera_yolox_axis component.xml]]} {
+ error "Run package_pynq_zu_video_ip.tcl after create_pynq_zu_usb_video_project.tcl first"
+}
+set_property ip_repo_paths $ip_repo [current_project]
+update_ip_catalog
+
 set bd_name pynq_zu_usb_video
 set bd_dir [file join $build_dir pynq_zu_usb_video.srcs sources_1 bd $bd_name]
 set existing_bd [get_files -quiet [file join $bd_dir ${bd_name}.bd]]
@@ -50,7 +59,7 @@ set_property -dict [list \
  CONFIG.c_include_sg {0} CONFIG.c_m_axis_mm2s_tdata_width {64}] [get_bd_cells axi_dma_0]
 create_bd_cell -type ip -vlnv xilinx.com:ip:axi_gpio:2.0 frame_id_gpio_0
 set_property -dict [list CONFIG.C_GPIO_WIDTH {32} CONFIG.C_ALL_OUTPUTS {1}] [get_bd_cells frame_id_gpio_0]
-create_bd_cell -type module -reference dual_camera_yolox_axis_top yolox_video_rtl_0
+create_bd_cell -type ip -vlnv project.local:video:dual_camera_yolox_axis:1.0 yolox_video_rtl_0
 create_bd_cell -type ip -vlnv xilinx.com:ip:util_vector_logic:2.0 video_irq_or_0
 set_property -dict [list CONFIG.C_OPERATION {or} CONFIG.C_SIZE {1}] [get_bd_cells video_irq_or_0]
 create_bd_cell -type ip -vlnv xilinx.com:ip:util_vector_logic:2.0 reset_invert_0

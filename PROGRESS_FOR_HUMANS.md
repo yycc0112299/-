@@ -253,3 +253,9 @@
 - 後續重新插拔後兩支 Logitech C270 再次出現並重跑 index 0/2 的 640×480 preflight PASS；網站以正確設定啟動後仍立刻回報雙鏡頭擷取中斷，未形成持續串流。這再次確認問題在 USB 傳輸資源，尚非軟體安裝或相機索引。
 - 已額外嘗試雙路 MJPEG、320×240、10 FPS 的低頻寬模式，仍在同時擷取時中斷；目前不能在網站顯示雙路畫面，必須先改善 USB 實體拓撲／供電。
 
+## 2026-11-06：Vivado USB/DMA 硬體檔完成
+
+- 已把自訂影像 RTL 改成 IP Catalog 元件，避開 Vivado Windows module-reference 快取錯誤。
+- 新的 PYNQ-ZU Block Design 已完整通過 Vivado 實作、DRC 和 bitstream，並成功輸出 Vitis 要用的 XSA；時序為正裕量。
+- 這是硬體檔完成，不是雙鏡頭影像已跑通。下一步是用 XSA 建 Vitis 控制程式並以 JTAG 上板測試；USB 雙鏡頭同時串流的實體頻寬問題仍待解決。
+

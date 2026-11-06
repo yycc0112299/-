@@ -373,6 +373,12 @@
 - 官方 ZIP、解壓 `.img` 和重複下載副本位於 `C:\Users\dsic\Downloads\`，是大型可重新取得的本機部署媒體，未加入 Git；本次只同步程式交接紀錄。
 - 這次紀錄已在整合共享 `main` 的新增提交後，以 `65c36f8` 成功推送至 `origin/main`；沒有覆寫其他電腦先行推送的校正／benchmark 變更。
 
+### 2026-11-06：PS USB→DDR→AXI DMA→PL Block Design 已完成可攜 XSA 匯出
+
+- 新增 `fpga/package_pynq_zu_video_ip.tcl`：將 staged RTL 封裝為 `project.local:video:dual_camera_yolox_axis:1.0` 的 IP Catalog core。`create_pynq_zu_usb_video_bd.tcl` 先要求這個本機 build 目錄內的 IP repository，再由 IP Catalog 建立自訂 stream/AXI-Lite IP；此作法取代在 Windows batch 環境會失敗的 module-reference GUI cache。
+- 以全新 `%TEMP%` build 實跑封裝與 `validate_bd_design` 成功。完整 Vivado 2024.2 synthesis、implementation、DRC、bitstream 和 `write_hw_platform -include_bit` 均完成：bitgen DRC 為 0 errors；routing 估算 WNS `+0.193 ns`、WHS `+0.012 ns`；XSA 已成功匯出。暫存 build/XSA/bitstream 位於 `%TEMP%`，可由 tracked TCL 重建，不納入 Git。
+- 這證明可重建的硬體交付物包含 PS USB 設定、DDR HP0、AXI DMA MM2S、64-bit AXI4-Stream、AXI-Lite mailbox、frame-ID GPIO 與 PS IRQ 接線；不代表兩支 UVC 鏡頭、DDR frame producer、DMA 啟動、PL 演算法或 IRQ 已在實板端端驗證。下一階段須用此 XSA 建立 Vitis platform/BSP/application，再以 JTAG 對板端下載和觀察控制路徑。
+
 ### 2026-11-06：PYNQ SD-boot 實機環境、UVC 與 dashboard bring-up
 
 - 板端透過 USB 網路 `192.168.3.1` 的 JupyterLab 可操作；實測 Linux `6.6.10-xilinx-v2024.1`、Python 3.10.4、NumPy 2.1.5、OpenCV 4.5.4、PYNQ 3.1.1。部署 tarball（含 35,858,002-byte YOLOX ONNX）由開發電腦臨時 HTTP server 傳至板子，不含帳密或私密資料。

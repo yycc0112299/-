@@ -80,4 +80,4 @@
 - 實際完成：官方 ZIP SHA-256 為 `7F61F9F7D9B74DB2DE64B8AC443CE472894C3FA70426906367A4386928F5A810`，與本機既有 ZIP 完全相同，內容為 `pynq_zu_2025_09_25.img`。已在 balenaEtcher 明確選取 15.9 GB `Generic- Multi-Card USB Device` 後進行新的寫入；本輪 Verify 曾觀察至 52%，最後 Etcher 顯示「燒錄成功」（23.2 MB/s）。
 - 驗證範圍：此證據涵蓋 Etcher 的寫入與內建驗證；Etcher 完成後自動卸載媒體，Windows 顯示 `No Media`，未對卸載後的 Disk 2 做無效的分割區宣稱。尚未在板子上重新開機，故 PS ERR、Linux、USB 網路、Jupyter、SSH、相機、Overlay 及 FPGA 皆仍未驗證。
 - 未上傳項目：官方 ZIP、9.84 GB `.img` 和重複下載副本均在 `C:\Users\dsic\Downloads\`，為大型可重建部署媒體，未上傳 Git；不含帳密或私人資料。
-- Git／同步：本筆紀錄與進度文件將提交並推送至 `origin/main`；提交／推送結果於完成後補實際狀態。
+- Git／同步：初次推送因遠端已有新提交而被拒絕；已 `fetch`、成功 rebase 至 `origin/main` 後，以 `65c36f8`（`Record verified PYNQ-ZU SD imaging`）成功推送至 `origin/main`。此同步結果隨後續文件提交保留。

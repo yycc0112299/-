@@ -60,6 +60,24 @@ def open_usb_camera(index):
     return p.cv2.VideoCapture(index, backend)
 
 
+def configure_usb_camera(cap):
+    """Use a low-bandwidth UVC mode when the dashboard runs on Linux.
+
+    Two C270 cameras on the PYNQ-ZU's shared USB controller cannot reliably
+    sustain the driver's default uncompressed 640x480 stream.  MJPEG at 15
+    FPS preserves the dashboard's 640x480 contract while reducing bus load.
+    Windows keeps its existing DirectShow negotiation.
+    """
+    if os.name != "nt":
+        cap.set(p.cv2.CAP_PROP_FOURCC, p.cv2.VideoWriter_fourcc(*"MJPG"))
+        cap.set(p.cv2.CAP_PROP_FPS, float(os.environ.get("PYNQ_UVC_FPS", "10")))
+        cap.set(p.cv2.CAP_PROP_FRAME_WIDTH, int(os.environ.get("PYNQ_UVC_WIDTH", "320")))
+        cap.set(p.cv2.CAP_PROP_FRAME_HEIGHT, int(os.environ.get("PYNQ_UVC_HEIGHT", "240")))
+    else:
+        cap.set(p.cv2.CAP_PROP_FRAME_WIDTH, 640)
+        cap.set(p.cv2.CAP_PROP_FRAME_HEIGHT, 480)
+
+
 def snapshot_quality(frame, box, confidence, check_face=True):
     """Score a person crop; frontal-face detection improves review photos only."""
     height, width = frame.shape[:2]
@@ -369,8 +387,7 @@ class DualEngine:
                     caps.append(cap)
                     if not cap.isOpened():
                         raise RuntimeError(f"鏡頭 {index} 無法開啟；請確認沒有被其他程式使用")
-                    cap.set(p.cv2.CAP_PROP_FRAME_WIDTH, 640)
-                    cap.set(p.cv2.CAP_PROP_FRAME_HEIGHT, 480)
+                    configure_usb_camera(cap)
                 while True:
                     with self.lock:
                         if not self.enabled or self.epoch != epoch:
@@ -380,8 +397,8 @@ class DualEngine:
                     frames = []
                     for cap in caps:
                         ok, frame = cap.retrieve()
-                        if not ok or frame.shape != (480, 640, 3):
-                            raise RuntimeError("兩台鏡頭都必須輸出原生 640 × 480")
+                        if not ok or frame is None or frame.ndim != 3 or frame.shape[2] != 3:
+                            raise RuntimeError("兩台鏡頭必須輸出有效的 BGR 影格")
                         frames.append(frame)
                     now = time.monotonic()
                     images = None

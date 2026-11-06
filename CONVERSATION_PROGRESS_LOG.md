@@ -96,3 +96,10 @@
 - 判定／未完成：重插仍重現同時串流失敗，與先前 kernel 的 USB bandwidth/altsetting 錯誤一致。需要外接供電 hub、不同 root hub 或降低 UVC 格式/傳輸需求後才能繼續；這不是已完成的相機實機驗證。
 - Git／同步：已提交為 `1995476`（`Record repeated PYNQ UVC bandwidth failure`）並成功推送至 `origin/main`。
 
+## 2026-11-06 — 低頻寬雙鏡頭串流嘗試
+
+- 需求：使 PYNQ 的雙鏡頭畫面可傳到電腦網站。
+- 實際變更：Linux UVC 協商改為 MJPEG、預設 320×240、10 FPS，並可經 `PYNQ_UVC_FPS/WIDTH/HEIGHT` 覆寫；預檢查同步採用此低頻寬模式。
+- 驗證：本機 6 項網站測試與 syntax compile PASS；透過 SSH 將 v7 部署到板子，網站 `/api/start` 保留 camera `[0,2]`。10 秒後 `/api/live` 仍為「雙鏡頭擷取中斷」、frame_id=0。
+- 未完成：兩路畫面尚未能持續出現在電腦網站。需改變 USB root hub／外接供電或只保留一路後，再進行實機驗證。
+

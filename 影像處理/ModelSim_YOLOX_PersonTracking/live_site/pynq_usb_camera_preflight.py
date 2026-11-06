@@ -12,8 +12,10 @@ def inspect(index: int) -> tuple[int, int]:
     try:
         if not cap.isOpened():
             raise RuntimeError(f"camera index {index} did not open")
-        cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
-        cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
+        cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc(*"MJPG"))
+        cap.set(cv2.CAP_PROP_FPS, 10)
+        cap.set(cv2.CAP_PROP_FRAME_WIDTH, 320)
+        cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 240)
         ok, frame = cap.read()
         if not ok or frame is None:
             raise RuntimeError(f"camera index {index} did not return a frame")

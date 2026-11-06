@@ -150,6 +150,10 @@
 - 驗證範圍：這證明 Vivado bitstream 加 Vitis A53 對實機 AXI GPIO/mailbox 的寫讀控制。status `3` 是 pending/pair-present，因尚未有 UVC/DMA AXI stream 消耗這筆 command；未證明 UVC、DDR frame capture、DMA、PL feature/bbox、IRQ 或雙相機畫面。
 - Git／同步：本次會提交 control smoke-test 原始碼與三份紀錄並推送 `origin/main`；實際提交結果由下一筆紀錄承接。
 
+### 同步結果
+
+- 已提交為 `5684f47`（`Verify PYNQ-ZU Vitis AXI control over JTAG`）並成功推送至 `origin/main`；工作樹與遠端 `main` 同步。
+
 - 需求／決策：使用已完成的 PYNQ-ZU USB/DMA XSA 建立 Vitis A53 standalone platform，讓 Vitis 取代 Jupyter 擔任 AXI DMA、GPIO 與 mailbox 的控制端。
 - 實際驗證：Vitis 2024.2 Python CLI 已實際啟動並讀取 XSA。初始 Lopper installation path 為 `null`；確認隨附 Lopper 包缺失 requirements link 後，以該安裝包的離線 wheels 建立本機 Lopper virtualenv，並驗證 `lopper -h`、YAML 與 libfdt imports。設定 `VITIS_LOPPER_INSTALL_LOC` 後，Vitis 已進一步嘗試從 XSA 產生 SDT。
 - 驗證界線／阻礙：本機 Vitis 安裝未提供 `xsct`，也沒有 Vitis-side embedded software tree。即使 `ESW_REPO` 指向已存在的 Vivado `data/embeddedsw`，Vitis 仍在 SDT generation 失敗；未產生 platform、BSP、`xparameters.h`、ELF 或 JTAG application。Lopper virtualenv、Vitis temporary workspaces 和 logs 是此電腦本機工具產物，不上傳。

@@ -200,3 +200,9 @@
 - 實際完成：新增 `run_uvc_vitis_preflight.sh`；它驗證兩個 V4L2 device、執行 AArch64 packer、並要求輸出剛好為 640×480×8 = 2,457,600 bytes，PASS marker 為 `PYNQ_ZU_UVC_VITIS_PREFLIGHT_PASS`。
 - 驗證範圍／未完成：Windows host 沒有可用 Git Bash/WSL，尚未執行 POSIX shell syntax check；更尚未因板子仍為 standalone/JTAG state 在 PYNQ Linux 執行，也不含 DMA/CMA handoff。
 - Git／同步：待本輪提交與 push 後補上結果。
+## 2026-11-06 — Vitis Linux UVC packer 可重跑建置
+
+- 需求／決策：讓下次上板前可用一個受版本控制的命令重建 AArch64 UVC packer，避免再誤用失敗的 Windows wrapper。
+- 實際完成：新增 `build_linux_uvc_packer.ps1`，使用 Vitis direct GNU compiler、暫時 PATH、`-Wall -Wextra -Werror`，輸出 deployable ELF 與 `PYNQ_ZU_UVC_PACKER_BUILD_PASS` marker。
+- 驗證範圍／未完成：以 `%TEMP%/pynq_zu_uvc_build_check` 實跑成功，生成 74,624-byte packer；未進行板端 execution 或 DMA handoff。
+- Git／同步：待本輪提交與 push 後補上結果。

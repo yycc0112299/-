@@ -444,3 +444,6 @@
 
 - 新增 `vitis/pynq_zu_usb_video/linux/run_uvc_vitis_preflight.sh`。它不使用 Jupyter：檢查兩個指定 V4L2 character devices 和 packer executable，執行一次兩路 UVC capture/packing，並強制輸出為 2,457,600 bytes（640×480×8-byte dual-RGB words）。成功標記 `PYNQ_ZU_UVC_VITIS_PREFLIGHT_PASS`，可作為下週 SD boot 後的第一個 runtime gate。
 - 此 Windows host 沒有 Git Bash/WSL 的可用 POSIX shell，故尚未做 shell syntax execution；尚未在板端 Linux 執行，也尚未做 AXI DMA/CMA handoff。
+### 2026-11-06：可重跑的 Vitis Linux UVC build script
+
+- 新增 `vitis/pynq_zu_usb_video/linux/build_linux_uvc_packer.ps1`，固定使用已驗證的 Vitis direct GNU compiler（非會 DLL 失敗的 wrapper），臨時將 tool `bin` 放入 PATH、以 warnings-as-errors 建置 `uvc_v4l2_packer`，並輸出 `PYNQ_ZU_UVC_PACKER_BUILD_PASS`。預設產物在 `linux/build/`，用於 SD/Linux 上板前複建。

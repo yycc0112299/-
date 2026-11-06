@@ -28,6 +28,9 @@ $env:PATH = "$bin;$env:PATH"
 & "$bin\aarch64-linux-gnu-gcc.exe" -std=c11 -Wall -Wextra -Werror -O2 uvc_v4l2_packer.c -o uvc_v4l2_packer
 ```
 
+Or run `./build_linux_uvc_packer.ps1` from PowerShell; it writes the deployable
+`uvc_v4l2_packer` ELF under `linux/build/` and prints a PASS marker.
+
 On 2026-11-06 this command produced a 74,624-byte AArch64 ELF64 PIE with
 `-Wall -Wextra -Werror`.  Do not use the adjacent
 `x86_64-petalinux-mingw32/.../aarch64-xilinx-linux-gcc.exe` wrapper on this

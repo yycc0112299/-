@@ -303,3 +303,6 @@
 
 - 新增不靠 Jupyter 的 Linux 檢查腳本：會開兩支 UVC、產生一張 FPGA 格式的雙影格，並確認大小正確。
 - 下週切回 SD/Linux 後，直接執行它就能知道相機與 Vitis packing 是否真的正常。
+## 2026-11-06：Vitis Linux 一鍵編譯
+
+- 新增一鍵 build script，可重新產生要部署到板子的 AArch64 UVC packer，不需手動設定 compiler。

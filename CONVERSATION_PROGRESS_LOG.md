@@ -89,3 +89,10 @@
 - 未上傳項目：部署 tarball、模型和板上 `/root/pynq_dual_dashboard_v*` 都是可重建的本機／板端部署產物，不進 Git；不含帳密、私人影像或連結。
 - Git／同步：已提交為 `0b8b768`（`Fix PYNQ dual camera dashboard bring-up`）並成功推送至 `origin/main`；本機與遠端 `main` 已同步。
 
+## 2026-11-06 — 重新插拔後的雙 UVC 複測
+
+- 實際完成：重新登入 JupyterLab、重新插拔後，兩支 Logitech C270 再次被 Linux 列成 `/dev/video0`–`/dev/video3`。專案 UVC preflight 以 camera A=0、B=2 再次 PASS，兩路皆讀到 640×480。
+- 驗證結果：以已修正的 v5 dashboard 啟動，health endpoint 成功，POST `/api/start` 保留 `[0,2]`；約 7 秒後 `/api/live` 回報「雙鏡頭擷取中斷」、frame_id=0。未產生持續影像／YOLOX 結果。
+- 判定／未完成：重插仍重現同時串流失敗，與先前 kernel 的 USB bandwidth/altsetting 錯誤一致。需要外接供電 hub、不同 root hub 或降低 UVC 格式/傳輸需求後才能繼續；這不是已完成的相機實機驗證。
+- Git／同步：本次環境複測紀錄與進度文件將提交並推送至 `origin/main`；結果在提交後補記。
+

@@ -364,4 +364,5 @@
 - 修正 `live_site/dual_server.py`：PYNQ 內建 OpenCV 4.5.4 沒有 `cv2.data`，現在 Haar cascade 會依序找 pip 和系統路徑，找不到時回傳空 cascade，不會阻擋網站。另修正 Host 白名單的無 Origin 首頁導覽，以及 `/api/start`／`/api/stop` 未傳 camera 欄位時保留命令列設定。
 - 修正 `start_pynq_dual.sh`、README、PowerShell 部署訊息：參數是瀏覽器使用的 PYNQ 位址（本次 `192.168.3.1`），不是觀看網站的電腦 IP；開發電腦對 `/api/health` 實測成功。
 - 驗證限制：啟動後內核記錄 `Not enough bandwidth for new device state/altsetting 7`，接著 USB device 3/4 disconnect；重查 `/dev/video*` 已不存在。這是 USB bus 頻寬／供電或相機協商中斷的實機問題，不可宣稱持續雙鏡頭、YOLOX 或 FPGA video path 已完成。
+- 重新插拔的複測：兩支 C270 再次列為 `/dev/video0`–`/dev/video3`；`pynq_usb_camera_preflight.py --camera-a 0 --camera-b 2` 再次 PASS（皆 640×480）。以 v5 dashboard 啟動並由電腦 POST `/api/start` 後，API 正確保留 `[0,2]`，但約 7 秒內狀態變為「雙鏡頭擷取中斷」、frame_id=0。這排除先前 API fallback 到 0/1 的程式錯誤，仍指向兩路同時 UVC 串流的實體 USB 資源問題。
 

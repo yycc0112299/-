@@ -13,6 +13,29 @@
 .\run_person_tracking.ps1 -Mode web
 ```
 
+## 兩板 Wi-Fi 偵測資料交換（Linux）
+
+`peer_protocol.py` 是兩塊 PYNQ-ZU 之間的第一個、可獨立驗證的
+TCP 資料協定。它只傳送人物框、confidence、local track ID、frame ID、
+capture timestamp 與影像尺寸，不把高頻寬原始影像假裝成必要資料。
+schema 固定為 `pynq-person-detections-v1`；目前只接受 `person`，並在
+接收端驗證座標、尺寸、類別與封包大小，才寫入最新 JSON。
+
+板 B（接收端）：
+
+```sh
+python3 peer_protocol.py receive --bind 0.0.0.0 --port 8790 --output peer_latest.json
+```
+
+板 A（傳送端，`frame.json` 必須符合上述 schema）：
+
+```sh
+python3 peer_protocol.py send --host <board-b-wifi-ip> --port 8790 --input frame.json
+```
+
+這個模組目前經本機 loopback TCP 與 schema unit tests 驗證；尚未在兩塊
+實體 PYNQ-ZU 的 Wi-Fi 上驗證，也尚未直接接上 YOLOX/YOLOv8/DPU detector。
+
 第一行從 USB 攝影機新拍 90 張；第二行使用下載的公開人物照片做平移序列和空白負例。每次結果都放入 `person_tracking/runs` 的新資料夾，`report.html` 可直接看人物框和 ID。
 
 另有 `validate_camera.py` 會先連續擷取兩輪各 120 張，再處理；`validate_web.py` 會使用兩張人物照片、三種亮度和每組七個位置，搭配手標人物框核對 IoU 與 ID 切換，並測試水果照片等負例；`test_tracking.py` 測試追蹤交會、遮擋、離開，以及手算 ROI 硬體案例。

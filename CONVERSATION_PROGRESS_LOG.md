@@ -221,3 +221,10 @@
 - DPU audit：板端實測無 `xdputil`、VART Python module 或 `/dev/dpu`。目前 PYNQ image 不具 DPU hardware/runtime；尚未有 YOLOv8 quantization、`.xmodel`、VART 或 DPU inference。需先為 `xczu5eg` 完成 DPUCZDX8G Vivado integration、matching Linux driver/VART/CMA image 和 DPU-specific `arch.json`。
 - 驗證範圍／未完成：本次已實證實板 USB failure、AArch64 packer build/deploy/run 與 DPU runtime absence；未驗證單鏡頭持續串流、第二板、Wi-Fi、DPU image/bitstream、YOLOv8 inference 或 DMA/CMA handoff。
 - Git／同步：已提交為 `8391da8`（`Diagnose PYNQ dual UVC and plan DPU architecture`）並成功推送至 `origin/main`；本機 `linux/build/` 只有可重建 AArch64 ELF，未上傳。
+
+## 2026-11-11 — 兩板 Linux Wi-Fi person-detection protocol 基礎
+
+- 需求／決策：為後續每板一鏡頭、Wi-Fi 互傳資料建立可由 YOLOX 或未來 YOLOv8/DPU 使用的共同介面，先傳 compact detections 而非 raw video。
+- 實際完成：新增 `person_tracking/peer_protocol.py`，實作 versioned TCP newline-JSON schema `pynq-person-detections-v1`、strict packet/box/class validation、single-packet sender、持續 receiver 與 latest-result JSON 輸出；新增 four-case tests。
+- 驗證範圍：`python person_tracking/tests/test_peer_protocol.py` 實測 4 tests PASS，含 localhost TCP framed transfer；`py_compile` PASS。這是開發電腦 loopback，不是兩塊 PYNQ 的 Wi-Fi 或真實 detector/DPU 推論驗證。
+- Git／同步：待本輪差異檢查、提交與 push 後補上 commit 結果。

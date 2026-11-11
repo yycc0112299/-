@@ -463,3 +463,10 @@
 - 模型名稱決策：現有 assets 是 YOLOX；新 detector target 是 YOLOv8。兩者不能混稱。保留一個 detector adapter output schema，先支援 CPU YOLOv8，再以 VART DPU implementation 取代 backend，避免重寫 tracker/Wi-Fi interface。
 - 驗證邊界：Vitis Linux packer cross-build 和兩路 USB failure 都已實板驗證；單板單鏡頭持續 streaming、第二板、Wi-Fi、DPU Vivado build、VART、YOLOv8 quantization/compile/inference 尚未完成。
 - 同步結果：本項程式、架構與交接文件已提交為 `8391da8`（`Diagnose PYNQ dual UVC and plan DPU architecture`）並成功推送至 `origin/main`。
+
+### 2026-11-11：兩板 Linux Wi-Fi detection protocol 基礎實作
+
+- 新增 `person_tracking/peer_protocol.py`：標準庫 TCP newline-JSON protocol，schema=`pynq-person-detections-v1`，傳送 `board_id`、frame/timestamp、影像尺寸與 person detections。接收端在寫出 `peer_latest.json` 前嚴格驗證 packet size、schema、person 類別、信心值、track ID 及 box 在畫面範圍內。設計上不傳 raw video，避免將其當成兩板初期通訊前提。
+- CLI：`receive --bind --port --output` 持續接收並保留最新 validated result；`send --host --port --input` 傳送一個 JSON packet。此 module 可由既有 YOLOX 或未來 YOLOv8/VART adapter 產生相同 schema，不綁定目前 detector。
+- 新增 `person_tracking/tests/test_peer_protocol.py`，實跑四項：normalization round-trip、out-of-range box rejection、非 person/schema rejection、localhost TCP framed send/read。實測 `python tests/test_peer_protocol.py` PASS（4 tests）與 `py_compile` PASS。
+- 驗證邊界：尚未將 packet producer 接到實際 detector，尚未在兩塊 PYNQ Wi-Fi 上執行，且沒有聲稱 DPU/VART 已就緒。

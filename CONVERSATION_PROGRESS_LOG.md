@@ -495,4 +495,4 @@
 - 實際完成：UART read-only check 證實 `/lib/firmware/regulatory.db`（4,160 bytes）與 `.p7s` 都存在；`wireless-regdb` package status 是 `install ok installed`，installed/candidate 均為 `2021.08.28-0ubuntu1`。
 - 更正：先前記錄的 kernel load error 仍是事實，但不能推論為 package/file missing；目前較合理的未驗證原因是 early boot/load timing 或 association 前的 driver state。未來應在授權 SSID 下啟用/association diagnostics 後才決定 image repair。
 - 驗證界線／未完成：沒有 network writes、reload/installation、interface up 或 scan；仍無第二板/SSID/peer test。
-- Git：本項更正與進度文件將以本輪 commit 推送至 `origin/main`；下一筆紀錄補上結果。
+- Git：已提交為 `f237e2e`（`Correct PYNQ regulatory database diagnosis`）並成功推送至 `origin/main`；本行的同步結果由下一筆文件提交補上。

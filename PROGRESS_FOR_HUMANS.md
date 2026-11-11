@@ -380,5 +380,6 @@
 
 ## 2026-11-11：DPU Linux 映像的環境阻礙
 
+- 此環境檢查已同步到 GitHub `main`（`e9413a3`）。
 - 這台 Windows 沒有 PetaLinux、Docker 或已安裝的 WSL Linux；所以目前不能產生相配 DPU driver/VART Linux image。
 - Vivado 與 Vitis 的硬體交接已完成，但這不等於 DPU 可以上板推論；仍需受支援的 Linux/PetaLinux build host。

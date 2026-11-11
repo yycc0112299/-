@@ -302,4 +302,4 @@
 - 需求／決策：確認現有主機是否能接續 Vivado/Vitis handoff 建置 PYNQ-ZU B512 的 matching Linux DPU runtime，而非將 absence 視為可略過的步驟。
 - 實際驗證：Windows `wsl.exe` 存在但沒有任何 installed Linux distribution；未找到 Docker command。Xilinx 安裝樹沒有 PetaLinux executable/settings，僅有 installer EULA 與 lopper helper。
 - 驗證範圍／未完成：本機確實不能建置 PetaLinux/VART/DPU driver image；未嘗試安裝 WSL、PetaLinux、重刷 SD 或下載 DPU bitstream。DPU Linux build 仍需要受支援 Linux host 的外部環境，不影響已驗證 CPU YOLOv8 path。
-- Git／同步：本項環境紀錄將提交至 `main`；確切提交與推送結果會在後續同步紀錄寫入。
+- Git／同步：已提交為 `e9413a3`（`Record DPU Linux build host blocker`）並成功推送至 `origin/main`。沒有安裝或上傳 PetaLinux、Linux image、bitstream、模型或帳密。

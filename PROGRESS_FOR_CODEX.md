@@ -503,6 +503,7 @@
 
 ### 2026-11-11：DPU Linux build-host recheck
 
+- 同步結果：環境 blocker 與進度文件已提交為 `e9413a3`（`Record DPU Linux build host blocker`）並成功推送至 `origin/main`。
 - 實際 host audit：Windows 有 `wsl.exe` 但未安裝任何 Linux distribution，沒有 `docker` command；Xilinx 安裝樹沒有 PetaLinux executable/settings，僅見 installer EULA 與 lopper helper。這台主機目前不能作為 PetaLinux/Vitis-AI Linux image build host；安裝 WSL/PetaLinux 或使用受支援 Linux build host 是 B512 DPU driver/VART runtime 的外部前提，不能由目前 Vitis platform 成功推論出來。
 - 驗證界線：未安裝 WSL/PetaLinux、未重刷 SD、未下載 DPU bitstream。這不影響已驗證 CPU YOLOv8 path，但 matching DPU Linux image 仍未完成。
 

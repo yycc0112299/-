@@ -487,4 +487,4 @@
 - 需求／決策：判定 all-zero/down `wlan0` 是缺 hardware/driver 還是未完成 Linux/network setup；只讀取現況，不 scan/join/write Wi-Fi。
 - 實際完成：UART 讀取 sysfs/dmesg；`wlan0` 是 SDIO `mmc1:0001:1` 的 `wilc_sdio` driver，dmesg 明示 `Driver Initializing success`。但 `cfg80211` 無法載入 `regulatory.db`（error -2），並有未連線 RSSI read failure。
 - 驗證界線／未完成：未啟用 interface、未設定 regulatory data/SSID/peer，沒有第二板。這證實 driver/hardware initialization，不能證實 wireless association、IP addressing、TCP peer 或雙板工作。
-- Git：本紀錄與進度文件將以本輪 commit 推送至 `origin/main`；下一筆紀錄補上結果。
+- Git：已提交為 `8c366ad`（`Record PYNQ WiFi driver diagnosis`）並成功推送至 `origin/main`；本行的同步結果由下一筆文件提交補上。

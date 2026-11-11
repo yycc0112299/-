@@ -337,3 +337,8 @@
 - 這代表「Vivado 硬體檔」已有可重建的 DPU bitstream；尚未代表板上已能跑人物辨識。接下來還需要相配的 Linux DPU driver、VART、記憶體設定、YOLOv8 INT8 `.xmodel`，以及板端實測。
 
 本項已同步到 GitHub `main`（`dbaeb8f`）。
+
+## 2026-11-11：Vitis 的硬體交接檔
+
+- 已用 DPU bitstream 匯出 XSA 硬體交接檔，裡面有 bitstream、硬體描述與 PS 初始化資料，供下一步 Vitis/Linux 建置使用。
+- XSA 已實際產生並檢查內容；它只是把 Vivado 硬體交給軟體工具，尚不是 Linux DPU driver、VART 或 YOLOv8 已能運作。

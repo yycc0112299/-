@@ -109,6 +109,13 @@ extracted official DPUCZDX8G source root and, optionally,
 `create_pynq_zu_dpu_bd.tcl`, `synthesize_pynq_zu_dpu_b512.tcl`, then
 `implement_pynq_zu_dpu_b512.tcl` with Vivado 2024.2 batch mode.
 
+`export_pynq_zu_dpu_xsa.tcl` is the next reproducible handoff step. It opens
+only a `write_bitstream Complete!` implementation run and writes a fixed XSA
+with the bitstream. It was run successfully: the 2,586,044-byte XSA contains
+the DPU `.hwh`, bitstream, PS init files, `sysdef.xml`, and XSA metadata. The
+archive is deliberately a local build artifact; the tracked Tcl reconstructs
+it on another development machine.
+
 The generated `pynq_zu_dpu` Block Design uses native
 `xilinx.com:ip:dpuczdx8g:4.0`, one B512 core, PS USB0/USB1 on MIO, A53 HPM0
 to the DPU AXI-Lite control slave, HP0/HP1 for 128-bit DPU data, HP2 for DPU

@@ -236,3 +236,11 @@
 - 實際驗證：Vivado 2024.2 `validate_bd_design`、top synthesis、implementation、routing、bitstream 均成功。最終 route status 為 68,180 fully-routed nets、0 routing errors；bitgen 0 errors/0 critical warnings；signoff WNS `+0.966 ns`、WHS `+0.010 ns`，所有 user timing constraints met。資源為 LUT 27.34%、register 17.75%、BRAM 50.00%、DSP 10.74%。外部 build 的 7,797,815-byte `.bit`、XSA/report 與 AMD source 都未上傳，因 Tcl 可重建且不是專案原始碼。
 - 驗證界線／未完成：尚未下載此 bitstream 到板子，也沒有 matching Linux image/device tree/CMA/DPU driver/VART、B512 `arch.json`、YOLOv8 INT8 `.xmodel` 或 VART inference。現有 SD PYNQ image 先前已確認缺 `/dev/dpu`、`xdputil` 和 VART；因此不能聲稱 DPU 或 YOLOv8 已上板可用。
 - Git／同步：已提交為 `dbaeb8f`（`Add PYNQ-ZU native DPU B512 Vivado flow`）並成功推送至 `origin/main`；下方同步紀錄提交會記錄此結果。
+
+## 2026-11-11 — DPU XSA hardware handoff for Vitis
+
+- 需求／決策：讓已完成的 Vivado DPU bitstream 可由後續 Vitis/Linux 流程取得，並拒絕從未完成 implementation 匯出硬體。
+- 實際完成：新增 `fpga/export_pynq_zu_dpu_xsa.tcl`，它檢查 `impl_1` 為 `write_bitstream Complete!`，再從 routed run 執行 `write_hw_platform -fixed -include_bit`。
+- 實際驗證：Vivado 2024.2 成功輸出 2,586,044-byte `pynq_zu_dpu_b512.xsa`；archive 實測含 `.hwh`、`.bit`、`psu_init.*`、`sysdef.xml`、`xsa.json/xml`。
+- 驗證界線／未完成：XSA 是 Vitis handoff，尚未用於 Vitis platform、Linux image/device tree/CMA/DPU driver/VART 或板端 inference；外部 XSA/bitstream/report 未上傳，因 tracked Tcl 可重建。
+- Git／同步：待本輪 script 與三份紀錄檢查、提交與 push 後補上結果。

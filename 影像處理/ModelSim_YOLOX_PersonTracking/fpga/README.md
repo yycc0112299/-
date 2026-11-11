@@ -11,6 +11,9 @@ BD 接線為 A53 HPM0 → SmartConnect → DPU AXI-Lite 控制、DPU 128-bit DAT
 PS IRQ0；PL1 150 MHz 餵 DDR data domain，clock wizard 產生 300 MHz DPU 2x
 clock。`synthesize_pynq_zu_dpu_b512.tcl` 與
 `implement_pynq_zu_dpu_b512.tcl` 分別產出 synthesis 和 bitstream gate。
+`export_pynq_zu_dpu_xsa.tcl` 僅在 `impl_1` 已完成 bitstream 時輸出含 `.bit` 的固定 XSA；
+2026-11-11 實跑輸出 2,586,044-byte archive，確認包含 `.hwh`、`.bit`、PS init、
+`sysdef.xml` 與 XSA metadata，供下一階段 Vitis/Linux 使用。
 
 先設定 `DPUCZDX8G_HOME` 為官方 AMD DPUCZDX8G 解壓來源根目錄；可選設定短路徑
 `PYNQ_ZU_DPU_BUILD_DIR`。2026-11-11 實跑 Vivado 2024.2：BD validate、synthesis、

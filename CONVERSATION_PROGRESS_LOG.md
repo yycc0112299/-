@@ -405,4 +405,4 @@
 - 實際完成：新增 `pynq_wifi_peer_preflight.py` 和 4 個 offline contract tests。gate 要求 interface up、IPv4；給 `--peer-host` 時還要求 peer TCP 可達。支援任意 interface name 並只做一次 TCP connect。
 - 實機驗證：暫傳至現有 PYNQ `/tmp` 以 `wlan0` 執行，JSON 證實 interface exists 但 down、沒有 IPv4，預期 exit=1／FAIL；暫存檔已移除。
 - 驗證界線／未完成：沒有 SSID scan/join、沒有 network write、沒有第二板或 Wi-Fi packet。未來需在共同 Wi-Fi/AP 上啟動 peer receiver 後，以 `--peer-host` 通過。
-- Git：本次程式與進度紀錄待同一筆提交推送至 `origin/main`；提交後在此紀錄補上結果。
+- Git：已提交為 `02c8183`（`Add two-board WiFi readiness gate`）並成功推送至 `origin/main`；本行的同步結果將由下一筆文件提交記錄。

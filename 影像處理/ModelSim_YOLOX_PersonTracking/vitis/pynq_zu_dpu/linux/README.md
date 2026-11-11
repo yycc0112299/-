@@ -61,7 +61,9 @@ python3 preflight_dpu_build_host.py \
 ```
 
 The Vitis-AI `v4.0` release notes state that the DPU IP in that branch and
-Vitis AI 3.5 are verified with Vivado, Vitis and PetaLinux **2024.1**. The
+Vitis AI 3.5 are verified with Vivado, Vitis and PetaLinux **2024.1**. Here
+`v4.0` identifies the DPU IP source branch; the runtime/compiler version to
+pass to this preflight remains `3.5`, not a guessed `4.0` runtime. The
 present hardware was successfully built with Vivado 2024.2, but that is not
 the published compatible toolchain for this DPU Linux path. Do not infer
 runtime compatibility from a successful Vivado implementation. Rebuild the

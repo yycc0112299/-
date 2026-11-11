@@ -421,3 +421,10 @@
 - 實際驗證：live PYNQ 有 `/dev/dma_heap/linux,cma`、`/dev/dma_heap/system`，CmaTotal=524288 KiB、CmaFree=517188 KiB。
 - 驗證界線／未完成：沒有 allocate/submit DMA buffer、沒有 DMA-BUF importer/driver、沒有 DMA/PL/DPU transfer；未改 kernel/module/bitstream。需要 matching kernel client/driver attach/map/sync DMA-BUF 才能接 AXI DMA。
 - Git：已提交為 `cc4d3d3`（`Document Linux CMA DMA handoff boundary`）並成功推送至 `origin/main`；本行的同步結果將由下一筆文件提交記錄。
+
+## 2026-11-11 — DPU v4.0 branch / Vitis AI 3.5 version clarification
+
+- 需求／決策：核對官方 release wording，避免把 DPU source branch `v4.0` 誤填為 Vitis AI runtime/compiler `4.0`，而下載錯 toolchain。
+- 實際完成：官方 Vitis-AI v4.0 release notes 證實該 branch DPU IP 搭配 Vitis AI 3.5 與 2024.1 tools；preflight docstring 和 Linux README 已明確區分。3/3 tests PASS，exact arch JSON 實跑仍 FAIL 於 compiler/PetaLinux/2024.2 mismatch。
+- 驗證界線／未完成：未下載或安裝工具；AMD Chrome profile 目前 signed out，故無法在本機取得 PetaLinux 2024.1。C: 剩餘約 165.70 GiB，超過 AMD UG1144 所列 100 GB host free-space minimum，但還需 Linux host。
+- Git：本次程式與進度紀錄待同一筆提交推送至 `origin/main`；提交後在此紀錄補上結果。

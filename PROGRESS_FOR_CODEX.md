@@ -1,5 +1,10 @@
 # 專題狀態與交接記錄（供 Codex）
 
+## 2026-11-11：DPU branch 與 Vitis AI runtime 版本語意已重新核對
+
+- AMD 官方 Vitis-AI `v4.0` release note 的精確措辭是：該 branch 的 DPU IP 與 **Vitis AI 3.5** 已驗證搭配 Vivado/Vitis/PetaLinux 2024.1。這裡的 `v4.0` 是 DPU source branch，不是 `--vitis-ai-version` 參數應傳的 runtime/compiler 版本；preflight 仍正確要求 `3.5`。
+- 為避免誤讀，更新 `preflight_dpu_build_host.py` docstring。unit tests 3/3 PASS；使用 exact `pynq_zu_dpu_b512_arch.json` 與現有 2024.2 值重跑，仍只報 Docker/`vai_c_xir` 缺失、PetaLinux 缺失、以及 2024.2 非 verified 2024.1 toolchain。
+
 ## 2026-11-11：Linux CMA 可用，但 Vitis/Linux AXI DMA 仍需 kernel DMA-BUF ownership layer
 
 - 對 live PYNQ 做唯讀盤點，發現 `/dev/dma_heap/linux,cma`、`/dev/dma_heap/system`；`CmaTotal=524288 KiB`、`CmaFree=517188 KiB`。所以 Linux camera/packer 後有 contiguous-memory allocation source，這是正面硬體／kernel 證據。

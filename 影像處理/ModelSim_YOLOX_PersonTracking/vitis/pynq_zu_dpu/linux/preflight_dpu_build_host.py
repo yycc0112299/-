@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """Report whether a host can build the matching PYNQ-ZU DPU Linux image.
 
-This check covers the DPUCZDX8G 4.0 / Vitis AI 3.5 contract used by this
-project. It makes no downloads and changes no system configuration.
+This check covers the DPUCZDX8G IP from the Vitis AI v4.0 branch and its
+Vitis AI 3.5 runtime/compiler contract. It makes no downloads and changes no
+system configuration.
 """
 
 from __future__ import annotations

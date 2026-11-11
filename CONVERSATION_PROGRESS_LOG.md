@@ -346,4 +346,4 @@
 - 需求／決策：為後續兩塊 PYNQ-ZU 各一支相機、以 Wi-Fi 交換人物 metadata 的架構，先確認第一塊板的無線硬體狀態；不連線、不掃描 SSID、不寫入網路設定。
 - 實際驗證：`wlan0` managed interface/`phy#0` 存在，kernel dmesg 顯示 `wilc_sdio` 已初始化 `wlan0`。目前 `wlan0` DOWN、無 IP，NetworkManager/wpa_supplicant 皆 inactive。
 - 驗證界線／未完成：沒有第二塊板，沒有 SSID/密碼/授權，故未設定 Wi-Fi、未收發 peer packet。`regulatory.db` 缺失與未連線的 RSSI 訊息僅記錄為 kernel 診斷，不當作 Wi-Fi 成功或失敗的替代證據。
-- Git：本次 Wi-Fi readiness 紀錄待同一筆提交推送至 `origin/main`；提交後在此紀錄補上結果。
+- Git：已提交為 `64ff1db`（`Record PYNQ WiFi readiness`）並成功推送至 `origin/main`。沒有上傳 SSID、密碼、相機影像、模型、bitstream 或板端檔案。

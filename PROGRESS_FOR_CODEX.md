@@ -1,5 +1,11 @@
 # 專題狀態與交接記錄（供 Codex）
 
+## 2026-11-11：重開後 DPU bitstream 仍在 PL，Linux runtime 仍不相配
+
+- Vivado Hardware Manager 的目前 `xczu5_0` 狀態為 `Programmed`，Programming file 指向 `C:/pynq_zu_dpu_native_build/project/pynq_zu_dpu.runs/impl_1/pynq_zu_dpu_wrapper.bit`。Tcl Console 有明確 `set_property PROGRAM.FILE ...` 後的 `program_hw_devices [get_hw_devices xczu5_0]` 記錄；不是僅檔案欄位殘留。
+- 同時，SD Linux 已實測正常 SSH、UVC 與 CPU YOLOv8；但 `/dev/dpu0` 仍 absent，`xdputil`、Python `vart`、`xir` 均不存在。故 bitstream 已載入的硬體事實不可延伸為 DPU runtime/YOLOv8 DPU inference 完成。
+- 本次僅讀取 Hardware Manager 狀態，沒有重新 Program、Erase、寫 SD 或變更板端環境。後續在沒有 matching 2024.1 Linux/device tree/DPU driver/VART/.xmodel 前，不得以此 PL 現況做 DPU inference 測試。
+
 ## 2026-11-11：兩板 Wi-Fi 路徑的板端唯讀診斷
 
 - 實機唯讀檢查：PYNQ-ZU Linux 有 `wlan0` managed interface（`phy#0`），kernel 在 boot 時載入 `wilc_sdio` 並初始化 `wlan0`；因此板載 Wi-Fi 路徑可供後續第二板 metadata peer 使用。

@@ -347,3 +347,10 @@
 - 實際驗證：`wlan0` managed interface/`phy#0` 存在，kernel dmesg 顯示 `wilc_sdio` 已初始化 `wlan0`。目前 `wlan0` DOWN、無 IP，NetworkManager/wpa_supplicant 皆 inactive。
 - 驗證界線／未完成：沒有第二塊板，沒有 SSID/密碼/授權，故未設定 Wi-Fi、未收發 peer packet。`regulatory.db` 缺失與未連線的 RSSI 訊息僅記錄為 kernel 診斷，不當作 Wi-Fi 成功或失敗的替代證據。
 - Git：已提交為 `64ff1db`（`Record PYNQ WiFi readiness`）並成功推送至 `origin/main`。沒有上傳 SSID、密碼、相機影像、模型、bitstream 或板端檔案。
+
+## 2026-11-11 — Post-restart PL DPU bitstream state reconciliation
+
+- 需求／決策：釐清 SD restart 後 Vivado DPU bitstream 是否仍載於 PL，避免把 Hardware Manager 的 stale file field 誤作硬體狀態或把硬體載入誤說成 runtime 完成。
+- 實際驗證：Hardware Manager 顯示 `xczu5_0` status=`Programmed`，其 programming file 是 `pynq_zu_dpu_wrapper.bit`；同一 Vivado Tcl Console 記錄 `set_property PROGRAM.FILE` 與 `program_hw_devices [get_hw_devices xczu5_0]`。因此確定 DPU bitstream 目前載於 PL。
+- 驗證界線／未完成：Linux SSH/UVC/CPU YOLOv8 正常，但 `/dev/dpu0`、`xdputil`、VART/XIR 皆仍不存在。未重新 programming、未寫 SD/flash、未製作 matching Linux image 或 `.xmodel`；不得稱 DPU inference 完成。
+- Git：本次 PL state reconciliation 紀錄待同一筆提交推送至 `origin/main`；提交後在此紀錄補上結果。

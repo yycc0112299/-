@@ -1,5 +1,11 @@
 # 專題進度（重點版）
 
+## 2026-11-11：DPU 硬體檔目前已在 PL，但尚不能推論
+
+- Vivado 確認 PYNQ‑ZU 的 PL 目前載入 DPU bitstream。
+- SD Linux 仍可開機、相機和 CPU YOLOv8 仍可用；但 DPU driver、VART/XIR 與 DPU 模型都沒有，所以目前不能用 DPU 做 YOLOv8 推論。
+- 沒有再次燒錄或改動 SD；下一步必須先做相配的 Linux DPU runtime。
+
 ## 2026-11-11：板載 Wi‑Fi 硬體已確認，但尚未連網
 
 - 板子的 `wlan0` 與 Wi‑Fi 驅動已存在，可作為未來兩塊板傳送人物框資料的網路介面。

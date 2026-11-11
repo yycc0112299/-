@@ -1,5 +1,11 @@
 # 專題進度（重點版）
 
+## 2026-11-11：DPU 的 Python 執行介面已先做好
+
+- 新增可在未來 DPU Linux 上載入 `.xmodel`、送入量化影像、取回反量化 tensor 的 Python 介面；它會和既有 tracker／Wi-Fi 資料格式銜接。
+- 已用不需板子的假 DPU runner 測過影像顏色順序、量化、輸出還原與錯誤保護（7 個測試全部通過）。
+- 尚未有真正 DPU 編譯模型，所以還不能從 DPU tensor 產生人物框；程式會明確停止，不會把猜測的結果當作偵測成功。
+
 ## 2026-11-11：已確認下載的 Vitis 檔不能建 DPU Linux
 
 - 約 6.6GB 的下載檔是 Windows 版 Vitis Embedded 2024.2，不是 PetaLinux 或 Vitis AI Linux 建置環境。

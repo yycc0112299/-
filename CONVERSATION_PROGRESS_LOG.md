@@ -369,3 +369,10 @@
 - 實際驗證：該檔為 7,049,861,120-byte `Vitis_Embedded_Win_2024.2_1113_2356.tar`；Downloads 內沒有 PetaLinux/Vitis AI/2024.1 installer。WSL 尚未安裝 Linux distribution，Docker/Podman 也不存在。
 - 驗證界線／未完成：Windows Vitis Embedded archive 不是 PetaLinux/Vitis AI runtime build host。未解壓 139GB Unified archive、未安裝 WSL/Docker/PetaLinux、未改板子。DPU runtime 仍需受支援的 2024.1 Linux/PetaLinux/Vitis AI 環境。
 - Git：已提交為 `49b8755`（`Record DPU build host re-audit`）並成功推送至 `origin/main`；本行的同步結果將由下一筆文件提交記錄。
+
+## 2026-11-11 — VART Python execution boundary
+
+- 需求／決策：在尚未有可用 DPU Linux image／`.xmodel` 前，先把未來 DPU YOLOv8 的 Python 執行邊界接到既有 tracker／two-board metadata flow；不可假設 DPU compiled graph 的 output layout 等同 ONNX。
+- 實際完成：新增 `person_tracking/assets/yolov8_vart.py` 與離線 contract test。程式以 VART/XIR `.xmodel` 的唯一 DPU subgraph 與 real tensor shape/fix point 做 RGB NHWC INT8 input、job execution、named dequantized output tensors。沒有已測 decoder 時，人物 `infer()` 會明確拒絕。
+- 驗證界線／未完成：fake runner 加既有 YOLOv8 adapter/peer tests 共 7/7 PASS；未安裝 VART/XIR、未編譯 `.xmodel`、未修改 overlay/SD image 或板子，故沒有 DPU/VART/positive-person hardware claim。model-specific output decoder 仍必須以此 B512 的 compiled model 實測後才可接 `pipeline.Detector`。
+- Git：本次程式與進度紀錄待同一筆提交推送至 `origin/main`；提交後在此紀錄補上結果。

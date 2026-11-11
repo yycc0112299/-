@@ -74,6 +74,21 @@ PYNQ ONNX Runtime 1.16.3. On the current PYNQ, `numpy==1.21.6` and
 contained no person, so it did not validate a positive detection. This is not
 DPU/VART inference and does not replace the required B512 `.xmodel` flow.
 
+## Future B512 DPU / VART boundary
+
+`assets/yolov8_vart.py` is the Linux-side VART boundary for the future
+compiled B512 `.xmodel`. It discovers exactly one DPU subgraph, letterboxes a
+BGR camera frame to the graph's actual NHWC input tensor, converts it to RGB
+INT8 using that tensor's `fix_point`, then returns named dequantized output
+tensors. The hardware-free test protects this input/output contract.
+
+It intentionally does **not** pretend every compiled YOLOv8 graph has the
+same output heads as the CPU ONNX model. Until an exact PYNQ-ZU B512 `.xmodel`
+exists and its output decoder is validated with a known person frame,
+`VartYoloV8.infer()` raises an error rather than emitting guessed boxes. The
+remaining integration is to bind that verified decoder into `pipeline.Detector`
+so tracker and `pynq_yolov8_peer.py` retain the same person-packet schema.
+
 ## Two-board detection packets
 
 `pynq_yolov8_peer.py` captures exactly one C270 per board, calls the default

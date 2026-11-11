@@ -1,5 +1,11 @@
 # 專題狀態與交接記錄（供 Codex）
 
+## 2026-11-11：VART Python 執行邊界已補上，尚未偽稱為 DPU 人物偵測
+
+- 新增 `影像處理/ModelSim_YOLOX_PersonTracking/person_tracking/assets/yolov8_vart.py`。`VartYoloV8.from_xmodel()` 會在目標 Linux 的 VART/XIR 存在時，從 `.xmodel` 找到唯一 DPU subgraph；`infer_tensors()` 對照實際 VART tensor 的 NHWC shape／`fix_point` 完成 BGR→RGB letterbox、INT8 量化、VART job 與輸出反量化。這讓之後的 DPU YOLOv8 可把 tensor 結果交給既有 Python tracker／Wi-Fi schema，而不是發明裸金屬控制 API。
+- 目前尚無由此 PYNQ-ZU B512 `arch.json` 編譯的 `.xmodel`，故尚不知道模型真實 output heads 與 decode/量化契約。`infer()` 在未注入並測過的 model-specific decoder 時會明確失敗；不得將此檔案描述成已完成 DPU 人物框。`tests/test_yolov8_vart_adapter.py` 使用 fake VART runner 驗證 input RGB/NHWC/fix-point、輸出反量化與上述拒絕行為；連同既有 YOLOv8 adapter/peer tests 共 7/7 PASS。
+- 實機仍需要先取得 2024.1 PetaLinux/Vitis AI Linux host、重建相符 DPU/XSA、編譯確切 `.xmodel`，再把輸出 decoder 接到 `pipeline.Detector` 後在板上驗證。這次沒有安裝軟體、燒錄或改動板子。
+
 ## 2026-11-11：本機下載檔與 DPU Linux host 再稽核
 
 - 重新盤點 `C:/Users/dsic/Downloads`：使用者提及的約 6.6GB 檔為 `Vitis_Embedded_Win_2024.2_1113_2356.tar`（實際 7,049,861,120 bytes），另有 Windows Unified 2024.2 installer/2024.2.2 archive；未找到 PetaLinux installer、Vitis AI Docker archive 或 2024.1 Vivado/PetaLinux installer。

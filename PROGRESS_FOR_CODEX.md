@@ -512,6 +512,7 @@
 - 已將 `pipeline.Detector` 預設切換至 `yolov8`，`PERSON_DETECTOR=yolox` 是明確 legacy 回退。PYNQ bundle 改僅包含 YOLOv8 adapter/model，preflight 要求 ONNX Runtime；已在板端暫存 bundle 實測 `pipeline.Detector()` 讀取 `video0` 320×240 後使用 `yolov8` backend 成功推論 1.255 s。修正了前次 bundle 雖選 YOLOv8、卻在 import time 強制要求未打包的 `yolox.py` 的缺陷。
 - 此次 pipeline 實測畫面仍是 0 person，因此只能證明完整 capture→pipeline→YOLOv8 CPU path，尚未驗證正樣本人框、tracker 確認、dashboard 連線或 peer packet producer。
 - 後續以專案既有公開 `bus.jpg` 在同一板端暫存 bundle 重跑：`pipeline.Detector()` 的 `yolov8` backend 對 810×1080 image 回傳 4 個 person boxes、耗時 0.950 s；這是正樣 person postprocess/pipeline 證據。公開測試圖未上傳或改動 Git，現場 C270 人物正樣本、tracker/dashboard/peer 仍未驗證。
+- 新增 `person_tracking/pynq_yolov8_peer.py`：每板一個 C270、預設 YOLOv8、Tracker 後建構 versioned peer packet，只傳 person metadata。PYNQ loopback 以 `127.0.0.1` receiver 實測 C270 `video0`→YOLOv8→Tracker→TCP，receiver accepted `pynq-a:0` 且 JSON schema/dimensions 正確（當次 empty detections）。這不是第二板或 Wi-Fi 驗證；`wlan0` 仍未設定。
 
 ### 2026-11-11：SD 板端雙 C270 實測與 DPU recheck
 

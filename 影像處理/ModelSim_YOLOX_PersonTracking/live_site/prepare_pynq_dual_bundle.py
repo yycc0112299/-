@@ -22,6 +22,7 @@ REQUIRED = [
     ROOT / "dual_server.py", ROOT / "dual_index.html", ROOT / "start_pynq_dual.sh",
     ROOT / "pynq_usb_camera_preflight.py", ROOT / "pynq_system_preflight.py",
     TRACKING / "pipeline.py", TRACKING / "cross_camera.py", TRACKING / "dual_camera.py",
+    TRACKING / "peer_protocol.py", TRACKING / "pynq_yolov8_peer.py",
     TRACKING / "assets" / "yolov8.py", MODEL,
     TRACKING / "verify_pynq_zu_bringup.py",
 ]

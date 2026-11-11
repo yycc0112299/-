@@ -74,6 +74,23 @@ PYNQ ONNX Runtime 1.16.3. On the current PYNQ, `numpy==1.21.6` and
 contained no person, so it did not validate a positive detection. This is not
 DPU/VART inference and does not replace the required B512 `.xmodel` flow.
 
+## Two-board detection packets
+
+`pynq_yolov8_peer.py` captures exactly one C270 per board, calls the default
+YOLOv8/tracker pipeline, and sends compact person metadata through
+`peer_protocol.py`; it never transfers raw frames. On board A, run a receiver
+on board B first, then run:
+
+```sh
+python3 person_tracking/pynq_yolov8_peer.py \
+  --board-id pynq-a --peer-host <board-b-wifi-ip> --camera 0
+```
+
+For a finite bring-up run use `--frames 1`. The board-side loopback test has
+verified one C270 frame through YOLOv8, tracker, TCP framing and strict schema
+validation. It is not evidence of Wi-Fi, a second board, or a positive person
+detection in a live camera frame.
+
 攝影機輸入不縮小：640×480 只在偵測模型底部補至 640×640，不縮圖。公開照片為了固定測試座標，先等比例放入 640×480 畫布；這是測試照片的前處理，和攝影機原生解析度不同。
 
 `detections.json` 保存每幀人物框、信心值、追蹤 ID 及 tentative/confirmed 狀態。兩次觀測後為 confirmed。漏抓時保留短期追蹤狀態最多 8 幀，但不把預測位置假裝成實際偵測結果；超時後新出現的人使用新 ID。

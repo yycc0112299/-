@@ -288,3 +288,11 @@
 - 實際驗證：同一暫存 bundle 的 `pipeline.Detector()` / `yolov8` backend 在 810×1080 public `bus.jpg` 回傳 4 person boxes，推論耗時 0.950 s，並輸出 `PYNQ_YOLOV8_POSITIVE_PASS`。
 - 驗證範圍／未完成：公開圖經暫存傳送，未上傳或新增至 Git；不是 C270 現場人物、tracker confirmed state、dashboard、Wi-Fi peer 或 DPU/VART inference。
 - Git／同步：已提交為 `bf9a830`（`Record PYNQ YOLOv8 positive inference`）並成功推送至 `origin/main`。公開圖只在板端 `/tmp` 驗證使用，未上傳。
+
+## 2026-11-11 — PYNQ YOLOv8 one-camera peer producer
+
+- 需求／決策：將「兩板各一鏡頭、Wi-Fi 傳資料」落實為每板 YOLOv8/Tracker 產生 validated person-detection metadata packet，不傳 raw USB video。
+- 實際完成：新增 `pynq_yolov8_peer.py`、bundle inclusion 和 2 個 packet contract tests。它以 C270 V4L2 frame、project default detector/tracker、`peer_protocol.send_packet` 依序處理；可用 `--frames` 做有限 bring-up。
+- 實際驗證：6 個 unit tests PASS；在 PYNQ 暫存 bundle 啟動 `peer_protocol receive --bind 127.0.0.1`，再由 `pynq_yolov8_peer.py --camera 0 --frames 1` 實跑。receiver 接收 `pynq-a:0`，packet 有正確 320×240 dimensions、schema 與空 detections。tar 對開發機時間戳印出 future-time warning，但解壓、執行與 packet 驗證皆成功。
+- 驗證範圍／未完成：loopback 不是 Wi-Fi／第二板／跨網路斷線測試；未在 live camera 得到 person positive packet，非 DPU/VART。
+- Git／同步：本項程式與文件將提交至 `main`；確切提交與推送結果會在後續同步紀錄寫入。

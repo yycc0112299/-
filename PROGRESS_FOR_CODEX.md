@@ -1,5 +1,11 @@
 # 專題狀態與交接記錄（供 Codex）
 
+## 2026-11-11：SD 重開後兩支 C270 依序 UVC recheck
+
+- 在 `/home/xilinx/pynq_yolov8_20261111` 用 tracked `pynq_usb_camera_preflight.py` 實跑：列出 `/dev/video0`～`/dev/video3`，並依序以 MJPEG/320×240 開啟 index `0` 與 `2`；兩者皆成功讀到一張三通道影格。
+- 結果是 `PYNQ_CAMERA_A_PASS=index=0 size=320x240` 與 `PYNQ_CAMERA_B_PASS=index=2 size=320x240`。它確認 SD restart 後兩支 C270 個別取像仍正常。
+- 驗證界線：腳本是依序開／關相機，沒有同時擷取；不推翻先前 kernel `Not enough bandwidth` 的共用 hub 限制。未跑 YOLO/DPU/Wi-Fi/PL，未改寫板端資料或硬體設定。
+
 ## 2026-11-11：SD 重開後的持久 YOLOv8 CPU 部署與單鏡頭實測
 
 - 使用者完成 SD restart 後，SSH 至 `192.168.3.1` 恢復正常。板端為 Linux `6.6.10-xilinx-v2024.1-gb6067dbebcc8`；`/dev/video0`～`/dev/video3` 存在；DPU `/dev/dpu0`、`xdputil`、Python `vart`/`xir` 仍不存在，故本次沒有 DPU inference claim。

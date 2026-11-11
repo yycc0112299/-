@@ -333,3 +333,10 @@
 - 實際驗證：C270 `video0` 在 MJPEG/320×240 成功輸入 YOLOv8，推論 0.964 s、當下 0 person；公開 `bus.jpg` 暫存正樣本測試回傳 4 persons、1.654 s。測試後 `PYNQ_TEMP_IMAGE_REMOVED` 與 persistent deploy file 都已實測。
 - 驗證界線／未完成：僅一支 C270；未同時開兩相機、未測 Wi-Fi/第二板、tracker/dashboard、PL 或 DPU。現有 Linux 仍沒有 `/dev/dpu0`、`xdputil`、VART/XIR；CPU result 不得描述為 DPU。
 - Git：已提交為 `3d74721`（`Record PYNQ YOLOv8 CPU deployment`）並成功推送至 `origin/main`。板端目錄、模型與公開圖未上傳 Git；公開圖已從 `/tmp` 移除。
+
+## 2026-11-11 — Restarted-board sequential dual-C270 recheck
+
+- 需求／決策：SD restart 後確認兩個已連接的 C270 各自仍能被 Linux/UVC 使用，同時維持先前「不可同時串流」的證據界線。
+- 實際驗證：在新 YOLOv8 deployment 目錄執行 tracked camera preflight；`/dev/video0`～`/dev/video3` 存在，index 0 與 index 2 各自以 MJPEG/320×240 成功讀取一張 frame。
+- 驗證界線／未完成：檢查會先關閉 A 才開 B，未同時開兩支相機，不能宣稱雙鏡頭同時串流已修復。未跑 YOLO/DPU/Wi-Fi/PL，沒有寫入板端資料或變更硬體設定。
+- Git：本次實機 recheck 紀錄待同一筆提交推送至 `origin/main`；提交後在此紀錄補上結果。

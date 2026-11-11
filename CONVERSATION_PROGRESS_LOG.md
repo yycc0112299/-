@@ -442,4 +442,4 @@
 - 需求／決策：在等候需要使用者在場的 Windows administrator / AMD download 工作前，繼續完成不需外部權限的 DPU runtime acceptance tooling，避免 artifact placeholder 被誤認為可部署模型。
 - 實際完成：採 test-first 方式新增 offline DPU runtime tests；先得到預期 import failure，證明舊程式沒有 model validation helper。新增 `valid_xmodel()` 後，明確指定的 `.xmodel` 必須是非空一般檔案；空檔、錯誤副檔名或 stat error 一律拒絕。新增的 fake device tree test 只接受 `xlnx,dpuczdx8g-4.0` compatible node。
 - 驗證界線／未完成：全部離線 tests 為 24/24 PASS（person_tracking 19、DPU Linux 5）。沒有登入板子、下載/安裝軟體、改 Windows/AMD 表單或執行 VART；nonempty model 檔也不等於已匹配 B512 architecture 或 inference PASS。
-- Git：程式、測試與進度文件將以本輪 commit 推送至 `origin/main`；下一筆紀錄補上結果。
+- Git：已提交為 `71bf3ca`（`Reject empty DPU xmodel artifacts`）並成功推送至 `origin/main`；本行的同步結果由下一筆文件提交補上。

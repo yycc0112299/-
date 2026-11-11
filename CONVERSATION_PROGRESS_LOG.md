@@ -427,4 +427,4 @@
 - 需求／決策：核對官方 release wording，避免把 DPU source branch `v4.0` 誤填為 Vitis AI runtime/compiler `4.0`，而下載錯 toolchain。
 - 實際完成：官方 Vitis-AI v4.0 release notes 證實該 branch DPU IP 搭配 Vitis AI 3.5 與 2024.1 tools；preflight docstring 和 Linux README 已明確區分。3/3 tests PASS，exact arch JSON 實跑仍 FAIL 於 compiler/PetaLinux/2024.2 mismatch。
 - 驗證界線／未完成：未下載或安裝工具；AMD Chrome profile 目前 signed out，故無法在本機取得 PetaLinux 2024.1。C: 剩餘約 165.70 GiB，超過 AMD UG1144 所列 100 GB host free-space minimum，但還需 Linux host。
-- Git：本次程式與進度紀錄待同一筆提交推送至 `origin/main`；提交後在此紀錄補上結果。
+- Git：已提交為 `a5f9262`（`Clarify DPU Vitis AI version contract`）並成功推送至 `origin/main`；本行的同步結果將由下一筆文件提交記錄。

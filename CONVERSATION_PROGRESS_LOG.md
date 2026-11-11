@@ -510,3 +510,11 @@
 - 實際完成：以 elevated Windows command 啟用 `Microsoft-Windows-Subsystem-Linux` 與 `VirtualMachinePlatform`，exit code=0、使用 `-NoRestart`。讀取 reboot markers 結果為 CBS `RebootPending=True`、`PendingFileRenameOperations=True`；`wsl --list --verbose` 尚無 Linux distribution，符合重開前預期。
 - 驗證界線／未完成：未重開 Windows，未安裝 Ubuntu/PetaLinux/Docker/Vitis AI，未執行 3.07-GiB PetaLinux installer，未變更 board/SD/FPGA。需使用者先儲存 GUI work 並確認 reboot，重開後再建立受支援 Ubuntu 22.04。
 - Git：已提交為 `622f52b`（`Record WSL prerequisite enablement`）並成功推送至 `origin/main`；本行的同步結果由下一筆文件提交補上。
+
+## 2026-11-12 — Installed WSL2 Ubuntu and PetaLinux 2024.1 build host
+
+- 需求／決策：建立能產生 matching PetaLinux/DPU Linux image 的實際 Linux host，避免把單純 Windows/Vivado 交接誤稱為可部署的 DPU runtime。
+- 實際完成：修復後仍偵測到 Windows inbox WSL payload 缺失（`0x8007019e`），遂以 winget 安裝 hash-verified official `Microsoft.WSL` 3.0.5，重開機後確認 WSL2 kernel `6.18.58.1-1`。已註冊 Ubuntu 22.04、建立 non-root `petalinux` user、安裝 PetaLinux host dependencies與 `zlib1g-dev`，並以已驗證 SHA-256 的 AMD 2024.1 installer 安裝 aarch64 PetaLinux 至 `/home/petalinux/xilinx/petalinux/2024.1`。final installer log 宣告 SDK ready；Bash source 後 `petalinux-create`、`petalinux-config`、`petalinux-build` 可用。
+- 安裝清理：installer 的 `--dir` 在此 flow 未生效。首次誤產生於 repo 的未追蹤 outputs 已移至 `C:\\pynq_wsl_setup\\quarantine_peta_wrong_target_20261112`，partial WSL install 已移至 `/home/petalinux/quarantine_partial_install_20261112`；兩者均非 Git 資產，repo worktree 確認乾淨。
+- 驗證界線／未完成：PetaLinux setup 不等於已建立 rootfs、DPU driver/VART/XIR、matching 2024.1 XSA、Docker/Vitis AI compiler、xmodel、SD boot、camera/DMA 或 Wi-Fi peer。installer 只有 non-blocking TFTP warning。未觸碰板子、SD、PL 或相機；現有 2024.2 USB-video artifact 仍不構成 DPU 2024.1 deployment verification。
+- Git：本次文件與同步結果將由後續提交記錄；PetaLinux/WSL installers、SDK、quarantine artifacts 均不納入 repository。

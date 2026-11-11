@@ -697,3 +697,12 @@
 - 在使用者確認在電腦前後，以 Windows administrator elevation 成功執行 `Enable-WindowsOptionalFeature`，啟用 `Microsoft-Windows-Subsystem-Linux` 與 `VirtualMachinePlatform`，兩項同一 elevated command exit code=0，且使用 `-NoRestart` 避免未告知即中斷 Vivado/Vitis。
 - 讀取 Windows reboot markers：CBS `RebootPending=True`、`PendingFileRenameOperations=True`。因此必須重開機後才能建立/執行 WSL Linux distribution；目前 `wsl --list --verbose` 仍顯示沒有 distribution，屬預期的重開機前狀態。
 - 驗證界線：尚未重開 Windows、未安裝 Ubuntu、未執行 PetaLinux installer、未改 Vivado/Vitis project 或板子。重開前必須由使用者儲存目前開啟的 Vivado/Vitis 工作。
+
+### 2026-11-12：WSL2 Ubuntu 與 PetaLinux 2024.1 host 已實裝
+
+- Windows 原本的 inbox WSL payload 不完整：雖然 Optional Feature 顯示 enabled，Ubuntu registration 仍為 `0x8007019e`，且 `%SystemRoot%\\System32\\lxss\\LxssManager.dll` 不存在。已完成 `DISM /RestoreHealth`、`SFC /scannow`、WSL feature disable/enable 與重開機；仍不能修復 inbox service。最後以官方 winget package 安裝並 hash-verified 的 `Microsoft.WSL` 3.0.5，重開機後確認 WSL kernel `6.18.58.1-1`、default version 2。
+- 已安裝官方 Ubuntu 22.04 package，registered distro=`Ubuntu`、WSL version=2；建立 Linux non-root `petalinux` account（uid 1000，sudo group）。實測 `/etc/os-release` 為 Ubuntu 22.04.1 LTS、root filesystem 有約 937 GiB free space。PetaLinux 安裝與後續 commands 必須使用 `bash`，並在 install root 執行 `source settings.sh`；`/bin/sh` 為 dash 只造成 PetaLinux warning，非 blocker。
+- 已以 apt 安裝 PetaLinux 2024.1 host prerequisites，installer preflight 只補了 `zlib1g-dev` 後通過。官方 installer 的 SHA-256 在 Windows 與 WSL copy 皆為 `9efb6191dc9a90afeb374eafd8733cbc8c27c2e5d54e2d388fa0302294b5bb93`。
+- PetaLinux 2024.1 已完成安裝於外部 WSL path `/home/petalinux/xilinx/petalinux/2024.1`，採 `aarch64` platform（Zynq UltraScale+ target）。installer final log 回報 `PetaLinux SDK has been successfully set up and is ready to be used.`；Bash source 後已實測 `petalinux-create`、`petalinux-config`、`petalinux-build` 在 PATH。
+- 安裝器實際以 current working directory 為 install root，`--dir` 在此 `.run` flow 未生效。第一次錯誤解壓到 repo 的未追蹤 `components/`、`scripts/` 已立即移到 `C:\\pynq_wsl_setup\\quarantine_peta_wrong_target_20261112`，未留在 Git worktree；第二次錯誤解壓到 `/home/petalinux` 的 7.8 GiB partial tree 亦已隔離至 `/home/petalinux/quarantine_partial_install_20261112`。它們均是外部暫存資產、未上傳 Git；正式 install root 約 11 GiB。
+- 驗證界線：PetaLinux installer 警告 host 未提供 TFTP server，這不阻止 SDK setup，但若採 network boot 需另行配置。尚未以 2024.1 重建 matching XSA、建立 PetaLinux project/rootfs、加入 DPU device tree/driver、VART/XIR、Docker/Vitis AI compiler 或 `.xmodel`；也尚未寫 SD、program PL、改板端 Linux 或驗證 DPU/Wi-Fi/second board。現有已實作 USB-video XSA/ELF 是 2024.2，不能直接聲稱與 DPUCZDX8G 4.0 + Vitis AI 3.5 的 2024.1 deployment contract 相容。

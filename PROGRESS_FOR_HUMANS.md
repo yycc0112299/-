@@ -530,3 +530,9 @@
 
 - Windows 的 WSL 與虛擬機平台功能已成功啟用。
 - Windows 要求重開機才會生效；Ubuntu 和 PetaLinux 尚未安裝。請先儲存目前 Vivado／Vitis 的工作，確認後才能重開。
+
+## 2026-11-12：PetaLinux Linux 主機已可用
+
+- WSL2、Ubuntu 22.04 與 PetaLinux 2024.1 已安裝完成；PetaLinux 的建立、設定與建置命令都可使用。
+- PetaLinux 裝在 WSL Linux 路徑，不在專題 Git 內；安裝時產生的錯誤暫存檔已隔離，專題工作樹保持乾淨。
+- 仍未完成：2024.1 matching 硬體/XSA、PetaLinux 映像、DPU/VART/YOLOv8 模型部署、燒錄 SD、兩板 Wi-Fi 與實機人物辨識。現有 Vivado/Vitis USB-video 成果仍是 2024.2，不能直接當成 DPU runtime 完成。

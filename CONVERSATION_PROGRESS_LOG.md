@@ -251,4 +251,4 @@
 - 實際完成：新增 `vitis/pynq_zu_dpu/build_vitis_dpu_platform.py` 和 README；它以一個新的短 workspace 建立 `psu_cortexa53_0` / `standalone_domain` platform 與 FSBL，沒有建立不存在的 DPU bare-metal runtime。
 - 實際驗證：`C:\Xilinx_Embedded_2024_2` 的 Vitis 2024.2 成功生成 SDT、BSP、FSBL、platform export 和 XPFM。生成 `xparameters.h` 實測為 DPU AXI-Lite `0x400000000`，與 Vivado 接線一致；FSBL 為 445,080 bytes。
 - 驗證界線／未完成：這只驗證 Vivado→Vitis hardware handoff。沒有下載板子，沒有 matching Linux/device-tree/CMA/DPU driver/VART、INT8 `.xmodel` 或 DPU inference。workspace/XPFM/FSBL 是可重建本機產物，不上傳。
-- Git／同步：待本輪 script 與三份紀錄檢查、提交與 push 後補上結果。
+- Git／同步：已提交為 `6fd4f9b`（`Build Vitis platform for PYNQ-ZU DPU`）並成功推送至 `origin/main`；下方同步紀錄提交會記錄此結果。

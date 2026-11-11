@@ -350,3 +350,5 @@
 - 完整 Embedded Vitis 已成功把 DPU XSA 建成 A53 platform、BSP 與開機用 FSBL；這證明 Vivado 硬體檔能正確交給 Vitis。
 - Vitis 產生的硬體定義已看得到 DPU 控制基址 `0x400000000`。
 - 這仍只是 Vitis 平台建置成功，未做板端下載，也不是 Linux VART 或 YOLOv8 推論完成。
+
+本項已同步到 GitHub `main`（`6fd4f9b`）。

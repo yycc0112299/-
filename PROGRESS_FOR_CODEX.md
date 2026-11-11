@@ -628,3 +628,11 @@
 
 ### 2026-11-11：DPU Linux runtime acceptance contract（續）
 - 實際 host audit：`C:\Xilinx_Embedded_2024_2`／`C:\Xilinx` 找不到 `petalinux.bat` 或 PetaLinux `settings.sh`。因此本機目前可驗證 Vivado→Vitis handoff，但無法建立 matching PetaLinux image；也尚未部署、重刷 SD、或在板端執行 verifier。保留現有 PYNQ image，不能聲稱 DPU/VART/YOLOv8 已可用。
+
+### 2026-11-11：非 AMD 下載路徑的 host revalidation
+
+- 在不填寫、送出或變更 AMD Download Center 資料的前提下，以 Python 內建 `unittest` 重跑 `person_tracking/tests` 的 19 項契約測試與 DPU build-host preflight 的 3 項測試，均 PASS；系統沒有安裝 `pytest`，故沒有額外安裝套件。
+- 實跑 exact B512 `arch.json` 的 host preflight：仍正確列出三個 blockers：沒有 Docker/`vai_c_xir` compiler route、沒有 PetaLinux、且目前是 2024.2 而 DPUCZDX8G 4.0 + Vitis AI 3.5 所驗證的是 2024.1。
+- 再次以 `build_linux_uvc_packer.ps1` 和 direct Vitis 2024.2 GNU AArch64 compiler 建置 `uvc_v4l2_packer.c` 成功；產物為外部 `C:\pynq_zu_dpu_native_build\checks\uvc_v4l2_packer_20261111\uvc_v4l2_packer`（75,272 bytes），未寫入 Git working tree。這是 cross-compile，不是板端 capture/DMA/PL/DPU 驗證。
+- 嘗試建立 Ubuntu 22.04 WSL 基礎環境時，這台舊版 `wsl.exe` 僅提供系統層級 `--install`，而 Optional Feature 查詢回傳需要 elevated permission；本輪未取得或改動 Windows administrator setting、未安裝 distribution/Docker/PetaLinux。後續需在管理員權限下完成 WSL 啟用/重開機後再建立受支援 Linux host。
+- 驗證界線：沒有改 tracked application/FPGA code、沒有登入或送出 AMD export/download form、沒有下載 PetaLinux、沒有接觸板端或相機；DPU runtime 仍未完成。

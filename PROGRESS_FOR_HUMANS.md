@@ -476,3 +476,9 @@
 - 此環境檢查已同步到 GitHub `main`（`e9413a3`）。
 - 這台 Windows 沒有 PetaLinux、Docker 或已安裝的 WSL Linux；所以目前不能產生相配 DPU driver/VART Linux image。
 - Vivado 與 Vitis 的硬體交接已完成，但這不等於 DPU 可以上板推論；仍需受支援的 Linux/PetaLinux build host。
+
+## 2026-11-11：可先完成的主機檢查
+
+- 不碰 AMD 下載表單的情況下，YOLOv8/VART 介面、兩板封包、Wi-Fi 前檢查和 DPU 建置規則共 22 項測試都通過。
+- Vitis 也重新成功編譯 USB C270 的 Linux 封包程式；這只表示程式能交叉編譯，不是 DPU 或兩台板子的實測完成。
+- 這台 Windows 尚不能直接建立 Linux 開發環境：WSL 啟用需要系統管理員權限，Docker 和 PetaLinux 仍未安裝。AMD 下載、Linux/PetaLinux、DPU driver/VART 和 `.xmodel` 仍是後續工作。

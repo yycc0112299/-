@@ -1,5 +1,11 @@
 # 專題進度（重點版）
 
+## 2026-11-11：板子已重新以 Composite USB 連線
+
+- 電腦目前看得到 PYNQ-USB 與板子的 USB 網路，並可連到 `192.168.3.1` 的 SSH port。
+- 這不是 UART/JTAG：Vivado Hardware Manager 目前仍不會透過這條 Composite 線看到板子。若要燒錄/除錯，還要接 UART/JTAG 孔。
+- 尚未登入板子或改動板子的 SD、開機設定和 bitstream。
+
 ## 2026-11-11：DPU Linux 建置環境已做離線檢查
 
 - 新增 DPU 主機檢查程式，會在真正開始做 Linux 映像前確認 Vitis AI 編譯器、PetaLinux 與正確的 DPU 架構檔都存在，避免把不相容的模型或映像燒進板子。

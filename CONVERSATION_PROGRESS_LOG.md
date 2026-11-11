@@ -311,3 +311,10 @@
 - 驗證：新 unit tests `3/3 PASS`。在此 Windows host 實跑 gate，Docker、`vai_c_xir`、PetaLinux 與 exact `arch.json` 均不存在，輸出 `PYNQ_ZU_DPU_BUILD_HOST_FAIL`。AMD Vitis-AI v4.0 release notes 指出 DPUCZDX8G 4.0 + Vitis AI 3.5 已驗證於 2024.1；現有 Vivado/Vitis 2024.2 hardware handoff 因此不得宣稱 runtime compatibility。
 - 未完成：必須取得受支援的 2024.1 PetaLinux/Vitis AI build host，重建 matching DPU hardware/XSA、Linux image、VART 與 YOLOv8 INT8 `.xmodel`，再上板驗證。未安裝系統軟體、未插板、未重刷 SD、未上傳模型/bitstream/私人資料。
 - Git：已提交為 `dbfcad4`（`Add DPU build host compatibility gate`）並成功推送至 `origin/main`。未上傳 Linux image、bitstream、模型或私人資料；它們均尚未產生或屬部署端產物。
+
+## 2026-11-11 — PYNQ-ZU Composite USB reconnect verification
+
+- 需求／決策：使用者表示板子已重新接線，需先以系統偵測結果區分 Composite 網路與 UART/JTAG，避免對 Vivado 連線狀態誤判。
+- 實際驗證：Windows 偵測到 PYNQ-USB、Remote NDIS（VID `03FD:010C`）且 `乙太網路 3` 為 Up；主機 `192.168.3.102` 對 `192.168.3.1:22` TCP 成功。非互動式 SSH 因沒有 key 回覆 `Permission denied (publickey,password)`，未登入或執行任何板端命令。
+- 驗證界線／未完成：未偵測到 Xilinx/FTDI UART/JTAG 或新增 COM port，因此這是 Composite USB 恢復，不是 Vivado Hardware Manager JTAG 連線。未更動 boot switch、SD、bitstream、板端檔案或任何帳密。
+- Git：本次硬體連線紀錄待同一筆提交推送至 `origin/main`；提交後在此紀錄補上結果。

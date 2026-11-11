@@ -1,5 +1,11 @@
 # 專題狀態與交接記錄（供 Codex）
 
+## 2026-11-11：PYNQ-ZU Composite USB 已恢復，UART/JTAG 未偵測
+
+- 實際硬體驗證：Windows 現在可辨識板子的 `PYNQ-USB` mass-storage gadget、`Remote NDIS Compatible Device`（VID `03FD:010C`）與 `乙太網路 3`。主機取得 `192.168.3.102`，`192.168.3.1:22` TCP 成功，故 SD Linux/Composite 網路連線已恢復。
+- 明確界線：目前 PnP 沒有 Xilinx/FTDI UART/JTAG 裝置或新增 COM port；以 `ssh -o BatchMode=yes xilinx@192.168.3.1` 測試僅得到 `Permission denied (publickey,password)`，表示 SSH server reachable 但本機無可用 key，未登入、未執行板端指令。
+- 結論：目前插回的是 Composite USB，而非可供 Vivado Hardware Manager 使用的 UART/JTAG 路徑。Linux/SSH 與 PYNQ-USB 可繼續使用 Composite；若要 Vivado/Vitis JTAG programming/debug，仍須另接 UART/JTAG 孔。未變更 boot switch、SD、bitstream 或板端檔案。
+
 ## 2026-11-11：DPU Linux build-host 版本契約與離線 gate
 
 - 需求／決策：使用者暫未插 UART/JTAG，先完成不接板也能驗證的 DPU 部署準備；不以成功產生 Vivado 2024.2 bitstream 混稱為 DPU runtime 相容。

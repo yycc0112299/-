@@ -531,4 +531,4 @@
 - 需求／決策：在 PetaLinux host 可用後建立 ZynqMP project foundation，但不得把已知 2024.2 XSA 匯入 2024.1 DPU contract，避免產生看似可用但不相容的 deployment image。
 - 實際完成：以 sourced PetaLinux 2024.1 Bash environment 成功執行 `petalinux-create project --template zynqMP --name pynq_zu_dpu_2024_1`，新 project 位於外部 WSL path `/home/petalinux/work/pynq_zu_dpu_2024_1`。
 - 驗證界線／未完成：尚未 config hardware description、build rootfs、加 DPU/VART/driver、compile xmodel 或寫 SD；無硬體/board/network side effect。此 generated project 不進 Git，仍待 matching Vivado 2024.1 XSA。
-- Git：本次 project-skeleton evidence 與同步結果將由後續提交記錄。
+- Git：已提交為 `d8ef2b7`（`Record PetaLinux ZynqMP project skeleton`）並成功推送至 `origin/main`。

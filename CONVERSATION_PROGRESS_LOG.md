@@ -458,3 +458,11 @@
 - 實際完成：重新盤點既有 Xilinx install 後找到 Vitis bundled MinGW GCC，臨時加入 process PATH，以 `-std=c11 -Wall -Wextra -Werror` 編譯並執行 `video_control.c` + `test_video_control.c`，輸出 `VIDEO_CONTROL_TEST_PASS`。測試覆蓋 frame ID、bbox payload 與最後 CONTROL commit 的 register write ordering，以及遺失必要地址時的拒絕；暫存 executable 已移除。
 - 驗證界線／未完成：此為 host pure-C contract，不觸碰硬體，未執行 A53 ELF、UVC、DMA、DPU 或 Wi-Fi。前一筆 Vivado/XSA/Vitis build evidence 與 Linux deployment blockers 維持不變。
 - Git：已提交為 `c6af6b1`（`Verify Vitis controller host contract`）並成功推送至 `origin/main`；本行的同步結果由下一筆文件提交補上。
+
+## 2026-11-11 — Added USB-video XSA structural handoff gate
+
+- 需求／決策：讓可重建的 Vivado USB-video XSA 在交給 Vitis 前有 machine-readable gate，避免只以檔案存在誤稱 Vivado→Vitis control mapping 正確。
+- 實際完成：新增 `verify_pynq_zu_usb_video_handoff.py` 和兩個 offline tests。gate 讀取 archive/HWH，要求 bitstream、HWH、system definition、PS init source，並核對 AXI DMA=`0xA0000000`、frame GPIO=`0xA0010000`、video RTL mailbox=`0xA0020000`。test-first run 先得到 missing-module failure；第一次真實 artifact run 又發現 HWH `0X` prefix normalization 和 missing-bitstream diagnostics 的缺口，已修正。
+- 驗證：FPGA tests 7/7 PASS；對剛重新建出的 1,573,588-byte XSA 回傳 `PYNQ_ZU_USB_VIDEO_XSA_PASS`，addresses 與 Vitis `xparameters.h` 對齊。
+- 驗證界線／未完成：gate 是 host read-only structural verification；未載入 bitstream、未跑 A53 ELF/UVC/DMA/PL/DPU/Wi-Fi，產物未上傳 Git。
+- Git：程式、測試與進度文件將以本輪 commit 推送至 `origin/main`；下一筆紀錄補上結果。

@@ -502,4 +502,4 @@
 - 需求／決策：確認使用者表示已完成的 PetaLinux download 是否實際存在、完成且可供下一步 Linux-host installation 使用；只讀取檔案，不執行 installer。
 - 實際完成：在 Downloads 找到 `petalinux-v2024.1-05202009-installer.run`，大小 3,296,562,820 bytes，SHA-256 `9EFB6191DC9A90AFEB374EAFD8733CBC8C27C2E5D54E2D388FA0302294B5BB93`。
 - 驗證界線／未完成：這是 installer acquisition，不是 PetaLinux/WSL/Vitis AI 安裝或 DPU Linux image build；未執行檔案、未改 Windows/board。大檔保持 Downloads、因外部 installer 且不適合 Git，未上傳 repository。
-- Git：本紀錄與進度文件將以本輪 commit 推送至 `origin/main`；下一筆紀錄補上結果。
+- Git：已提交為 `808bb54`（`Record PetaLinux installer verification`）並成功推送至 `origin/main`；本行的同步結果由下一筆文件提交補上。

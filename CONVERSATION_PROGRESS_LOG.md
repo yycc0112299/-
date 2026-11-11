@@ -420,4 +420,4 @@
 - 需求／決策：判定 Vitis/Linux packer 下一步是否已有 contiguous allocation source，且不以 standalone physical-address model 或 `/dev/mem` 冒充 Linux DMA ownership。
 - 實際驗證：live PYNQ 有 `/dev/dma_heap/linux,cma`、`/dev/dma_heap/system`，CmaTotal=524288 KiB、CmaFree=517188 KiB。
 - 驗證界線／未完成：沒有 allocate/submit DMA buffer、沒有 DMA-BUF importer/driver、沒有 DMA/PL/DPU transfer；未改 kernel/module/bitstream。需要 matching kernel client/driver attach/map/sync DMA-BUF 才能接 AXI DMA。
-- Git：本次架構／環境紀錄待同一筆提交推送至 `origin/main`；提交後在此紀錄補上結果。
+- Git：已提交為 `cc4d3d3`（`Document Linux CMA DMA handoff boundary`）並成功推送至 `origin/main`；本行的同步結果將由下一筆文件提交記錄。

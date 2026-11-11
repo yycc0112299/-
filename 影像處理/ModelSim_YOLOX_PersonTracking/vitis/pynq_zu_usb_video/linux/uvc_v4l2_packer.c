@@ -13,6 +13,7 @@
  * DMA-safe.
  */
 #define _GNU_SOURCE
+#include <stdbool.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <linux/videodev2.h>
@@ -183,6 +184,55 @@ static void pack_dual_yuyv(const uint8_t *a, const uint8_t *b, uint64_t *output)
     }
 }
 
+/* The deployed topology is one C270 per PYNQ-ZU.  Keep the same AXI-stream
+ * word contract as the two-lane RTL, but explicitly black-fill the lane that
+ * belongs to the other board rather than duplicating a camera and pretending
+ * there are two independent sources. */
+static void pack_single_yuyv_lane(const uint8_t *source, bool source_is_b, uint64_t *output) {
+    for (unsigned int y = 0; y < HEIGHT; ++y) {
+        for (unsigned int x = 0; x < WIDTH; ++x) {
+            unsigned int source_pixel = (y / 2u) * CAPTURE_WIDTH + (x / 2u);
+            unsigned int output_pixel = y * WIDTH + x;
+            uint64_t rgb = yuyv_rgb24(source, source_pixel);
+            output[output_pixel] = source_is_b ? (rgb << 32) : rgb;
+        }
+    }
+}
+
+static void close_camera(struct camera *camera);
+
+static int write_packed_frame(const char *output_path, const uint64_t *packed) {
+    int output = open(output_path, O_WRONLY | O_CREAT | O_TRUNC | O_CLOEXEC, 0644);
+    size_t remaining = PIXELS * sizeof(*packed);
+    const uint8_t *cursor = (const uint8_t *)packed;
+    if (output < 0) return -1;
+    while (remaining) {
+        ssize_t written = write(output, cursor, remaining);
+        if (written <= 0) { close(output); return -1; }
+        cursor += (size_t)written;
+        remaining -= (size_t)written;
+    }
+    return close(output);
+}
+
+static int capture_single_lane(const char *camera_path, const char *output_path, bool source_is_b) {
+    struct camera camera = { .fd = -1 };
+    struct v4l2_buffer frame;
+    uint64_t *packed = NULL;
+    int rc = 1;
+    if (start_camera(&camera, camera_path) < 0 || dequeue_frame(&camera, &frame) < 0 ||
+        frame.bytesused < CAPTURE_WIDTH * CAPTURE_HEIGHT * 2u) goto done;
+    packed = aligned_alloc(64, PIXELS * sizeof(*packed));
+    if (!packed) goto done;
+    pack_single_yuyv_lane(camera.buffers[frame.index], source_is_b, packed);
+    rc = write_packed_frame(output_path, packed) == 0 ? 0 : 1;
+done:
+    if (rc) fprintf(stderr, "single UVC capture/pack failed: %s\n", strerror(errno));
+    free(packed);
+    close_camera(&camera);
+    return rc;
+}
+
 static void close_camera(struct camera *camera) {
     if (camera->fd < 0) return;
     enum v4l2_buf_type type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
@@ -194,6 +244,10 @@ static void close_camera(struct camera *camera) {
 
 int main(int argc, char **argv) {
     if (argc == 3 && strcmp(argv[1], "--probe") == 0) return probe_camera(argv[2]);
+    if (argc == 4 && strcmp(argv[1], "--single-a") == 0)
+        return capture_single_lane(argv[2], argv[3], false);
+    if (argc == 4 && strcmp(argv[1], "--single-b") == 0)
+        return capture_single_lane(argv[2], argv[3], true);
     if (argc == 4 && strcmp(argv[1], "--mjpeg-stream-test") == 0) {
         struct camera a = { .fd = -1 }, b = { .fd = -1 };
         requested_pixelformat = V4L2_PIX_FMT_MJPEG;
@@ -215,9 +269,7 @@ int main(int argc, char **argv) {
     packed = aligned_alloc(64, PIXELS * sizeof(*packed));
     if (!packed) goto done;
     pack_dual_yuyv(a.buffers[frame_a.index], b.buffers[frame_b.index], packed);
-    int output = open(output_path, O_WRONLY | O_CREAT | O_TRUNC | O_CLOEXEC, 0644);
-    if (output < 0 || write(output, packed, PIXELS * sizeof(*packed)) != (ssize_t)(PIXELS * sizeof(*packed))) { if (output >= 0) close(output); goto done; }
-    close(output); rc = 0;
+    rc = write_packed_frame(output_path, packed) == 0 ? 0 : 1;
 done:
     if (rc) fprintf(stderr, "UVC capture/pack failed: %s\n", strerror(errno));
     free(packed); close_camera(&a); close_camera(&b); return rc;

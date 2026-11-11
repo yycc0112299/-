@@ -383,3 +383,11 @@
 - 實際完成：`pynq_yolov8_peer.py` 新增同一包 frame metadata 的 TCP retry helper、CLI retry budget/delay 與可見 retry logging。只對網路 `OSError` 重試，耗盡時 raise `ConnectionError`。
 - 驗證界線／未完成：`test_yolov8_peer.py` fake sender 驗證兩次 transient failure 後第三次成功與耗盡失敗；尚未有第二 PYNQ、Wi-Fi SSID/IP 或實機封包。未變更任何網路或板子。
 - Git：已提交為 `e588a7f`（`Retry two-board metadata delivery`）並成功推送至 `origin/main`；本行的同步結果將由下一筆文件提交記錄。
+
+## 2026-11-11 — Vitis Linux single-C270 packed-lane hardware check
+
+- 需求／決策：同板兩 C270 同時串流已被 USB hub bandwidth 證據阻擋；為之後每板一鏡頭架構提供可由 Vitis/Linux 實際驗證的單 lane source，而非複製影像假裝雙鏡頭。
+- 實際完成：`uvc_v4l2_packer.c` 新增 `--single-a`／`--single-b`，未使用的 32-bit RGB lane 維持黑色，並修正 packed-frame partial-write handling。Vitis 2024.2 AArch64 compile 以 `-Werror` 先檢出 declaration-order error；修正後產生 ELF。
+- 實機驗證：暫存 ELF 到 `192.168.3.1:/tmp`，`--single-a /dev/video0` 協商 320×240 YUYV、10 FPS，輸出 2,457,600 bytes、307,200 words；A nonzero=307,160，B nonzero=0。測後 `/tmp/uvc_v4l2_packer`、`/tmp/vitis_single_a.bin` 已清除。
+- 驗證界線／未完成：尚無 contiguous DMA/AXI DMA/PL/DPU、第二板或 Wi-Fi 結果；未改 SD 卡或系統設定。現有兩 C270 shared-hub STREAMON failure 仍有效。
+- Git：本次程式與進度紀錄待同一筆提交推送至 `origin/main`；提交後在此紀錄補上結果。

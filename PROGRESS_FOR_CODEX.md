@@ -1,5 +1,11 @@
 # 專題狀態與交接記錄（供 Codex）
 
+## 2026-11-11：Vitis Linux 單 C270 → packed AXI-stream lane 已於板端驗證
+
+- 因同板兩支 C270 已確定受共用 USB2 hub `ENOSPC` 限制，`vitis/pynq_zu_usb_video/linux/uvc_v4l2_packer.c` 新增 `--single-a <video> <output>`、`--single-b <video> <output>`。它們仍輸出既有 RTL 的 640×480、64-bit word 格式：A mode 僅填 `RGB[23:0]`，B mode 僅填 `RGB[55:32]`，未使用 lane 固定黑色；不複製一支相機來假裝雙來源。寫檔現在也會處理 partial write。
+- Vitis 2024.2 AArch64 cross compile first因 `close_camera` 宣告順序被 `-Werror` 拒絕，修正 forward declaration 後 `build_linux_uvc_packer.ps1` 成功輸出 ELF。2026-11-11 將 ELF 暫傳至 live PYNQ 的 `/tmp`，以 `/dev/video0` 執行 `--single-a`：V4L2 協商 320×240 YUYV、10 FPS，產出 2,457,600 bytes（307,200 words）；板端檢查 low A lane 有 307,160 nonzero words、high B lane 為 0。`/tmp/uvc_v4l2_packer` 與輸出檔均已移除。
+- 驗證界線：這是實機 Linux V4L2 + Vitis-built C + YUYV→RGB/64-bit packing；尚未配置 contiguous DMA buffer、未送 AXI DMA／PL、未執行 DPU，亦沒有第二板／Wi-Fi。兩 C270 同時 STREAMON 仍為已知失敗，不能以單 lane PASS 宣稱完成同板雙鏡頭。
+
 ## 2026-11-11：兩板 metadata sender 的 peer-restart 重試語意已完成離線測試
 
 - `person_tracking/pynq_yolov8_peer.py` 現在以 `send_packet_with_retry()` 對每一張已擷取／追蹤的 metadata packet 預設送三次、間隔 0.5 秒。它只攔截 TCP `OSError` 類失敗，重傳**同一個** frame packet；payload schema 錯誤不會被錯誤重試。重試用盡後丟出 `ConnectionError`，故不會把未送達誤記成成功。

@@ -11,6 +11,27 @@ it is deliberately not a DMA allocation.  The production handoff must replace
 the output file with a PYNQ Linux contiguous DMA buffer and submit that physical
 address to the AXI DMA already verified through JTAG.
 
+For the deployed two-board topology, use one C270 per PYNQ-ZU with an explicit
+single-lane command. `--single-a` writes captured RGB only to the low A lane;
+`--single-b` writes it only to the high B lane. The unused lane is all-black;
+the program does not duplicate a camera and falsely represent it as an
+independent second source.
+
+```sh
+# On board A: write camera pixels to RGB A[23:0], leave B[55:32] black.
+./uvc_v4l2_packer --single-a /dev/video0 /tmp/board_a_rgb888.bin
+
+# On board B: write camera pixels to RGB B[55:32], leave A[23:0] black.
+./uvc_v4l2_packer --single-b /dev/video0 /tmp/board_b_rgb888.bin
+```
+
+On 2026-11-11 the Vitis 2024.2 AArch64 ELF was copied temporarily to the live
+PYNQ-ZU and `--single-a /dev/video0` completed at negotiated 320×240 YUYV,
+10 FPS. It produced 2,457,600 bytes / 307,200 words; 307,160 low A-lane words
+were nonzero and every high B-lane word was zero. The temporary executable and
+output were then removed. This is a real single-camera V4L2/packing result;
+it is not AXI DMA, PL, DPU, two-camera, or two-board Wi-Fi proof.
+
 The packer explicitly negotiates the source rate after selecting the format and
 prints the negotiated result before streaming. Both C270s share the tested
 PYNQ-ZU USB 2 hub. On 2026-11-11, the board accepted 320×240/10-FPS for both

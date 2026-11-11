@@ -485,3 +485,4 @@
 - 新增 `fpga/export_pynq_zu_dpu_xsa.tcl`。它只接受 `impl_1` 已達 `write_bitstream Complete!` 的 project，開啟已 routed 的 implementation run，執行 `write_hw_platform -fixed -include_bit`，並檢查輸出檔存在；輸出為 `$PYNQ_ZU_DPU_BUILD_DIR/pynq_zu_dpu_b512.xsa`。
 - 實跑 Vivado 2024.2 成功輸出 2,586,044-byte XSA。以 `tar -tf` 檢查 archive，確認包含 `pynq_zu_dpu.hwh`、`pynq_zu_dpu_b512.bit`、`psu_init.*`、`sysdef.xml`、`xsa.json` 與 `xsa.xml`。這是後續 Vitis platform/Linux boot artifact 的硬體 handoff，不是 VART runtime 或 device-tree 已生成的證據。
 - 驗證界線：XSA、bitstream 與 Vivado build output 均位於 `C:\pynq_zu_dpu_native_build`，可由 tracked Tcl 重建且不納入 Git。仍待以此 XSA 建立相配的 Linux/device-tree/CMA/DPU driver/VART image，並於板端驗證。
+- 同步結果：XSA export script 與交接文件已提交為 `817a8cc`（`Export PYNQ-ZU DPU hardware handoff`）並成功推送至 `origin/main`。

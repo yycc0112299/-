@@ -342,3 +342,5 @@
 
 - 已用 DPU bitstream 匯出 XSA 硬體交接檔，裡面有 bitstream、硬體描述與 PS 初始化資料，供下一步 Vitis/Linux 建置使用。
 - XSA 已實際產生並檢查內容；它只是把 Vivado 硬體交給軟體工具，尚不是 Linux DPU driver、VART 或 YOLOv8 已能運作。
+
+本項已同步到 GitHub `main`（`817a8cc`）。

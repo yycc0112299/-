@@ -243,4 +243,4 @@
 - 實際完成：新增 `fpga/export_pynq_zu_dpu_xsa.tcl`，它檢查 `impl_1` 為 `write_bitstream Complete!`，再從 routed run 執行 `write_hw_platform -fixed -include_bit`。
 - 實際驗證：Vivado 2024.2 成功輸出 2,586,044-byte `pynq_zu_dpu_b512.xsa`；archive 實測含 `.hwh`、`.bit`、`psu_init.*`、`sysdef.xml`、`xsa.json/xml`。
 - 驗證界線／未完成：XSA 是 Vitis handoff，尚未用於 Vitis platform、Linux image/device tree/CMA/DPU driver/VART 或板端 inference；外部 XSA/bitstream/report 未上傳，因 tracked Tcl 可重建。
-- Git／同步：待本輪 script 與三份紀錄檢查、提交與 push 後補上結果。
+- Git／同步：已提交為 `817a8cc`（`Export PYNQ-ZU DPU hardware handoff`）並成功推送至 `origin/main`；下方同步紀錄提交會記錄此結果。

@@ -71,6 +71,16 @@ def cma_total_kib() -> int | None:
     return None
 
 
+def valid_xmodel(path: Path | None) -> bool:
+    """Return whether an explicitly requested compiled model is nonempty."""
+    if path is None or path.suffix != ".xmodel":
+        return False
+    try:
+        return path.is_file() and path.stat().st_size > 0
+    except OSError:
+        return False
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--xmodel", type=Path,
@@ -85,9 +95,7 @@ def main() -> int:
     xir = module_result("xir")
     xdputil = command_result(["xdputil", "query"])
     cameras = sorted(str(path) for path in Path("/dev").glob("video*"))
-    model_ok = arguments.xmodel is None or (
-        arguments.xmodel.is_file() and arguments.xmodel.suffix == ".xmodel"
-    )
+    model_ok = arguments.xmodel is None or valid_xmodel(arguments.xmodel)
     report = {
         "expected_compatible": DPU_COMPATIBLE,
         "device_tree_nodes": device_nodes,

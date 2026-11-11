@@ -636,3 +636,9 @@
 - 再次以 `build_linux_uvc_packer.ps1` 和 direct Vitis 2024.2 GNU AArch64 compiler 建置 `uvc_v4l2_packer.c` 成功；產物為外部 `C:\pynq_zu_dpu_native_build\checks\uvc_v4l2_packer_20261111\uvc_v4l2_packer`（75,272 bytes），未寫入 Git working tree。這是 cross-compile，不是板端 capture/DMA/PL/DPU 驗證。
 - 嘗試建立 Ubuntu 22.04 WSL 基礎環境時，這台舊版 `wsl.exe` 僅提供系統層級 `--install`，而 Optional Feature 查詢回傳需要 elevated permission；本輪未取得或改動 Windows administrator setting、未安裝 distribution/Docker/PetaLinux。後續需在管理員權限下完成 WSL 啟用/重開機後再建立受支援 Linux host。
 - 驗證界線：沒有改 tracked application/FPGA code、沒有登入或送出 AMD export/download form、沒有下載 PetaLinux、沒有接觸板端或相機；DPU runtime 仍未完成。
+
+### 2026-11-11：DPU Linux runtime gate 的模型檔完整性修正
+
+- 新增 `vitis/pynq_zu_dpu/linux/tests/test_verify_dpu_runtime.py`。先以 test 證實舊 gate 缺口：空白但副檔名為 `.xmodel` 的檔案會通過 model existence 條件。
+- `verify_dpu_runtime.py` 現新增 `valid_xmodel()`：明確指定模型時，必須是可讀的正確副檔名、一般檔案且大小大於 0 bytes；空檔、錯誤副檔名和無法 stat 的 path 都會讓 runtime gate FAIL。device-tree test 也確認只接受 `xlnx,dpuczdx8g-4.0` compatible node。
+- 驗證：先得到預期的 import/test failure，再完成修正；`person_tracking` 19 tests 加 DPU Linux tests 5 tests 共 24/24 PASS。沒有板端 DPU runtime claim，非空檔仍不代表它與 B512 architecture 相容或已經成功 VART inference。

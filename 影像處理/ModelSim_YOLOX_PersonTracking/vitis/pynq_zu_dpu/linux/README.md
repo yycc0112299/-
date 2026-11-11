@@ -46,3 +46,30 @@ model file and UVC camera nodes.  It prints JSON followed by
 `PYNQ_ZU_DPU_LINUX_RUNTIME_PASS` only when each requested prerequisite exists.
 Passing this gate still does not replace an end-to-end camera inference test;
 the next test must run VART on a frame and validate a person-detection packet.
+
+## Build-host gate and version contract
+
+Before creating the matching image or compiling YOLOv8, run the host-side,
+read-only gate:
+
+```sh
+python3 preflight_dpu_build_host.py \
+  --arch-json /path/to/the/exact/DPU/arch.json \
+  --vitis-ai-version 3.5 \
+  --vivado-version 2024.1 \
+  --petalinux-version 2024.1
+```
+
+The Vitis-AI `v4.0` release notes state that the DPU IP in that branch and
+Vitis AI 3.5 are verified with Vivado, Vitis and PetaLinux **2024.1**. The
+present hardware was successfully built with Vivado 2024.2, but that is not
+the published compatible toolchain for this DPU Linux path. Do not infer
+runtime compatibility from a successful Vivado implementation. Rebuild the
+DPU/XSA on the 2024.1 toolchain before making a deployable Linux image.
+
+The preflight requires a compiler route (Docker with Vitis AI or `vai_c_xir`),
+PetaLinux and the exact DPU-generated `arch.json`. It intentionally refuses to
+guess a fingerprint or compile an `.xmodel` from a board-family JSON. It prints
+`PYNQ_ZU_DPU_BUILD_HOST_PASS` only for the compatible build contract; it does
+not download software, alter the workstation, build an image or touch the
+board.

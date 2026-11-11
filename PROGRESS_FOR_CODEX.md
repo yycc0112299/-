@@ -1,5 +1,13 @@
 # 專題狀態與交接記錄（供 Codex）
 
+## 2026-11-11：DPU Linux build-host 版本契約與離線 gate
+
+- 需求／決策：使用者暫未插 UART/JTAG，先完成不接板也能驗證的 DPU 部署準備；不以成功產生 Vivado 2024.2 bitstream 混稱為 DPU runtime 相容。
+- 新增 `影像處理/ModelSim_YOLOX_PersonTracking/vitis/pynq_zu_dpu/linux/preflight_dpu_build_host.py` 與三個標準庫 unit tests。它不下載、不安裝、也不改動系統；只檢查 Docker 或 `vai_c_xir` 編譯入口、PetaLinux、精確 DPU `arch.json` 與版本契約，並輸出 JSON/sentinel。
+- 依 AMD Vitis-AI `v4.0` release notes，DPUCZDX8G 4.0 與 Vitis AI 3.5 的已驗證配對是 Vivado/Vitis/PetaLinux **2024.1**。目前已成功實作的 DPU hardware/XSA 是 Vivado/Vitis 2024.2；其 Vivado implementation 成功仍屬未在官方矩陣驗證的 runtime 路線，不能用來產出/宣稱可部署的 DPU Linux image。後續應在 2024.1 重建 DPU/XSA，並以同版 PetaLinux 建 image。
+- 本機實測 gate：沒有 Docker、`vai_c_xir`、PetaLinux 或 DPU-generated `arch.json`；Windows 只有 Vivado/Vitis 2024.2。因此輸出 `PYNQ_ZU_DPU_BUILD_HOST_FAIL`，列出四個明確 blockers。這是主機離線檢查，不是板端或模型驗證。
+- 未完成：2024.1 build host、matching DPU bitstream/XSA、PetaLinux device-tree/driver/VART image、YOLOv8 INT8 quantization/`.xmodel`、板端 VART/person-inference。現有 CPU YOLOv8 fallback 與兩板 packet schema 不受影響。
+
 ## 2026-11-06：PYNQ-ZU USB Vivado Block Design 與 Vitis 控制骨架（進行中）
 
 - 使用者決策：不再以 Jupyter 作為主控制流程，改採 Vivado 硬體檔（Block Design/XSA）與 Vitis C/C++ 控制檔。

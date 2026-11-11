@@ -1,5 +1,11 @@
 # 專題進度（重點版）
 
+## 2026-11-11：DPU Linux 建置環境已做離線檢查
+
+- 新增 DPU 主機檢查程式，會在真正開始做 Linux 映像前確認 Vitis AI 編譯器、PetaLinux 與正確的 DPU 架構檔都存在，避免把不相容的模型或映像燒進板子。
+- 查到目前 DPU 硬體用 Vivado 2024.2 做成；AMD 公開驗證的 DPU 4.0 + Vitis AI 3.5 組合是 2024.1。因此硬體雖可做出 bitstream，仍必須在 2024.1 重建並搭配同版 PetaLinux，才可進入正式 DPU/YOLOv8 部署。
+- 目前這台電腦沒有 Docker、Vitis AI compiler、PetaLinux 或可用的 DPU `arch.json`，所以尚不能建 DPU Linux image；沒有進行任何系統安裝、重刷 SD 或板子操作。
+
 ## 2026-11-06：改為 Vivado Block Design + Vitis 控制架構（進行中）
 
 - 已新增 PYNQ-ZU 的 `pynq_zu_usb_video` Vivado Block Design 腳本：保留板上 USB0（MIO 52–63）與 USB1（MIO 64–75）給 Zynq PS，並加入 AXI DMA、DDR HP0、AXI-Lite bbox mailbox、frame-ID GPIO、64-bit 雙 RGB stream 與 IRQ。USB C270 的 D+/D− 是 PS USB 控制器接腳，不是可拉進 PL 的 GPIO。

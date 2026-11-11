@@ -55,6 +55,25 @@ python3 peer_protocol.py send --host <board-b-wifi-ip> --port 8790 --input frame
 
 ## 介面與結果
 
+## PYNQ CPU YOLOv8 fallback
+
+The requested detector target is YOLOv8. `assets/yolov8.py` accepts the raw
+Ultralytics detection output in either `(1,84,8400)` or `(1,8400,84)` form,
+keeps only COCO class 0 (`person`), de-letterboxes it and emits the existing
+`box`/`confidence` contract. It first uses ONNX Runtime and falls back to
+OpenCV DNN only when ONNX Runtime is unavailable. The PYNQ image's OpenCV
+4.5.4 cannot parse this current YOLOv8 ONNX graph, so ONNX Runtime is required
+for this CPU fallback.
+
+On a development PC run `python assets/prepare_yolov8_onnx.py` after installing
+the recorded Ultralytics exporter environment. It emits ignored
+`assets/yolov8n.onnx`, with IR metadata limited to version 9 for the verified
+PYNQ ONNX Runtime 1.16.3. On the current PYNQ, `numpy==1.21.6` and
+`onnxruntime==1.16.3` are installed in the `xilinx` user site. A live C270
+320x240 frame completed CPU inference in 1.017 seconds; the test scene
+contained no person, so it did not validate a positive detection. This is not
+DPU/VART inference and does not replace the required B512 `.xmodel` flow.
+
 攝影機輸入不縮小：640×480 只在偵測模型底部補至 640×640，不縮圖。公開照片為了固定測試座標，先等比例放入 640×480 畫布；這是測試照片的前處理，和攝影機原生解析度不同。
 
 `detections.json` 保存每幀人物框、信心值、追蹤 ID 及 tentative/confirmed 狀態。兩次觀測後為 confirmed。漏抓時保留短期追蹤狀態最多 8 幀，但不把預測位置假裝成實際偵測結果；超時後新出現的人使用新 ID。

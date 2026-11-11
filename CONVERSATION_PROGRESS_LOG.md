@@ -266,3 +266,10 @@
 - 實際完成：SSH 到 `192.168.3.1` 的 PynqLinux 3.0 / kernel `6.6.10-xilinx-v2024.1-gb6067dbebcc8`；兩支 C270 皆在 USB2744 480-Mbit/s hub 上，OpenCV/NumPy 存在。將 `xilinx` 加入既有 `video` 群組後，新 session 可開 V4L2 node。兩支各自 MJPEG 320×240、5 FPS 讀三張均成功；同時開啟則 `video0` 五張成功、`video2` 五張失敗。`dmesg` 實測對第二支記錄 `Not enough bandwidth for altsetting 7`。
 - 驗證範圍／未完成：這證明個別 C270 可 capture 且一板雙 C270 在現有共用 hub 失敗，並非長時間串流測試。`wlan0` 存在但 DOWN/unconfigured，未做兩板 Wi-Fi。CMA 524288 KiB，但仍無 DPU DT node、`/dev/dpu*`、`xdputil`、VART/XIR；未部署 DPU bitstream、未重刷 SD、未跑 `.xmodel` 或 YOLOv8。
 - Git／同步：已提交為 `6fd075b`（`Record PYNQ dual camera hardware result`）並成功推送至 `origin/main`。沒有上傳板端帳密、影像、bitstream 或模型。
+
+## 2026-11-11 — PYNQ CPU YOLOv8 ONNX fallback
+
+- 需求／決策：使用者確認目標模型是 YOLOv8；在 DPU/VART 尚未可用前，建立不改動 tracker/peer person schema 的 CPU fallback，並在實板驗證而非只在 host 假定 ONNX 相容。
+- 實際完成：新增 YOLOv8 adapter、單元測試和可重建 exporter。官方 YOLOv8n 經 Ultralytics 8.3.0 匯出 static 640 ONNX。原 artifact 是 opset 18／IR 10；PYNQ OpenCV 4.5.4 的 Reshape parser 失敗，ONNX Runtime 1.16.3 也先拒絕 IR 10。以 ONNX checker 產生 IR 9 artifact 後，板端 ORT 成功回傳 `(1,84,8400)`，zero input 為 0.845 s；C270 `video0` 320×240 frame 經 adapter CPU inference 為 1.017 s，當次 0 person。
+- 環境／範圍：第三台 PYNQ 的 `xilinx` user site 已安裝 NumPy 1.21.6、ONNX Runtime 1.16.3、flatbuffers/protobuf/coloredlogs 依賴；開發機安裝 Ultralytics 8.3.0、Torch 2.15.0、ONNX/onnxscript 以重建 model。模型、wheel 和 `/tmp` deployment files 不上傳 Git。尚未做含人物的正樣本驗證，這不是 DPU/VART 或 INT8 `.xmodel`。
+- Git／同步：adapter、exporter、測試和文件將提交到 `main`；確切提交與推送結果會在後續同步紀錄寫入。

@@ -365,3 +365,8 @@
 - 板子已由 SD 開機並可 SSH；兩支 C270 都被 Linux 與 OpenCV 辨識，且帳號已取得相機群組權限。
 - 每支相機單獨在低畫質/低幀率下可讀影像；兩支同時讀取時第二支失敗，kernel 明確回報 USB hub 頻寬不足。
 - 所以目前不能把「一板兩鏡頭串流」列為完成；後續兩板各一鏡頭是必要方案。Wi‑Fi 尚未設定，DPU/VART/YOLOv8 也尚未在板上可用。
+
+## 2026-11-11：YOLOv8 已在板上以 CPU 跑通
+
+- YOLOv8n 已改用 ONNX Runtime 在 PYNQ 實跑一張 C270 影格，約 1.017 秒完成一次推論；這次畫面沒有偵測到人，因此只證明相機到模型的流程可執行。
+- PYNQ 的 OpenCV 不能讀這份 YOLOv8 ONNX，已改由 ONNX Runtime CPU fallback；DPU/VART 加速、YOLOv8 INT8 `.xmodel` 與正樣本人像驗證仍未完成。

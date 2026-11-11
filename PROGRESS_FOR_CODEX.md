@@ -501,6 +501,12 @@
 - 新增 `vitis/pynq_zu_dpu/linux/README.md` 與可在目標板執行的 `verify_dpu_runtime.py`。它不寫 register、不下載 bitstream；會以 live device tree 的 `xlnx,dpuczdx8g-4.0`、`/dev/dpu*`、CMA、Python `vart`/`xir`、`xdputil query`、指定 `.xmodel` 和可選 UVC `/dev/video*` 為 DPU Linux deployment gate，全部存在才輸出 `PYNQ_ZU_DPU_LINUX_RUNTIME_PASS`。
 - 已檢查官方 DPUCZDX8G 4.0 source 的 ZCU102 參考：其 kernel patch 僅讓 `xlnx_dpu` 接受 `xlnx,dpuczdx8g-4.0`；VART 2.5 recipe 依賴 XIR、target-factory 且 Vitis flow 依賴 XRT。這些是相容性需求，不是可直接複製到 PYNQ-ZU 3.1.1 Linux 的 image/DT/ABI。
 
+### 2026-11-11：PYNQ CPU YOLOv8 fallback 實測
+
+- 新增 `person_tracking/assets/yolov8.py`、`prepare_yolov8_onnx.py` 和 adapter unit tests。adapter 支援 Ultralytics raw `(1,84,8400)`／`(1,8400,84)`，僅保留 COCO person、還原 letterbox 座標並保持既有 box/confidence contract；優先 ONNX Runtime、不可用時才嘗試 OpenCV DNN。export script 固定使用 YOLOv8n 640 static ONNX，並經 ONNX checker 將 IR metadata 設為 9，供 PYNQ ORT 1.16.3 使用；模型權重與 ONNX 都不納入 Git。
+- 實板：原始 ONNX opset 18 在 OpenCV 4.5.4 的 Reshape parser 失敗；板端安裝 user-site `numpy==1.21.6`、`onnxruntime==1.16.3` 和依賴後，IR 9 artifact 成功輸出 `(1,84,8400)`，zero-input forward 0.845 s。從 C270 `video0` 讀取一張 320×240 frame 並以新增 adapter CPU inference 實跑 1.017 s、無 runtime error；當次畫面回傳 0 person，未驗證正樣本 detection。
+- 驗證界線：這是 CPU ONNX Runtime fallback，不是 DPU、VART、INT8 `.xmodel` 或 YOLOv8 DPU inference。板上 Python 套件變更已在這台第三台設備完成；未在第一台執行端安裝 CPU runtime，且兩板 Wi-Fi/peer/DPU 尚未驗證。
+
 ### 2026-11-11：SD 板端雙 C270 實測與 DPU recheck
 
 - 同步結果：實板檢查結果、兩板架構與進度文件已提交為 `6fd075b`（`Record PYNQ dual camera hardware result`）並成功推送至 `origin/main`。

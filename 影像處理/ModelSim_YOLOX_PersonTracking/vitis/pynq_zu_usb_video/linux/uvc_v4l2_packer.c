@@ -233,6 +233,49 @@ done:
     return rc;
 }
 
+static int capture_yuyv_frame_copy(const char *camera_path, uint8_t **frame_copy) {
+    struct camera camera = { .fd = -1 };
+    struct v4l2_buffer frame;
+    const size_t bytes = CAPTURE_WIDTH * CAPTURE_HEIGHT * 2u;
+    int rc = 1;
+    *frame_copy = NULL;
+    if (start_camera(&camera, camera_path) < 0 || dequeue_frame(&camera, &frame) < 0 ||
+        frame.bytesused < bytes) goto done;
+    *frame_copy = malloc(bytes);
+    if (!*frame_copy) goto done;
+    memcpy(*frame_copy, camera.buffers[frame.index], bytes);
+    rc = 0;
+done:
+    if (rc) {
+        fprintf(stderr, "%s: sequential UVC capture failed: %s\n", camera_path, strerror(errno));
+        free(*frame_copy);
+        *frame_copy = NULL;
+    }
+    close_camera(&camera);
+    return rc;
+}
+
+/* This deliberately captures one camera at a time. It validates both C270
+ * paths on the shared USB hub, but resulting A/B frames have no common capture
+ * timestamp and cannot replace a simultaneous dual-camera pipeline. */
+static int capture_sequential_pair(const char *camera_a, const char *camera_b,
+                                   const char *output_path) {
+    uint8_t *a = NULL, *b = NULL;
+    uint64_t *packed = NULL;
+    int rc = 1;
+    if (capture_yuyv_frame_copy(camera_a, &a) || capture_yuyv_frame_copy(camera_b, &b)) goto done;
+    packed = aligned_alloc(64, PIXELS * sizeof(*packed));
+    if (!packed) goto done;
+    pack_dual_yuyv(a, b, packed);
+    rc = write_packed_frame(output_path, packed) == 0 ? 0 : 1;
+done:
+    if (rc) fprintf(stderr, "sequential dual UVC capture/pack failed: %s\n", strerror(errno));
+    free(packed);
+    free(a);
+    free(b);
+    return rc;
+}
+
 static void close_camera(struct camera *camera) {
     if (camera->fd < 0) return;
     enum v4l2_buf_type type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
@@ -248,6 +291,8 @@ int main(int argc, char **argv) {
         return capture_single_lane(argv[2], argv[3], false);
     if (argc == 4 && strcmp(argv[1], "--single-b") == 0)
         return capture_single_lane(argv[2], argv[3], true);
+    if (argc == 5 && strcmp(argv[1], "--sequential") == 0)
+        return capture_sequential_pair(argv[2], argv[3], argv[4]);
     if (argc == 4 && strcmp(argv[1], "--mjpeg-stream-test") == 0) {
         struct camera a = { .fd = -1 }, b = { .fd = -1 };
         requested_pixelformat = V4L2_PIX_FMT_MJPEG;

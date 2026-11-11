@@ -25,6 +25,19 @@ independent second source.
 ./uvc_v4l2_packer --single-b /dev/video0 /tmp/board_b_rgb888.bin
 ```
 
+The same program also has a diagnostic `--sequential` mode for the current
+one-board/two-C270 wiring. It fully closes camera A before opening camera B,
+then packs one captured frame from each into the normal two-lane output:
+
+```sh
+./uvc_v4l2_packer --sequential /dev/video0 /dev/video2 /tmp/sequential_dual.bin
+```
+
+This is useful for checking both device nodes and the A/B packing contract on
+the shared hub. It is intentionally **not** a simultaneous capture: there is
+no shared timestamp or frame synchronization, so it cannot be used as evidence
+for real-time two-camera matching.
+
 On 2026-11-11 the Vitis 2024.2 AArch64 ELF was copied temporarily to the live
 PYNQ-ZU and `--single-a /dev/video0` completed at negotiated 320×240 YUYV,
 10 FPS. It produced 2,457,600 bytes / 307,200 words; 307,160 low A-lane words
@@ -32,6 +45,12 @@ were nonzero and every high B-lane word was zero. The same C270 then completed
 `--single-b` with low A=0 and 307,176 nonzero high B-lane words. The temporary
 executable and outputs were then removed. This is a real single-camera V4L2/packing result;
 it is not AXI DMA, PL, DPU, two-camera, or two-board Wi-Fi proof.
+
+The actual board also completed the above `--sequential /dev/video0 /dev/video2`
+command on 2026-11-11. Both negotiated 320×240 YUYV at 10 FPS; the packed file
+contained 307,200 words with 307,168 nonzero A-lane and 307,112 nonzero B-lane
+words. Temporary files were removed. This proves independent sequential access
+to both connected C270s, not simultaneous stream capacity.
 
 The packer explicitly negotiates the source rate after selecting the format and
 prints the negotiated result before streaming. Both C270s share the tested

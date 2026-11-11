@@ -1,5 +1,11 @@
 # 專題狀態與交接記錄（供 Codex）
 
+## 2026-11-11：同板雙 C270 的 Vitis/Linux sequential 格式驗證已通過
+
+- `vitis/pynq_zu_usb_video/linux/uvc_v4l2_packer.c` 新增 `--sequential <camera-a> <camera-b> <output>`。它會完整關閉第一支 C270 後再開啟第二支、各 copy 一張 320×240 YUYV 到 user memory，最後用既有 `pack_dual_yuyv()` 形成 A/B 兩 lane 的 640×480、64-bit packed frame；程式註解與 README 明確禁止將此模式當作同步或同時擷取。
+- Vitis 2024.2 AArch64 compile PASS。2026-11-11 實機執行 `--sequential /dev/video0 /dev/video2`：兩者各協商 320×240 YUYV、10 FPS，輸出 307,200 words，其中 A lane nonzero=307,168、B lane nonzero=307,112。`/tmp` ELF/output 已移除。
+- 驗證界線：這證實一板兩支已連接 C270 能獨立被 Vitis/Linux C 程式讀取並填入雙 lane，不是 simultaneous STREAMON、共同 timestamp、AXI DMA/PL/DPU 或人物偵測。已知兩支同時 STREAMON 的 USB `ENOSPC` 失敗仍未解除。
+
 ## 2026-11-11：兩板 Wi-Fi 只讀 preflight 已完成並在未設定板端正確失敗
 
 - 新增 `person_tracking/pynq_wifi_peer_preflight.py`：讀 `/sys/class/net/<interface>/operstate`、以 `ip -j addr` 列出 IPv4；指定 `--peer-host` 時只嘗試一次 TCP connect，沒有掃描、join SSID、寫入密碼或變更 interface。它輸出 JSON 和 `PYNQ_WIFI_PEER_PREFLIGHT_PASS/FAIL`，通過必須有 interface、operstate=up、IPv4，且指定 peer 時 TCP port 也可達。

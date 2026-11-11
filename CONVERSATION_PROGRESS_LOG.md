@@ -406,3 +406,11 @@
 - 實機驗證：暫傳至現有 PYNQ `/tmp` 以 `wlan0` 執行，JSON 證實 interface exists 但 down、沒有 IPv4，預期 exit=1／FAIL；暫存檔已移除。
 - 驗證界線／未完成：沒有 SSID scan/join、沒有 network write、沒有第二板或 Wi-Fi packet。未來需在共同 Wi-Fi/AP 上啟動 peer receiver 後，以 `--peer-host` 通過。
 - Git：已提交為 `02c8183`（`Add two-board WiFi readiness gate`）並成功推送至 `origin/main`；本行的同步結果將由下一筆文件提交記錄。
+
+## 2026-11-11 — Sequential two-C270 Vitis Linux packing check
+
+- 需求／決策：同時 STREAMON 已受 shared-hub `ENOSPC` 阻擋，但仍需以 Vitis/Linux 實機確認兩支已接 C270 均可送進既有雙 lane packed format；明確採 sequential，禁止誤稱同步雙鏡頭。
+- 實際完成：`uvc_v4l2_packer.c` 新增 `--sequential`，先擷取/關閉 A 再擷取/關閉 B，copy 兩個 YUYV source 後才 pack。Vitis 2024.2 AArch64 compile PASS。
+- 實機驗證：`--sequential /dev/video0 /dev/video2` 兩者各協商 320×240 YUYV、10 FPS；輸出 307,200 words，A nonzero=307,168、B nonzero=307,112。`/tmp` ELF/output 已清除。
+- 驗證界線／未完成：沒有共同 timestamp／simultaneous streams，沒有 DMA/PL/DPU/person inference 或第二板/Wi-Fi。既有 simultaneous USB bandwidth failure 仍有效。
+- Git：本次程式與進度紀錄待同一筆提交推送至 `origin/main`；提交後在此紀錄補上結果。

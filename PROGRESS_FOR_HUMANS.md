@@ -357,4 +357,4 @@
 - 查到目前 Windows 只有 Vitis，沒有能建立相配 Linux 映像的 PetaLinux。現有 SD image 也尚未有 DPU runtime，所以暫不下載 DPU bitstream 或重刷 SD 卡。
 - 尚未完成：matching Linux image、實際上板驗證、YOLOv8 INT8 模型與 DPU 人物辨識。
 
-本項已同步到 GitHub `main`（`6fd4f9b`）。
+本項檢查工具與說明已同步到 GitHub `main`（`61abcdf`）。

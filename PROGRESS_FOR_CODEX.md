@@ -496,6 +496,7 @@
 
 ### 2026-11-11：DPU Linux runtime acceptance contract
 
+- 同步結果：runtime gate、文件與本項紀錄已提交為 `61abcdf`（`Add PYNQ-ZU DPU Linux runtime gate`）並成功推送至 `origin/main`。
 - 新增 `vitis/pynq_zu_dpu/linux/README.md` 與可在目標板執行的 `verify_dpu_runtime.py`。它不寫 register、不下載 bitstream；會以 live device tree 的 `xlnx,dpuczdx8g-4.0`、`/dev/dpu*`、CMA、Python `vart`/`xir`、`xdputil query`、指定 `.xmodel` 和可選 UVC `/dev/video*` 為 DPU Linux deployment gate，全部存在才輸出 `PYNQ_ZU_DPU_LINUX_RUNTIME_PASS`。
 - 已檢查官方 DPUCZDX8G 4.0 source 的 ZCU102 參考：其 kernel patch 僅讓 `xlnx_dpu` 接受 `xlnx,dpuczdx8g-4.0`；VART 2.5 recipe 依賴 XIR、target-factory 且 Vitis flow 依賴 XRT。這些是相容性需求，不是可直接複製到 PYNQ-ZU 3.1.1 Linux 的 image/DT/ABI。
 - 實際 host audit：`C:\Xilinx_Embedded_2024_2`／`C:\Xilinx` 找不到 `petalinux.bat` 或 PetaLinux `settings.sh`。因此本機目前可驗證 Vivado→Vitis handoff，但無法建立 matching PetaLinux image；也尚未部署、重刷 SD、或在板端執行 verifier。保留現有 PYNQ image，不能聲稱 DPU/VART/YOLOv8 已可用。

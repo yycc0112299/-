@@ -332,4 +332,4 @@
 - 實際完成：SSH 成功登入；建立本機 13-member/11,104,503-byte bundle，部署至 `/home/xilinx/pynq_yolov8_20261111`。board system preflight PASS，確認 Python 3.10.4、NumPy 1.21.6、OpenCV 4.5.4、ONNX Runtime 1.16.3 與 13,057,836-byte YOLOv8 model。
 - 實際驗證：C270 `video0` 在 MJPEG/320×240 成功輸入 YOLOv8，推論 0.964 s、當下 0 person；公開 `bus.jpg` 暫存正樣本測試回傳 4 persons、1.654 s。測試後 `PYNQ_TEMP_IMAGE_REMOVED` 與 persistent deploy file 都已實測。
 - 驗證界線／未完成：僅一支 C270；未同時開兩相機、未測 Wi-Fi/第二板、tracker/dashboard、PL 或 DPU。現有 Linux 仍沒有 `/dev/dpu0`、`xdputil`、VART/XIR；CPU result 不得描述為 DPU。
-- Git：本次部署/驗證紀錄待同一筆提交推送至 `origin/main`；提交後在此紀錄補上結果。板端目錄、模型與公開圖未上傳 Git；公開圖已從 `/tmp` 移除。
+- Git：已提交為 `3d74721`（`Record PYNQ YOLOv8 CPU deployment`）並成功推送至 `origin/main`。板端目錄、模型與公開圖未上傳 Git；公開圖已從 `/tmp` 移除。

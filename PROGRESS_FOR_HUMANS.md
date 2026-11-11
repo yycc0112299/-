@@ -1,5 +1,11 @@
 # 專題進度（重點版）
 
+## 2026-11-11：兩條線可同時使用，JTAG 已找到
+
+- Composite 與 UART/JTAG 可以同時插；目前 Composite 維持 Linux/網路，Vivado 已實際找到 PYNQ‑ZU 的 `xczu5` JTAG target。
+- 現在 SSH port 雖仍可到達，但登入前會被板子重設連線。為了回到 SD Linux 的乾淨狀態，下一步要維持兩條線都插著，將板子關機後再開機。
+- 尚未證明 DPU Linux、VART 或 YOLOv8 DPU 可運作，也沒有重刷 SD、安裝套件或部署模型。
+
 ## 2026-11-11：板子已重新以 Composite USB 連線
 
 - 電腦目前看得到 PYNQ-USB 與板子的 USB 網路，並可連到 `192.168.3.1` 的 SSH port。

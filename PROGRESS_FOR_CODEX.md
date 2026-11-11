@@ -1,5 +1,11 @@
 # 專題狀態與交接記錄（供 Codex）
 
+## 2026-11-11：Composite 與 UART/JTAG 同時連線、JTAG target 已確認
+
+- 使用者已同時接上 Composite 與 UART/JTAG。Windows 維持 Composite 的 PYNQ-USB、RNDIS 與 `COM4`；Vivado Hardware Manager 現在實際開啟 `localhost/xilinx_tcf/Xilinx/1234-tulA`，並偵測到 `xczu5_0`（part `xczu5`）及 `arm_dap_1`，證明 JTAG 路徑可用。
+- Hardware Manager 顯示 `xczu5_0` status=`Programmed`、Programming file 欄位為 DPU wrapper `.bit`，但本輪沒有保留可證明「本輪 Program 成功」的獨立 Vivado log，故只能記錄目前觀測到的狀態，不能宣稱已安全部署 DPU runtime。
+- 重要即時狀態：先前以 Composite/SSH 可唯讀登入；在 JTAG target 開啟後，TCP 22 仍可通但 SSH 在 server banner 前重設連線。這可能是板子/PL 正在重設或目前 PL 與 SD Linux 狀態不一致；未再做 program、下載、覆寫、重刷或板端寫入。下一步需保留兩條線，實體斷電重開並以 SD boot 回復乾淨 Linux，再以 SSH/UART 檢查。
+
 ## 2026-11-11：PYNQ-ZU Composite USB 已恢復，UART/JTAG 未偵測
 
 - 實際硬體驗證：Windows 現在可辨識板子的 `PYNQ-USB` mass-storage gadget、`Remote NDIS Compatible Device`（VID `03FD:010C`）與 `乙太網路 3`。主機取得 `192.168.3.102`，`192.168.3.1:22` TCP 成功，故 SD Linux/Composite 網路連線已恢復。

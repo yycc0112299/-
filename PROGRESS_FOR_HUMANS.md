@@ -351,4 +351,10 @@
 - Vitis 產生的硬體定義已看得到 DPU 控制基址 `0x400000000`。
 - 這仍只是 Vitis 平台建置成功，未做板端下載，也不是 Linux VART 或 YOLOv8 推論完成。
 
+## 2026-11-11：DPU Linux 上板前檢查已準備
+
+- 已加入一個會在 PYNQ Linux 板上執行的檢查程式：它會確認 DPU 的 device tree、driver 裝置、記憶體、VART/XIR、`xdputil`、模型檔與 USB 相機是否都到位。
+- 查到目前 Windows 只有 Vitis，沒有能建立相配 Linux 映像的 PetaLinux。現有 SD image 也尚未有 DPU runtime，所以暫不下載 DPU bitstream 或重刷 SD 卡。
+- 尚未完成：matching Linux image、實際上板驗證、YOLOv8 INT8 模型與 DPU 人物辨識。
+
 本項已同步到 GitHub `main`（`6fd4f9b`）。

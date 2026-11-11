@@ -16,3 +16,8 @@ uses PS USB and Linux UVC/V4L2, and native DPU execution requires a matching
 Linux device tree, CMA, DPU driver, VART runtime, B512 `arch.json`, and INT8
 `.xmodel`. The generated XPFM/workspace is a local build artifact, not Git
 content.
+
+The board-side Linux acceptance contract and its read-only verifier are in
+[`linux/README.md`](linux/README.md).  It is deliberately separate from this
+standalone handoff: Vitis proving that it can parse an XSA does not prove a
+PYNQ Linux image has the DPU driver or runtime.

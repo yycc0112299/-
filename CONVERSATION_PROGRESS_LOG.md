@@ -252,3 +252,10 @@
 - 實際驗證：`C:\Xilinx_Embedded_2024_2` 的 Vitis 2024.2 成功生成 SDT、BSP、FSBL、platform export 和 XPFM。生成 `xparameters.h` 實測為 DPU AXI-Lite `0x400000000`，與 Vivado 接線一致；FSBL 為 445,080 bytes。
 - 驗證界線／未完成：這只驗證 Vivado→Vitis hardware handoff。沒有下載板子，沒有 matching Linux/device-tree/CMA/DPU driver/VART、INT8 `.xmodel` 或 DPU inference。workspace/XPFM/FSBL 是可重建本機產物，不上傳。
 - Git／同步：已提交為 `6fd4f9b`（`Build Vitis platform for PYNQ-ZU DPU`）並成功推送至 `origin/main`；下方同步紀錄提交會記錄此結果。
+
+## 2026-11-11 — PYNQ-ZU DPU Linux runtime acceptance gate
+
+- 需求／決策：把已驗證的 Vivado bitstream/XSA/Vitis handoff 接向真正可由 Linux/VART 使用的 DPU，同時不把不存在的 PYNQ runtime 誤列為完成。
+- 實際完成：新增 `vitis/pynq_zu_dpu/linux/verify_dpu_runtime.py` 和 README。verifier 是板端 read-only gate，檢查 `xlnx,dpuczdx8g-4.0` device tree、`/dev/dpu*`、CMA、VART/XIR、`xdputil query`、B512 `.xmodel` 與可選 UVC camera node，全部滿足才成功。官方 DPUCZDX8G 4.0 source 的 ZCU102 reference 已檢查：kernel patch 只加入 4.0 compatible；VART 2.5 recipe 要求 XIR/target-factory/XRT，不能作為 PYNQ 現有 image 的直接替換。
+- 驗證範圍／未完成：host audit 找不到 `C:\Xilinx_Embedded_2024_2` 或 `C:\Xilinx` 下的 PetaLinux；尚未建置 matching Linux image、部署 bitstream、重刷 SD 或在板端執行 verifier。因而尚未有 DPU driver/VART/YOLOv8 inference 的實機聲稱。
+- Git／同步：本次程式與文件將提交至 `main`；提交與推送結果會在後續同步紀錄寫入。

@@ -397,4 +397,4 @@
 - 需求／決策：確認未來第二板的 `--single-b` 不會將 C270 RGB 填到 A lane；僅使用既有 board、`/tmp` 和相同 Vitis-built ELF。
 - 實機驗證：`--single-b /dev/video0` 協商 320×240 YUYV、10 FPS，輸出 307,200 words；A nonzero=0、B nonzero=307,176。此結果與 `--single-a` 的反向 lane 結果一起確認 lane selection。
 - 驗證界線／未完成：仍是同一實體板／相機，不是第二板、Wi-Fi、AXI DMA、PL 或 DPU；暫存 ELF/output 已清除且未變更 SD/system settings。
-- Git：本次硬體驗證紀錄待提交並推送至 `origin/main`；提交後在此紀錄補上結果。
+- Git：已提交為 `0f08f57`（`Record Vitis B-lane hardware verification`）並成功推送至 `origin/main`；本行的同步結果將由下一筆文件提交記錄。

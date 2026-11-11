@@ -510,6 +510,7 @@
 - 驗證界線：這是 CPU ONNX Runtime fallback，不是 DPU、VART、INT8 `.xmodel` 或 YOLOv8 DPU inference。板上 Python 套件變更已在這台第三台設備完成；未在第一台執行端安裝 CPU runtime，且兩板 Wi-Fi/peer/DPU 尚未驗證。
 - 已將 `pipeline.Detector` 預設切換至 `yolov8`，`PERSON_DETECTOR=yolox` 是明確 legacy 回退。PYNQ bundle 改僅包含 YOLOv8 adapter/model，preflight 要求 ONNX Runtime；已在板端暫存 bundle 實測 `pipeline.Detector()` 讀取 `video0` 320×240 後使用 `yolov8` backend 成功推論 1.255 s。修正了前次 bundle 雖選 YOLOv8、卻在 import time 強制要求未打包的 `yolox.py` 的缺陷。
 - 此次 pipeline 實測畫面仍是 0 person，因此只能證明完整 capture→pipeline→YOLOv8 CPU path，尚未驗證正樣本人框、tracker 確認、dashboard 連線或 peer packet producer。
+- 後續以專案既有公開 `bus.jpg` 在同一板端暫存 bundle 重跑：`pipeline.Detector()` 的 `yolov8` backend 對 810×1080 image 回傳 4 個 person boxes、耗時 0.950 s；這是正樣 person postprocess/pipeline 證據。公開測試圖未上傳或改動 Git，現場 C270 人物正樣本、tracker/dashboard/peer 仍未驗證。
 
 ### 2026-11-11：SD 板端雙 C270 實測與 DPU recheck
 

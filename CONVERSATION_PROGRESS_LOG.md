@@ -281,3 +281,10 @@
 - 實際驗證：4 個 adapter/backend unit tests PASS；打包後暫存至 PYNQ，system preflight PASS（NumPy 1.21.6、OpenCV 4.5.4、ONNX Runtime 1.16.3、13,057,836-byte model）。`pipeline.Detector()` 實測 backend=`yolov8`、讀取 C270 `video0` 320×240、CPU inference 1.255 s，當次 0 detections。
 - 驗證範圍／未完成：暫存 `/tmp` bundle 非持久正式部署；無人物正樣本，未驗證 person box/tracker/dashboard/Wi-Fi peer。仍非 DPU/VART/INT8 `.xmodel`。
 - Git／同步：已提交為 `fac5fee`（`Use YOLOv8 in PYNQ tracking pipeline`）並成功推送至 `origin/main`。模型、wheel、影像、帳密和 `/tmp` bundle 未上傳。
+
+## 2026-11-11 — PYNQ YOLOv8 person positive inference
+
+- 需求／決策：補足只有 0-person C270 frame 的驗證不足，以專案現有公開人物圖確認 PYNQ 上真正的 person detector/postprocess 結果。
+- 實際驗證：同一暫存 bundle 的 `pipeline.Detector()` / `yolov8` backend 在 810×1080 public `bus.jpg` 回傳 4 person boxes，推論耗時 0.950 s，並輸出 `PYNQ_YOLOV8_POSITIVE_PASS`。
+- 驗證範圍／未完成：公開圖經暫存傳送，未上傳或新增至 Git；不是 C270 現場人物、tracker confirmed state、dashboard、Wi-Fi peer 或 DPU/VART inference。
+- Git／同步：本項驗證紀錄將提交至 `main`；確切提交與推送結果會在後續同步紀錄寫入。

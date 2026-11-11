@@ -435,4 +435,4 @@
 - 實際完成：以 Python 內建 `unittest` 重跑 19 個 `person_tracking` tests 與 3 個 DPU build-host preflight tests，皆 PASS；因系統未裝 `pytest`，未額外安裝測試套件。以 exact B512 `arch.json` 實跑 preflight，仍正確 FAIL 於 Docker/`vai_c_xir`、PetaLinux 缺失及 2024.2 vs required 2024.1 contract。Vitis direct AArch64 GNU compiler 亦成功重建 UVC packer（外部 75,272-byte ELF）。
 - 環境檢查：嘗試 WSL install 前檢查發現目前 `wsl.exe` 是舊版系統層級介面；Windows Optional Feature 查詢要求 elevated permission。因此沒有安裝 WSL distribution/Docker/PetaLinux、沒有要求或繞過管理員權限、也沒有重開機。
 - 驗證界線／未完成：沒有改 tracked code、AMD 帳號/表單、板子、相機、SD 或 network；cross-compile 不等於 Linux DPU driver/VART/YOLOv8 DPU inference。仍待有效的 PetaLinux 2024.1 取得、受支援 Linux host、matching 2024.1 hardware/image、DPU runtime 與實機驗證。
-- Git：本紀錄與兩份進度文件將以本輪 commit 推送至 `origin/main`；下一筆紀錄補上結果。
+- Git：已提交為 `251fa59`（`Record host validation and WSL prerequisite`）並成功推送至 `origin/main`；本行的同步結果由下一筆文件提交補上。

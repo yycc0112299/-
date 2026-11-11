@@ -362,3 +362,10 @@
 - 驗證：2/2 unit tests PASS；對 `C:/pynq_zu_dpu_native_build` 實跑成功輸出 JSON，然後 build-host preflight 確認 `has_arch_json=true`。預期仍 FAIL，原因僅剩沒有 Docker/`vai_c_xir`、沒有 PetaLinux、以及 2024.2 hardware 不在 Vitis AI 3.5/DPUCZDX8G 4.0 已驗證的 2024.1 工具鏈。
 - 驗證界線／未完成：未產生 `.xmodel`、未安裝任何工具、未重建 2024.1 hardware/image、未碰板子。generated arch JSON、bitstream、model 與帳密不進 Git。
 - Git：已提交為 `444e66e`（`Export exact PYNQ-ZU DPU architecture`）並成功推送至 `origin/main`。generated arch JSON、bitstream、model 與帳密未上傳。
+
+## 2026-11-11 — Downloaded-tool and Linux-host re-audit
+
+- 需求／決策：確認使用者下載的約 6.6GB 工具檔是否可以解除 DPU Linux build blocker；只讀盤點，不做系統安裝或大型解壓。
+- 實際驗證：該檔為 7,049,861,120-byte `Vitis_Embedded_Win_2024.2_1113_2356.tar`；Downloads 內沒有 PetaLinux/Vitis AI/2024.1 installer。WSL 尚未安裝 Linux distribution，Docker/Podman 也不存在。
+- 驗證界線／未完成：Windows Vitis Embedded archive 不是 PetaLinux/Vitis AI runtime build host。未解壓 139GB Unified archive、未安裝 WSL/Docker/PetaLinux、未改板子。DPU runtime 仍需受支援的 2024.1 Linux/PetaLinux/Vitis AI 環境。
+- Git：本次 host re-audit 紀錄待同一筆提交推送至 `origin/main`；提交後在此紀錄補上結果。

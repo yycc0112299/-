@@ -1,5 +1,11 @@
 # 專題狀態與交接記錄（供 Codex）
 
+## 2026-11-11：本機下載檔與 DPU Linux host 再稽核
+
+- 重新盤點 `C:/Users/dsic/Downloads`：使用者提及的約 6.6GB 檔為 `Vitis_Embedded_Win_2024.2_1113_2356.tar`（實際 7,049,861,120 bytes），另有 Windows Unified 2024.2 installer/2024.2.2 archive；未找到 PetaLinux installer、Vitis AI Docker archive 或 2024.1 Vivado/PetaLinux installer。
+- `wsl --status`／`wsl --list --verbose` 均要求先執行 `wsl --install`，故沒有任何已安裝 Linux distribution；未找到 Docker 或 Podman。這確認 6.6GB Vitis Embedded 下載不是可用的 PetaLinux/Vitis AI host。
+- 未嘗試解壓 139GB Unified archive、安裝 WSL/Docker/PetaLinux 或變更系統，因這些會是重大系統變更且現有 DPU runtime 所需的 2024.1 toolchain 仍不在本機。下一步需取得受支援 Linux host 與 2024.1 PetaLinux/Vitis AI；在獲得該環境前可繼續 CPU YOLOv8/兩板 peer 路線。
+
 ## 2026-11-11：原生 B512 DPU 的精確 `arch.json` 已擷取
 
 - 先前主機搜尋遺漏了 Vivado `pynq_zu_dpu.gen` 產物；現在在已完成的 native DPU build 找到 `project/pynq_zu_dpu.gen/sources_1/bd/pynq_zu_dpu/ip/pynq_zu_dpu_dpu_czdx8g_0_0/arch.json`。其精確 fingerprint 是 `0x101000016010400`。

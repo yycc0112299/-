@@ -1,5 +1,11 @@
 # 專題進度（重點版）
 
+## 2026-11-11：已確認下載的 Vitis 檔不能建 DPU Linux
+
+- 約 6.6GB 的下載檔是 Windows 版 Vitis Embedded 2024.2，不是 PetaLinux 或 Vitis AI Linux 建置環境。
+- 這台電腦沒有已安裝的 WSL Linux、Docker、PetaLinux，也沒有 2024.1 工具鏈；因此仍不能從這台機器產生 DPU runtime。
+- 沒有進行安裝、解壓大型工具或改動系統。
+
 ## 2026-11-11：DPU 正確的模型架構檔已找到
 
 - 已從 Vivado 產生的 DPU IP 找到正確的架構檔，fingerprint 是 `0x101000016010400`。這是之後編譯 YOLOv8 DPU 模型時必須使用的精確設定，不是其他板子的範例檔。

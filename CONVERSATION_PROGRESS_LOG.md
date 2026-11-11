@@ -368,4 +368,4 @@
 - 需求／決策：確認使用者下載的約 6.6GB 工具檔是否可以解除 DPU Linux build blocker；只讀盤點，不做系統安裝或大型解壓。
 - 實際驗證：該檔為 7,049,861,120-byte `Vitis_Embedded_Win_2024.2_1113_2356.tar`；Downloads 內沒有 PetaLinux/Vitis AI/2024.1 installer。WSL 尚未安裝 Linux distribution，Docker/Podman 也不存在。
 - 驗證界線／未完成：Windows Vitis Embedded archive 不是 PetaLinux/Vitis AI runtime build host。未解壓 139GB Unified archive、未安裝 WSL/Docker/PetaLinux、未改板子。DPU runtime 仍需受支援的 2024.1 Linux/PetaLinux/Vitis AI 環境。
-- Git：本次 host re-audit 紀錄待同一筆提交推送至 `origin/main`；提交後在此紀錄補上結果。
+- Git：已提交為 `49b8755`（`Record DPU build host re-audit`）並成功推送至 `origin/main`；本行的同步結果將由下一筆文件提交記錄。

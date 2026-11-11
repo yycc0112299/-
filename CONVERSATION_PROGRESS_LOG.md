@@ -524,4 +524,4 @@
 - 需求／決策：確認 PetaLinux installation 真正解除哪一項 DPU Linux-image blocker，避免把 SDK install 誤稱為完整 DPU deployment。
 - 實際完成：在 WSL `bash` source `/home/petalinux/xilinx/petalinux/2024.1/settings.sh` 後，使用 exact generated `arch.json` 執行 tracked preflight。結果確認 `petalinux-create=true`、arch JSON exists、PetaLinux=2024.1；gate 仍 FAIL，但明確只剩 Docker/`vai_c_xir` Vitis AI 3.5 compiler route 與 Vivado hardware=2024.2（需 2024.1）。
 - 驗證界線／未完成：沒有建立或燒錄 image、沒有安裝 VART/XIR/driver/xmodel、沒有把 2024.2 XSA 當成相容、沒有接觸板子/SD/相機/Wi-Fi。Docker installer 等待 Windows UAC completion，不以下載或 installer process 視為 Docker available。
-- Git：本次 preflight evidence 與同步結果將由後續提交記錄。
+- Git：已提交為 `4f301a7`（`Record installed PetaLinux DPU preflight`）並成功推送至 `origin/main`。

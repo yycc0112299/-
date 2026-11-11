@@ -413,4 +413,4 @@
 - 實際完成：`uvc_v4l2_packer.c` 新增 `--sequential`，先擷取/關閉 A 再擷取/關閉 B，copy 兩個 YUYV source 後才 pack。Vitis 2024.2 AArch64 compile PASS。
 - 實機驗證：`--sequential /dev/video0 /dev/video2` 兩者各協商 320×240 YUYV、10 FPS；輸出 307,200 words，A nonzero=307,168、B nonzero=307,112。`/tmp` ELF/output 已清除。
 - 驗證界線／未完成：沒有共同 timestamp／simultaneous streams，沒有 DMA/PL/DPU/person inference 或第二板/Wi-Fi。既有 simultaneous USB bandwidth failure 仍有效。
-- Git：本次程式與進度紀錄待同一筆提交推送至 `origin/main`；提交後在此紀錄補上結果。
+- Git：已提交為 `bd525f5`（`Support sequential dual C270 packing`）並成功推送至 `origin/main`；本行的同步結果將由下一筆文件提交記錄。

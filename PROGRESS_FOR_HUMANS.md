@@ -525,3 +525,8 @@
 
 - 已確認 PetaLinux 2024.1 installer 下載完成，約 3.07 GiB，並已記錄 SHA-256。
 - 它尚未執行或安裝。下一步仍需要在 Windows 管理員權限下建立 Linux/WSL 環境，再安裝 PetaLinux。
+
+## 2026-11-12：WSL 已啟用，等待重開機
+
+- Windows 的 WSL 與虛擬機平台功能已成功啟用。
+- Windows 要求重開機才會生效；Ubuntu 和 PetaLinux 尚未安裝。請先儲存目前 Vivado／Vitis 的工作，確認後才能重開。

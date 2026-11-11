@@ -691,3 +691,9 @@
 - 實際盤點 `C:\Users\dsic\Downloads`，確認 AMD installer `petalinux-v2024.1-05202009-installer.run` 存在且大小為 3,296,562,820 bytes（約 3.07 GiB）。SHA-256=`9EFB6191DC9A90AFEB374EAFD8733CBC8C27C2E5D54E2D388FA0302294B5BB93`。
 - 這解除「尚未有 PetaLinux 2024.1 installer」的下載 blocker，但不解除 Linux build host blocker：PetaLinux installer 需要受支援的 Linux host；本機 WSL 尚未啟用／安裝 distribution，Docker/Vitis AI compiler route 和 matching 2024.1 hardware/image 仍未完成。
 - 驗證界線：僅列檔與 hash，沒有執行 `.run`、未安裝/解壓 PetaLinux、未改 Windows、WSL、板子、SD 或 Git。installer 是外部下載資產，不納入 repository。
+
+### 2026-11-12：Windows WSL platform feature 已啟用，等待重開機
+
+- 在使用者確認在電腦前後，以 Windows administrator elevation 成功執行 `Enable-WindowsOptionalFeature`，啟用 `Microsoft-Windows-Subsystem-Linux` 與 `VirtualMachinePlatform`，兩項同一 elevated command exit code=0，且使用 `-NoRestart` 避免未告知即中斷 Vivado/Vitis。
+- 讀取 Windows reboot markers：CBS `RebootPending=True`、`PendingFileRenameOperations=True`。因此必須重開機後才能建立/執行 WSL Linux distribution；目前 `wsl --list --verbose` 仍顯示沒有 distribution，屬預期的重開機前狀態。
+- 驗證界線：尚未重開 Windows、未安裝 Ubuntu、未執行 PetaLinux installer、未改 Vivado/Vitis project 或板子。重開前必須由使用者儲存目前開啟的 Vivado/Vitis 工作。

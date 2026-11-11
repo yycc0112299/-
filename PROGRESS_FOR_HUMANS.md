@@ -329,3 +329,9 @@
 - 目前已在本機 TCP loopback 測試通過；尚未在兩塊實體板的 Wi-Fi 上測試，也尚未連到 YOLOv8/DPU。
 
 本項程式已同步到 GitHub `main`（`a1ff8f4`）。
+
+## 2026-11-11：DPU 硬體檔已成功做出
+
+- 用 Vivado 原生 DPU IP 做出 PYNQ-ZU 的 B512 DPU Block Design，不是把 USB 相機的線接到 FPGA 腳位；USB 相機仍由 Linux 處理，DPU 從 DDR 讀取資料。
+- Vivado 已實際完成 Block Design 驗證、綜合、placement、routing 與 bitstream。最終時序通過，沒有 errors 或 critical warnings；資源使用約 LUT 27%、BRAM 50%、DSP 11%。
+- 這代表「Vivado 硬體檔」已有可重建的 DPU bitstream；尚未代表板上已能跑人物辨識。接下來還需要相配的 Linux DPU driver、VART、記憶體設定、YOLOv8 INT8 `.xmodel`，以及板端實測。

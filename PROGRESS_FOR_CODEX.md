@@ -471,3 +471,10 @@
 - 新增 `person_tracking/tests/test_peer_protocol.py`，實跑四項：normalization round-trip、out-of-range box rejection、非 person/schema rejection、localhost TCP framed send/read。實測 `python tests/test_peer_protocol.py` PASS（4 tests）與 `py_compile` PASS。
 - 驗證邊界：尚未將 packet producer 接到實際 detector，尚未在兩塊 PYNQ Wi-Fi 上執行，且沒有聲稱 DPU/VART 已就緒。
 - 同步結果：本項程式與文件已提交為 `a1ff8f4`（`Add two-board detection peer protocol`）並成功推送至 `origin/main`。
+
+### 2026-11-11：PYNQ-ZU 原生 DPU B512 Block Design、實作與 bitstream
+
+- 新增 `fpga/create_pynq_zu_dpu_bd.tcl`、`inspect_pynq_zu_dpu_ip.tcl`、`inspect_pynq_zu_dpu_bd.tcl`、`synthesize_pynq_zu_dpu_b512.tcl`、`implement_pynq_zu_dpu_b512.tcl` 和 `dpu_config_pynq_zu_b512.vh`。流程要求 `DPUCZDX8G_HOME` 指向官方 AMD DPUCZDX8G source root，選用 `PYNQ_ZU_DPU_BUILD_DIR` 指向短 ASCII build path；外部 AMD IP 會 stage 到 build output，不納入 Git。
+- `create_pynq_zu_dpu_bd.tcl` 以原生 `xilinx.com:ip:dpuczdx8g:4.0` 建立一核心 B512 DPU。USB0/USB1 保持 PS MIO（不可作 PL camera pins）；AXI-Lite control 是 A53 HPM0→SmartConnect→DPU，DPU DATA0/DATA1 是 128-bit→HP0/HP1，INSTR 是 32-bit→SmartConnect→HP2，interrupt 接 PS IRQ0。PL0=100 MHz control、PL1=150 MHz data，clock wizard 提供 300 MHz DPU 2x clock。
+- 實測 Vivado 2024.2：`validate_bd_design` 成功；top-level synthesis 成功（0 errors/0 critical warnings）；implementation route status 為 68,180/68,180 routable nets fully routed、0 routing errors；`write_bitstream` 成功（0 errors/0 critical warnings）。signoff timing report 為 WNS `+0.966 ns`、WHS `+0.010 ns`，並明示 all user specified timing constraints are met。implementation utilization：LUT 32,022/117,120（27.34%）、register 41,567/234,240（17.75%）、BRAM 72/144（50.00%）、DSP 134/1,248（10.74%）。本機 `.bit` 是 7,797,815 bytes 的可重建 build output，不上傳 Git。
+- 驗證界線：這是 PYNQ-ZU DPU 硬體 feasibility 與 bitstream 證據，不是已上板的 DPU inference。SD PYNQ Linux 仍沒有 `/dev/dpu`、`xdputil`、VART、matching device-tree/CMA、B512 `arch.json`、YOLOv8 INT8 `.xmodel` 或 VART test；這些完成前不可聲稱人物偵測跑在 DPU。真實 C270 仍走 PS USB→Linux UVC/V4L2→DDR，之後由 VART 控制 DPU，不會改接 PL camera pins。

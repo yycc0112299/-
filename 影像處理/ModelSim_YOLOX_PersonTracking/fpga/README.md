@@ -1,5 +1,28 @@
 # PYNQ / EGo1 板級接線邊界
 
+## PYNQ-ZU native DPU B512 Block Design（2026-11-11）
+
+`create_pynq_zu_dpu_bd.tcl` 建立 PYNQ-ZU (`xczu5eg-sfvc784-1-e`) 的原生
+`xilinx.com:ip:dpuczdx8g:4.0` B512 單核心 Block Design。這不是把 USB 相機
+D+/D− 接到 PL：USB0/USB1 保持 PS MIO，由 Linux UVC/V4L2 把單鏡頭資料放到 DDR。
+
+BD 接線為 A53 HPM0 → SmartConnect → DPU AXI-Lite 控制、DPU 128-bit DATA0/1
+→ PS HP0/HP1、32-bit instruction → SmartConnect → PS HP2、DPU interrupt →
+PS IRQ0；PL1 150 MHz 餵 DDR data domain，clock wizard 產生 300 MHz DPU 2x
+clock。`synthesize_pynq_zu_dpu_b512.tcl` 與
+`implement_pynq_zu_dpu_b512.tcl` 分別產出 synthesis 和 bitstream gate。
+
+先設定 `DPUCZDX8G_HOME` 為官方 AMD DPUCZDX8G 解壓來源根目錄；可選設定短路徑
+`PYNQ_ZU_DPU_BUILD_DIR`。2026-11-11 實跑 Vivado 2024.2：BD validate、synthesis、
+implementation、routing、bitgen 都成功，0 errors/0 critical warnings；implementation
+timing 為 WNS +0.966 ns、WHS +0.010 ns，所有使用者約束滿足。資源為 LUT 27.34%、
+register 17.75%、BRAM 50.00%、DSP 10.74%。build 內 `.bit`/`.xsa`/report 是可由 Tcl
+重建的外部產物，未納入 Git。
+
+此 gate 不代表 PYNQ Linux 已能執行 DPU。仍需要與此 B512 設定一致的 device tree、
+CMA/DPU driver、VART、`arch.json`、INT8 `.xmodel` 與板端 VART test；現有 SD image
+沒有 `xdputil`、VART 或 `/dev/dpu`。
+
 `roi_feature_board_top.v` 是目前可共用的 FPGA top-level 核心：它把既有的
 `person_roi_stream.v` 接成一個同步 RGB 像素串流，完成一個 640×480 frame 後輸出
 上下區域主色特徵、像素數與 `result_led`。

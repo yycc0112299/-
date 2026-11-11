@@ -99,3 +99,33 @@ Model deployment sequence:
   describes the supported platform workflow and version considerations.
 - AMD [DPUCZDX8G product guide](https://docs.amd.com/r/4.0-English/pg338-dpu/Customizing-and-Generating-the-Core-in-the-Vitis-IDE)
   describes DPU configuration and PS DDR connectivity.
+
+## 2026-11-11: native B512 DPU Vivado feasibility result
+
+The repository now has a reproducible native-DPU Vivado flow under
+`影像處理/ModelSim_YOLOX_PersonTracking/fpga/`. Set `DPUCZDX8G_HOME` to AMD's
+extracted official DPUCZDX8G source root and, optionally,
+`PYNQ_ZU_DPU_BUILD_DIR` to a short writable ASCII path. Run
+`create_pynq_zu_dpu_bd.tcl`, `synthesize_pynq_zu_dpu_b512.tcl`, then
+`implement_pynq_zu_dpu_b512.tcl` with Vivado 2024.2 batch mode.
+
+The generated `pynq_zu_dpu` Block Design uses native
+`xilinx.com:ip:dpuczdx8g:4.0`, one B512 core, PS USB0/USB1 on MIO, A53 HPM0
+to the DPU AXI-Lite control slave, HP0/HP1 for 128-bit DPU data, HP2 for DPU
+instructions, PL1=150 MHz DPU/DDR traffic, a generated 300 MHz DPU 2x clock,
+and `dpu0_interrupt` to PS IRQ0. It was validated with
+`validate_bd_design` and fully implemented for `xczu5eg-sfvc784-1-e`.
+
+Actual Vivado 2024.2 result: bitstream generation completed with 0 errors and
+0 critical warnings; all user timing constraints are met (WNS +0.966 ns,
+WHS +0.010 ns); 68,180 of 68,180 routable nets were fully routed with 0 route
+errors. Implemented utilization is 32,022 LUTs (27.34%), 41,567 registers
+(17.75%), 72 BRAM tiles (50.00%), and 134 DSPs (10.74%). The generated
+7,797,815-byte bitstream is intentionally not checked into Git because all
+tracked Tcl sources rebuild it.
+
+This is not yet a claim of DPU inference on the board. The current PYNQ Linux
+image still lacks the matching DPU driver, VART, CMA/device-tree integration,
+an `arch.json` matching this configuration, a compiled INT8 `.xmodel`, and an
+on-board `xdputil`/VART execution test. USB UVC remains PS USB -> Linux V4L2
+-> DDR before a VART application submits a tensor to the DPU.

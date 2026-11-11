@@ -235,4 +235,4 @@
 - 實際完成：由官方 AMD DPUCZDX8G source 的原生 `xilinx.com:ip:dpuczdx8g:4.0` 建立 PYNQ-ZU `xczu5eg-sfvc784-1-e` B512 單核心 Block Design。DPU control、instruction、DATA0/1、clock/reset 和 IRQ 已以 tracked Tcl 接至 A53 HPM0、PS HP2、HP0/HP1、PL clocks 和 IRQ0；新增可重跑 create/inspect/synthesis/implementation Tcl。
 - 實際驗證：Vivado 2024.2 `validate_bd_design`、top synthesis、implementation、routing、bitstream 均成功。最終 route status 為 68,180 fully-routed nets、0 routing errors；bitgen 0 errors/0 critical warnings；signoff WNS `+0.966 ns`、WHS `+0.010 ns`，所有 user timing constraints met。資源為 LUT 27.34%、register 17.75%、BRAM 50.00%、DSP 10.74%。外部 build 的 7,797,815-byte `.bit`、XSA/report 與 AMD source 都未上傳，因 Tcl 可重建且不是專案原始碼。
 - 驗證界線／未完成：尚未下載此 bitstream 到板子，也沒有 matching Linux image/device tree/CMA/DPU driver/VART、B512 `arch.json`、YOLOv8 INT8 `.xmodel` 或 VART inference。現有 SD PYNQ image 先前已確認缺 `/dev/dpu`、`xdputil` 和 VART；因此不能聲稱 DPU 或 YOLOv8 已上板可用。
-- Git／同步：待本次 tracked Tcl 與三份進度文件檢查、提交、push 後補上 commit 結果。
+- Git／同步：已提交為 `dbaeb8f`（`Add PYNQ-ZU native DPU B512 Vivado flow`）並成功推送至 `origin/main`；下方同步紀錄提交會記錄此結果。

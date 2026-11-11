@@ -503,6 +503,7 @@
 
 ### 2026-11-11：PYNQ CPU YOLOv8 fallback 實測
 
+- 同步結果：YOLOv8 adapter、exporter、tests 與進度文件已提交為 `fbed6fe`（`Add PYNQ CPU YOLOv8 fallback`）並成功推送至 `origin/main`。
 - 新增 `person_tracking/assets/yolov8.py`、`prepare_yolov8_onnx.py` 和 adapter unit tests。adapter 支援 Ultralytics raw `(1,84,8400)`／`(1,8400,84)`，僅保留 COCO person、還原 letterbox 座標並保持既有 box/confidence contract；優先 ONNX Runtime、不可用時才嘗試 OpenCV DNN。export script 固定使用 YOLOv8n 640 static ONNX，並經 ONNX checker 將 IR metadata 設為 9，供 PYNQ ORT 1.16.3 使用；模型權重與 ONNX 都不納入 Git。
 - 實板：原始 ONNX opset 18 在 OpenCV 4.5.4 的 Reshape parser 失敗；板端安裝 user-site `numpy==1.21.6`、`onnxruntime==1.16.3` 和依賴後，IR 9 artifact 成功輸出 `(1,84,8400)`，zero-input forward 0.845 s。從 C270 `video0` 讀取一張 320×240 frame 並以新增 adapter CPU inference 實跑 1.017 s、無 runtime error；當次畫面回傳 0 person，未驗證正樣本 detection。
 - 驗證界線：這是 CPU ONNX Runtime fallback，不是 DPU、VART、INT8 `.xmodel` 或 YOLOv8 DPU inference。板上 Python 套件變更已在這台第三台設備完成；未在第一台執行端安裝 CPU runtime，且兩板 Wi-Fi/peer/DPU 尚未驗證。

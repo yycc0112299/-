@@ -306,3 +306,16 @@
 ## 2026-11-06：Vitis Linux 一鍵編譯
 
 - 新增一鍵 build script，可重新產生要部署到板子的 AArch64 UVC packer，不需手動設定 compiler。
+## 2026-11-11：真實雙鏡頭 USB 頻寬修正
+
+- 板上兩支 C270 與 Vitis Linux 程式都已實際看到；第一次同時開啟時被 Linux 判定 USB 頻寬不足。
+- 已將 Vitis 程式改為主動要求較低的 10 FPS，再重新上板測試，不再使用相機預設的高 FPS。
+
+## 2026-11-11：雙鏡頭限制確認與新兩板方向
+
+- 已在板子實測：兩支 C270 都能被 Linux 看見，但同時開始擷取時，第二支相機會被 USB Hub 拒絕。即使已降到 320×240、10 FPS，甚至改用 MJPEG，結果仍相同。這不是儲存空間或 Vivado 程式的問題。
+- 因此接下來採用「兩塊 PYNQ-ZU、每塊一支鏡頭」：各自用 Linux 取像與推論，再用 Wi-Fi 傳送人物偵測／追蹤結果。這比在一個共享 USB Hub 上硬撐兩支相機可靠。
+- 已新增兩板與 DPU 架構文件。DPU 目前尚未在板上可用：現有 Linux 沒有 DPU driver、VART 或 DPU 裝置，必須先重新做 Vivado DPU 硬體和相配的 Linux 映像。
+- 新人物偵測目標定為 YOLOv8；既有程式裡的是 YOLOX，兩者會透過相同輸出介面逐步替換，不會混稱或假裝已經跑在 DPU。
+
+尚未完成：每板單鏡頭長時間測試、第二塊板、Wi-Fi 通訊、DPU 硬體/Linux runtime、YOLOv8 量化與 DPU 人物偵測。

@@ -447,3 +447,18 @@
 ### 2026-11-06：可重跑的 Vitis Linux UVC build script
 
 - 新增 `vitis/pynq_zu_usb_video/linux/build_linux_uvc_packer.ps1`，固定使用已驗證的 Vitis direct GNU compiler（非會 DLL 失敗的 wrapper），臨時將 tool `bin` 放入 PATH、以 warnings-as-errors 建置 `uvc_v4l2_packer`，並輸出 `PYNQ_ZU_UVC_PACKER_BUILD_PASS`。預設產物在 `linux/build/`，用於 SD/Linux 上板前複建。
+### 2026-11-11：實板 UVC bandwith 診斷與 10-FPS Vitis capture 修正
+
+- SD-boot Linux 已實際登入；板端列出兩支 `046d:0825` C270，對應 `/dev/video0..3`。交叉編譯的 AArch64 Vitis packer 已成功以 SCP 部署、並被板端 `file` 確認為 AArch64 ELF。`xilinx` 不在 `video` group，故本輪以單次 `sudo` 執行 preflight，沒有修改帳號群組。
+- 真實雙路初測失敗的 errno 為 `ENOSPC`，排除 root filesystem 容量後，以 `sudo dmesg` 證實是 USB hub bandwidth：`usb 1-1.4: Not enough bandwidth for new device state`/`altsetting 7`。因此將 V4L2 packer 改成在 `VIDIOC_S_FMT` 後明確 `VIDIOC_S_PARM` 要求 640×480 YUYV 10 FPS，避免 driver high-FPS default。
+- 此次修改尚待重新交叉編譯與實板重跑；仍未完成 AXI DMA/CMA handoff。
+
+### 2026-11-11：雙 C270 V4L2 實測完成，改列兩板一鏡頭為必要架構
+
+- 實板已完成重新 cross-build、SCP 與 Linux 執行：兩支 C270 的 capture nodes 是 `/dev/video0`、`/dev/video2`，都可協商為 `320x240`、`10/1 FPS`、`YUYV`；但第二支在 `VIDIOC_STREAMON` 固定失敗為 `ENOSPC`。程式的即時 diagnostics 與 `dmesg` 對應為 USB hub `Not enough bandwidth ... altsetting 7`，不是檔案空間、權限、DMA 或 Vivado bitstream 錯誤。
+- 為排除未壓縮 YUYV 的假設，`uvc_v4l2_packer` 新增 `--probe`（枚舉 format/size/FPS）及 `--mjpeg-stream-test`。實機確認 C270 支援 YUYV/MJPG 和所需 frame interval；然而兩支同時協商 `320x240`、`10 FPS`、`MJPG` 時第二個 `VIDIOC_STREAMON` 仍為 `ENOSPC`。不能再將本板此 USB topology 說成可完成雙路持續擷取。
+- 一般 packer 現以 QVGA YUYV source 的 2x2 pixel expansion 維持既有的 640x480、2,457,600-byte packed output contract；但因第二 camera 不能 STREAMON，現板尚未得到雙路 preflight PASS。`linux/build/` 是本機可重建 ELF，未納入 Git。
+- 新增 `docs/pynq-zu-two-board-dpu-architecture.md`：目標改為每板一 C270、Linux UVC/V4L2、每板 DPU inference、Wi-Fi 傳 versioned detection/tracking message。raw video forwarding 是後續選項，不能阻擋第一個兩板推論里程碑。
+- DPU board audit：目前 PYNQ Linux 為 AArch64，但沒有 `xdputil`、Python `vart` 或 `/dev/dpu`。所以現有 PYNQ image 既沒有 DPU IP/driver，也沒有 VART；不能把 YOLOX/YOLOv8 ONNX 直接稱為 DPU inference。下一硬體 gate 是依 `xczu5eg` 資源與相容 Vitis AI release 加入 DPUCZDX8G、DDR/IRQ/CMA/Linux driver/VART，然後以 matching `arch.json` 將 INT8 YOLOv8 編成 `.xmodel`。
+- 模型名稱決策：現有 assets 是 YOLOX；新 detector target 是 YOLOv8。兩者不能混稱。保留一個 detector adapter output schema，先支援 CPU YOLOv8，再以 VART DPU implementation 取代 backend，避免重寫 tracker/Wi-Fi interface。
+- 驗證邊界：Vitis Linux packer cross-build 和兩路 USB failure 都已實板驗證；單板單鏡頭持續 streaming、第二板、Wi-Fi、DPU Vivado build、VART、YOLOv8 quantization/compile/inference 尚未完成。

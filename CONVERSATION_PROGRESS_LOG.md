@@ -206,3 +206,18 @@
 - 實際完成：新增 `build_linux_uvc_packer.ps1`，使用 Vitis direct GNU compiler、暫時 PATH、`-Wall -Wextra -Werror`，輸出 deployable ELF 與 `PYNQ_ZU_UVC_PACKER_BUILD_PASS` marker。
 - 驗證範圍／未完成：以 `%TEMP%/pynq_zu_uvc_build_check` 實跑成功，生成 74,624-byte packer；未進行板端 execution 或 DMA handoff。
 - Git／同步：待本輪提交與 push 後補上結果。
+## 2026-11-11 — Vitis Linux 真實 C270 UVC bring-up
+
+- 需求／決策：在 SD-boot PYNQ Linux 上以 Vitis Linux C program（非 Jupyter）驗證兩支實體 C270 的 V4L2→packed frame 路徑。
+- 實際完成：Composite USB/RNDIS、HTTP、SSH 都已實測通；以 `xilinx` 帳號登入後確認 Linux 6.6.10、兩支 `046d:0825` C270、`/dev/video0..3`。交叉編譯 packer 以 SCP 部署且板端辨識為 AArch64 ELF。
+- 實際發現：第一輪兩路 640×480 YUYV capture 失敗，`dmesg` 明確是 second C270 的 `Not enough bandwidth ... altsetting 7`，不是檔案空間或 FPGA/DMA。packer 現改為以 `VIDIOC_S_PARM` 協商 10 FPS，再進行實測。
+- 驗證界線／未完成：10-FPS build/retest 與 DMA/CMA handoff 尚未完成；本輪暫以 sudo 越過 `xilinx` 缺少 `video` group，未永久改帳號。
+
+## 2026-11-11 — 實板雙 C270 bandwidth 結論、兩板架構與 DPU audit
+
+- 需求／決策：先以一板兩鏡頭確認 Vitis Linux UVC 方案；後續改為兩板各一鏡頭、Linux/Wi-Fi 互通，並以 YOLOv8 為人物偵測目標、研究 DPU 接法。
+- 實際完成：更新並 cross-build Vitis Linux packer，部署至 SD-boot PYNQ Linux。兩個 C270 capture nodes 實際協商為 320×240/10 FPS/YUYV，但第二路 `VIDIOC_STREAMON` 回傳 `ENOSPC`；`dmesg` 為 shared USB hub 的 `Not enough bandwidth ... altsetting 7`。加入可重跑 `--probe` 與 `--mjpeg-stream-test`；probe 顯示 C270 支援 YUYV/MJPG 與多個 sizes/FPS，而 320×240/10-FPS MJPEG 兩路 stream-only test 仍在第二路 `STREAMON` 失敗。這排除只靠降低解析度、FPS 或改 MJPEG 即可修復的說法。
+- 實際完成：新增 `docs/pynq-zu-two-board-dpu-architecture.md`，規定第一個可交付目標為每板一鏡頭、Linux UVC/V4L2、每板 inference、Wi-Fi versioned detection message；raw video 傳輸留為後續選項。文件也將既有 YOLOX assets 與新 YOLOv8 target 分開，採 detector adapter 保持 tracker/fusion interface。
+- DPU audit：板端實測無 `xdputil`、VART Python module 或 `/dev/dpu`。目前 PYNQ image 不具 DPU hardware/runtime；尚未有 YOLOv8 quantization、`.xmodel`、VART 或 DPU inference。需先為 `xczu5eg` 完成 DPUCZDX8G Vivado integration、matching Linux driver/VART/CMA image 和 DPU-specific `arch.json`。
+- 驗證範圍／未完成：本次已實證實板 USB failure、AArch64 packer build/deploy/run 與 DPU runtime absence；未驗證單鏡頭持續串流、第二板、Wi-Fi、DPU image/bitstream、YOLOv8 inference 或 DMA/CMA handoff。
+- Git／同步：待差異檢查、提交與 push 後補上 commit 結果；本機 `linux/build/` 只有可重建 AArch64 ELF，未上傳。

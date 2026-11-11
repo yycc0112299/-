@@ -1,6 +1,7 @@
 影像處理/ModelSim_YOLOX_PersonTracking/work/remote_site/
 影像處理/ModelSim_YOLOX_PersonTracking/fpga/board_repos/
 影像處理/ModelSim_YOLOX_PersonTracking/fpga/build/
+影像處理/ModelSim_YOLOX_PersonTracking/vitis/pynq_zu_usb_video/linux/build/
 
 # Local Vivado/XSim execution products (rebuildable; may contain local paths).
 /.Xil/

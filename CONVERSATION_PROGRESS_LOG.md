@@ -361,4 +361,4 @@
 - 實際完成：在完成的 Vivado generated IP 目錄找到 `arch.json`，fingerprint 為 `0x101000016010400`；新增 tracked `fpga/export_pynq_zu_dpu_arch_json.py` 與兩個 unit tests，安全輸出外部可重建的 deploy JSON。
 - 驗證：2/2 unit tests PASS；對 `C:/pynq_zu_dpu_native_build` 實跑成功輸出 JSON，然後 build-host preflight 確認 `has_arch_json=true`。預期仍 FAIL，原因僅剩沒有 Docker/`vai_c_xir`、沒有 PetaLinux、以及 2024.2 hardware 不在 Vitis AI 3.5/DPUCZDX8G 4.0 已驗證的 2024.1 工具鏈。
 - 驗證界線／未完成：未產生 `.xmodel`、未安裝任何工具、未重建 2024.1 hardware/image、未碰板子。generated arch JSON、bitstream、model 與帳密不進 Git。
-- Git：本次 architecture extraction 待同一筆提交推送至 `origin/main`；提交後在此紀錄補上結果。
+- Git：已提交為 `444e66e`（`Export exact PYNQ-ZU DPU architecture`）並成功推送至 `origin/main`。generated arch JSON、bitstream、model 與帳密未上傳。

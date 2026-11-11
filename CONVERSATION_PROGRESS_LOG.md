@@ -287,4 +287,4 @@
 - 需求／決策：補足只有 0-person C270 frame 的驗證不足，以專案現有公開人物圖確認 PYNQ 上真正的 person detector/postprocess 結果。
 - 實際驗證：同一暫存 bundle 的 `pipeline.Detector()` / `yolov8` backend 在 810×1080 public `bus.jpg` 回傳 4 person boxes，推論耗時 0.950 s，並輸出 `PYNQ_YOLOV8_POSITIVE_PASS`。
 - 驗證範圍／未完成：公開圖經暫存傳送，未上傳或新增至 Git；不是 C270 現場人物、tracker confirmed state、dashboard、Wi-Fi peer 或 DPU/VART inference。
-- Git／同步：本項驗證紀錄將提交至 `main`；確切提交與推送結果會在後續同步紀錄寫入。
+- Git／同步：已提交為 `bf9a830`（`Record PYNQ YOLOv8 positive inference`）並成功推送至 `origin/main`。公開圖只在板端 `/tmp` 驗證使用，未上傳。

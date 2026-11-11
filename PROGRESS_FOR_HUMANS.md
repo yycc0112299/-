@@ -368,6 +368,7 @@
 
 ## 2026-11-11：YOLOv8 已在板上以 CPU 跑通
 
+- 正樣人像驗證紀錄已同步到 GitHub `main`（`bf9a830`）。
 - pipeline/bundle 的 YOLOv8 接入已同步到 GitHub `main`（`fac5fee`）。
 - 此次 YOLOv8 程式與實板驗證已同步到 GitHub `main`（`fbed6fe`）。
 - YOLOv8n 已改用 ONNX Runtime 在 PYNQ 實跑一張 C270 影格，約 1.017 秒完成一次推論；這次畫面沒有偵測到人，因此只證明相機到模型的流程可執行。

@@ -259,3 +259,10 @@
 - 實際完成：新增 `vitis/pynq_zu_dpu/linux/verify_dpu_runtime.py` 和 README。verifier 是板端 read-only gate，檢查 `xlnx,dpuczdx8g-4.0` device tree、`/dev/dpu*`、CMA、VART/XIR、`xdputil query`、B512 `.xmodel` 與可選 UVC camera node，全部滿足才成功。官方 DPUCZDX8G 4.0 source 的 ZCU102 reference 已檢查：kernel patch 只加入 4.0 compatible；VART 2.5 recipe 要求 XIR/target-factory/XRT，不能作為 PYNQ 現有 image 的直接替換。
 - 驗證範圍／未完成：host audit 找不到 `C:\Xilinx_Embedded_2024_2` 或 `C:\Xilinx` 下的 PetaLinux；尚未建置 matching Linux image、部署 bitstream、重刷 SD 或在板端執行 verifier。因而尚未有 DPU driver/VART/YOLOv8 inference 的實機聲稱。
 - Git／同步：已提交為 `61abcdf`（`Add PYNQ-ZU DPU Linux runtime gate`）並成功推送至 `origin/main`。本機沒有上傳 Linux image、bitstream、模型或任何帳密；它們皆尚未產生或屬可重建／部署端產物。
+
+## 2026-11-11 — SD PYNQ 實板雙 C270 capture 與 runtime recheck
+
+- 需求／決策：在 SD Linux 實機重新驗證目前「先一板兩鏡頭」是否可行，並確認 DPU/Linux 現況，不以 device node 存在代替實際 frame capture。
+- 實際完成：SSH 到 `192.168.3.1` 的 PynqLinux 3.0 / kernel `6.6.10-xilinx-v2024.1-gb6067dbebcc8`；兩支 C270 皆在 USB2744 480-Mbit/s hub 上，OpenCV/NumPy 存在。將 `xilinx` 加入既有 `video` 群組後，新 session 可開 V4L2 node。兩支各自 MJPEG 320×240、5 FPS 讀三張均成功；同時開啟則 `video0` 五張成功、`video2` 五張失敗。`dmesg` 實測對第二支記錄 `Not enough bandwidth for altsetting 7`。
+- 驗證範圍／未完成：這證明個別 C270 可 capture 且一板雙 C270 在現有共用 hub 失敗，並非長時間串流測試。`wlan0` 存在但 DOWN/unconfigured，未做兩板 Wi-Fi。CMA 524288 KiB，但仍無 DPU DT node、`/dev/dpu*`、`xdputil`、VART/XIR；未部署 DPU bitstream、未重刷 SD、未跑 `.xmodel` 或 YOLOv8。
+- Git／同步：本項紀錄、架構與進度文件將提交至 `main`；提交與推送結果會在後續同步紀錄寫入。沒有上傳板端帳密、影像、bitstream 或模型。

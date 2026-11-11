@@ -143,3 +143,27 @@ BSP, ZynqMP FSBL, and an exported XPFM. Its generated `xparameters.h` names
 the DPU AXI-Lite window at `0x400000000`. This proves the Vivado-to-Vitis
 hardware handoff, not native-DPU runtime support: VART needs the matching
 Linux image and DPU driver rather than an invented bare-metal register API.
+
+## 2026-11-11: SD-board USB, Wi-Fi and DPU recheck
+
+The live board at `192.168.3.1` now boots PynqLinux 3.0 (Ubuntu 22.04 base,
+kernel `6.6.10-xilinx-v2024.1-gb6067dbebcc8`) from SD.  Both C270s enumerate
+through one USB 2.0 480-Mbit/s Microchip USB2744 hub: `1-1.3` and `1-1.4`.
+They expose `video0`/`video1` and `video2`/`video3`, respectively.  The
+`xilinx` runtime account has been added to the existing `video` group; OpenCV
+and NumPy are installed, while `v4l2-ctl` is not.
+
+An OpenCV V4L2 capture test at MJPEG 320x240, 5 FPS read three consecutive
+frames from each camera when opened separately.  When both are open, all five
+reads from `video0` succeeded and all five from `video2` failed.  Kernel logs
+at that time state `Not enough bandwidth for altsetting 7` for `1-1.4`.
+This reconfirms that this physical shared-hub topology cannot satisfy the
+one-board/two-C270 streaming requirement even at the tested low setting; it
+does not disprove either camera independently.  The two-board/one-camera
+architecture remains the required deployment route.
+
+`wlan0` exists but is down/unconfigured, so no inter-board Wi-Fi exchange has
+been verified.  CMA is present (524288 KiB total), but the live image still has
+no DPU device-tree compatible node, `/dev/dpu*`, `xdputil`, Python `vart`, or
+Python `xir`.  This is current board evidence, not a claim that DPU inference
+or two-board networking works.

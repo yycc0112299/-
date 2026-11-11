@@ -503,6 +503,7 @@
 
 ### 2026-11-11：SD 板端雙 C270 實測與 DPU recheck
 
+- 同步結果：實板檢查結果、兩板架構與進度文件已提交為 `6fd075b`（`Record PYNQ dual camera hardware result`）並成功推送至 `origin/main`。
 - 實板 SSH `192.168.3.1` 成功：PynqLinux 3.0（Ubuntu 22.04 base）、kernel `6.6.10-xilinx-v2024.1-gb6067dbebcc8`。兩支 C270 都經 USB2744 480-Mbit/s hub 的 `1-1.3`／`1-1.4`，分別提供 `video0/1`、`video2/3`。已將 `xilinx` 加入既有 `video` 群組；OpenCV/NumPy 存在，`v4l2-ctl` 不存在。
 - 實際 OpenCV V4L2 capture：每支在單獨開啟的 MJPEG 320×240、5 FPS 下連續讀取三張均成功；雙開後 `video0` 五張成功而 `video2` 五張皆失敗。`dmesg` 同時有 `usb 1-1.4: Not enough bandwidth for altsetting 7`。因此一板兩支目前被同一 USB2 hub 的實體帶寬阻擋，不能視作完成的雙鏡頭串流；每板一鏡頭、兩板設計仍是 deployment route。
 - `wlan0` 存在但 DOWN/unconfigured；尚未有兩板 Wi-Fi 實測。CMA 為 524288 KiB，但板端仍無 DPU compatible device-tree node、`/dev/dpu*`、`xdputil`、Python `vart` 或 `xir`，故仍非 DPU/VART/YOLOv8 實機完成。

@@ -1,5 +1,11 @@
 # 專題狀態與交接記錄（供 Codex）
 
+## 2026-11-11：兩板 metadata sender 的 peer-restart 重試語意已完成離線測試
+
+- `person_tracking/pynq_yolov8_peer.py` 現在以 `send_packet_with_retry()` 對每一張已擷取／追蹤的 metadata packet 預設送三次、間隔 0.5 秒。它只攔截 TCP `OSError` 類失敗，重傳**同一個** frame packet；payload schema 錯誤不會被錯誤重試。重試用盡後丟出 `ConnectionError`，故不會把未送達誤記成成功。
+- CLI 增加 `--send-attempts`、`--retry-delay`；輸出會列出每次重試和實際使用 attempts。`tests/test_yolov8_peer.py` 現以 fake sender 覆蓋「兩次拒絕連線後成功」及「重試用盡失敗」；這只驗證送端復原語意，不驗證 Wi-Fi 封包實際抵達。
+- 現有 `peer_protocol.py receive` 在每個 connection 結束後持續 accept，兩段合起來提供兩板各自執行 receiver + sender 時的重啟容忍設計。仍須有第二塊板、已授權 Wi-Fi 網路設定與實機連線測試；未修改板子／SSID／網路設定。
+
 ## 2026-11-11：VART Python 執行邊界已補上，尚未偽稱為 DPU 人物偵測
 
 - 新增 `影像處理/ModelSim_YOLOX_PersonTracking/person_tracking/assets/yolov8_vart.py`。`VartYoloV8.from_xmodel()` 會在目標 Linux 的 VART/XIR 存在時，從 `.xmodel` 找到唯一 DPU subgraph；`infer_tensors()` 對照實際 VART tensor 的 NHWC shape／`fix_point` 完成 BGR→RGB letterbox、INT8 量化、VART job 與輸出反量化。這讓之後的 DPU YOLOv8 可把 tensor 結果交給既有 Python tracker／Wi-Fi schema，而不是發明裸金屬控制 API。

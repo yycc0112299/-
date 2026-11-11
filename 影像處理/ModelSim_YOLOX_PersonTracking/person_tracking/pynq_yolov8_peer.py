@@ -51,6 +51,35 @@ def open_camera(index, width, height, fps):
     return capture
 
 
+def send_packet_with_retry(host, port, packet, *, attempts=3, retry_delay=.5,
+                           sender=peer_protocol.send_packet, sleep=time.sleep,
+                           on_retry=None):
+    """Deliver one frame's metadata again after transient TCP peer failures.
+
+    The function retries the *same* validated packet so a receiver reboot does
+    not silently turn a captured frame into a dropped result.  A permanent
+    failure remains an error after the explicit retry budget rather than being
+    reported as a successful cross-board exchange.
+    """
+    if attempts < 1:
+        raise ValueError("attempts must be at least 1")
+    if retry_delay < 0:
+        raise ValueError("retry_delay must not be negative")
+    last_error = None
+    for attempt in range(1, attempts + 1):
+        try:
+            sender(host, port, packet)
+            return attempt
+        except OSError as error:
+            last_error = error
+            if attempt == attempts:
+                break
+            if on_retry is not None:
+                on_retry(attempt, error)
+            sleep(retry_delay)
+    raise ConnectionError(f"peer {host}:{port} unavailable after {attempts} attempts") from last_error
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--board-id", required=True)
@@ -60,10 +89,15 @@ def main() -> None:
     parser.add_argument("--width", type=int, default=320)
     parser.add_argument("--height", type=int, default=240)
     parser.add_argument("--fps", type=float, default=5.0)
+    parser.add_argument("--send-attempts", type=int, default=3,
+                        help="TCP attempts for each captured metadata packet")
+    parser.add_argument("--retry-delay", type=float, default=.5,
+                        help="seconds between retry attempts after a TCP failure")
     parser.add_argument("--frames", type=int, default=0,
                         help="0 streams forever; a positive count sends that many frames")
     args = parser.parse_args()
-    if not 1 <= args.port <= 65535 or args.camera < 0 or args.width < 1 or args.height < 1:
+    if (not 1 <= args.port <= 65535 or args.camera < 0 or args.width < 1 or args.height < 1
+            or args.send_attempts < 1 or args.retry_delay < 0):
         parser.error("invalid camera, dimensions, or port")
     if args.frames < 0:
         parser.error("--frames must be zero or positive")
@@ -79,8 +113,16 @@ def main() -> None:
                 raise RuntimeError("camera did not return a frame")
             tracked = tracker.update(detector.detect(frame))
             packet = build_packet(args.board_id, sent, capture_monotonic_ns, frame, tracked)
-            peer_protocol.send_packet(args.peer_host, args.port, packet)
-            print(f"PYNQ_YOLOV8_PEER_SENT frame={sent} people={len(tracked)}", flush=True)
+            used_attempts = send_packet_with_retry(
+                args.peer_host, args.port, packet, attempts=args.send_attempts,
+                retry_delay=args.retry_delay,
+                on_retry=lambda attempt, error: print(
+                    f"PYNQ_YOLOV8_PEER_RETRY frame={sent} attempt={attempt} error={error}",
+                    flush=True,
+                ),
+            )
+            print(f"PYNQ_YOLOV8_PEER_SENT frame={sent} people={len(tracked)} attempts={used_attempts}",
+                  flush=True)
             sent += 1
     finally:
         capture.release()

@@ -106,6 +106,13 @@ verified one C270 frame through YOLOv8, tracker, TCP framing and strict schema
 validation. It is not evidence of Wi-Fi, a second board, or a positive person
 detection in a live camera frame.
 
+Each packet defaults to three TCP attempts (`--send-attempts 3`) with a
+half-second delay (`--retry-delay .5`). A short receiver restart retries the
+same frame metadata rather than skipping it; after the configured budget the
+sender exits with an error, so a missing Wi-Fi peer cannot be mistaken for a
+successful exchange. This recovery behavior has only been checked with an
+offline fake sender so far, not with two physical boards.
+
 攝影機輸入不縮小：640×480 只在偵測模型底部補至 640×640，不縮圖。公開照片為了固定測試座標，先等比例放入 640×480 畫布；這是測試照片的前處理，和攝影機原生解析度不同。
 
 `detections.json` 保存每幀人物框、信心值、追蹤 ID 及 tentative/confirmed 狀態。兩次觀測後為 confirmed。漏抓時保留短期追蹤狀態最多 8 幀，但不把預測位置假裝成實際偵測結果；超時後新出現的人使用新 ID。

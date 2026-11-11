@@ -11,7 +11,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
 import peer_protocol
-from pynq_yolov8_peer import build_packet
+from pynq_yolov8_peer import build_packet, send_packet_with_retry
 
 
 class YoloV8PeerTests(unittest.TestCase):
@@ -32,6 +32,38 @@ class YoloV8PeerTests(unittest.TestCase):
     def test_build_packet_keeps_empty_detection_frames(self) -> None:
         packet = build_packet("pynq-b", 2, 456, np.zeros((2, 3, 3), dtype=np.uint8), [])
         self.assertEqual(peer_protocol.validate_packet(packet)["detections"], [])
+
+    def test_retries_the_same_packet_after_transient_peer_disconnect(self) -> None:
+        packet = build_packet("pynq-a", 9, 999, np.zeros((2, 3, 3), dtype=np.uint8), [])
+        sent = []
+        pauses = []
+
+        def transient_sender(host, port, payload):
+            sent.append((host, port, payload))
+            if len(sent) < 3:
+                raise ConnectionRefusedError("peer rebooting")
+
+        attempts = send_packet_with_retry(
+            "192.0.2.2", 8790, packet, attempts=3, retry_delay=.25,
+            sender=transient_sender, sleep=pauses.append,
+        )
+        self.assertEqual(attempts, 3)
+        self.assertEqual(pauses, [.25, .25])
+        self.assertTrue(all(payload is packet for _, _, payload in sent))
+
+    def test_does_not_silently_drop_when_peer_stays_unavailable(self) -> None:
+        calls = []
+
+        def unavailable_sender(*_):
+            calls.append(1)
+            raise ConnectionResetError("peer still rebooting")
+
+        with self.assertRaisesRegex(ConnectionError, "after 2 attempts"):
+            send_packet_with_retry(
+                "192.0.2.2", 8790, {"not": "a packet"}, attempts=2,
+                sender=unavailable_sender, sleep=lambda _: None,
+            )
+        self.assertEqual(calls, [1, 1])
 
 
 if __name__ == "__main__":

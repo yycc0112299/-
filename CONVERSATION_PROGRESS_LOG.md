@@ -391,3 +391,10 @@
 - 實機驗證：暫存 ELF 到 `192.168.3.1:/tmp`，`--single-a /dev/video0` 協商 320×240 YUYV、10 FPS，輸出 2,457,600 bytes、307,200 words；A nonzero=307,160，B nonzero=0。測後 `/tmp/uvc_v4l2_packer`、`/tmp/vitis_single_a.bin` 已清除。
 - 驗證界線／未完成：尚無 contiguous DMA/AXI DMA/PL/DPU、第二板或 Wi-Fi 結果；未改 SD 卡或系統設定。現有兩 C270 shared-hub STREAMON failure 仍有效。
 - Git：已提交為 `f64bf98`（`Add Vitis single-camera packed lane mode`）並成功推送至 `origin/main`；本行的同步結果將由下一筆文件提交記錄。
+
+## 2026-11-11 — Vitis Linux B-lane hardware confirmation
+
+- 需求／決策：確認未來第二板的 `--single-b` 不會將 C270 RGB 填到 A lane；僅使用既有 board、`/tmp` 和相同 Vitis-built ELF。
+- 實機驗證：`--single-b /dev/video0` 協商 320×240 YUYV、10 FPS，輸出 307,200 words；A nonzero=0、B nonzero=307,176。此結果與 `--single-a` 的反向 lane 結果一起確認 lane selection。
+- 驗證界線／未完成：仍是同一實體板／相機，不是第二板、Wi-Fi、AXI DMA、PL 或 DPU；暫存 ELF/output 已清除且未變更 SD/system settings。
+- Git：本次硬體驗證紀錄待提交並推送至 `origin/main`；提交後在此紀錄補上結果。

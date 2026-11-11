@@ -28,8 +28,9 @@ independent second source.
 On 2026-11-11 the Vitis 2024.2 AArch64 ELF was copied temporarily to the live
 PYNQ-ZU and `--single-a /dev/video0` completed at negotiated 320×240 YUYV,
 10 FPS. It produced 2,457,600 bytes / 307,200 words; 307,160 low A-lane words
-were nonzero and every high B-lane word was zero. The temporary executable and
-output were then removed. This is a real single-camera V4L2/packing result;
+were nonzero and every high B-lane word was zero. The same C270 then completed
+`--single-b` with low A=0 and 307,176 nonzero high B-lane words. The temporary
+executable and outputs were then removed. This is a real single-camera V4L2/packing result;
 it is not AXI DMA, PL, DPU, two-camera, or two-board Wi-Fi proof.
 
 The packer explicitly negotiates the source rate after selecting the format and

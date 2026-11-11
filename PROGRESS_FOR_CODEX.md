@@ -1,5 +1,11 @@
 # 專題狀態與交接記錄（供 Codex）
 
+## 2026-11-11：兩板 Wi-Fi 只讀 preflight 已完成並在未設定板端正確失敗
+
+- 新增 `person_tracking/pynq_wifi_peer_preflight.py`：讀 `/sys/class/net/<interface>/operstate`、以 `ip -j addr` 列出 IPv4；指定 `--peer-host` 時只嘗試一次 TCP connect，沒有掃描、join SSID、寫入密碼或變更 interface。它輸出 JSON 和 `PYNQ_WIFI_PEER_PREFLIGHT_PASS/FAIL`，通過必須有 interface、operstate=up、IPv4，且指定 peer 時 TCP port 也可達。
+- `tests/test_pynq_wifi_peer_preflight.py` 覆蓋 connected+peer PASS、沒有 IPv4、TCP peer failure 與自訂 interface 名稱；完整 `person_tracking` unit suite 為 19/19 PASS。板端暫傳腳本至 `/tmp` 執行，實際結果為 `wlan0` exists、operstate=down、IPv4=[]，因此正確輸出 FAIL；測後腳本已移除。
+- 未改任何 Wi-Fi 設定、SSID、密碼、rfkill 或第二板。真正兩板 Wi-Fi 仍需要授權的共同網路／明確 AP topology、兩塊板和 receiver service 後以 `--peer-host` 實測。
+
 ## 2026-11-11：Vitis Linux 單 C270 → packed AXI-stream lane 已於板端驗證
 
 - 因同板兩支 C270 已確定受共用 USB2 hub `ENOSPC` 限制，`vitis/pynq_zu_usb_video/linux/uvc_v4l2_packer.c` 新增 `--single-a <video> <output>`、`--single-b <video> <output>`。它們仍輸出既有 RTL 的 640×480、64-bit word 格式：A mode 僅填 `RGB[23:0]`，B mode 僅填 `RGB[55:32]`，未使用 lane 固定黑色；不複製一支相機來假裝雙來源。寫檔現在也會處理 partial write。

@@ -113,6 +113,21 @@ sender exits with an error, so a missing Wi-Fi peer cannot be mistaken for a
 successful exchange. This recovery behavior has only been checked with an
 offline fake sender so far, not with two physical boards.
 
+Before starting either board's sender, run the read-only Wi-Fi gate on that
+board. It does not scan, join, or alter an SSID; it only reads interface state
+and, when a peer address is supplied, attempts one TCP connection:
+
+```sh
+python3 person_tracking/pynq_wifi_peer_preflight.py \
+  --interface wlan0 --peer-host <other-board-wifi-ip> --port 8790
+```
+
+Start `peer_protocol.py receive` on the other board before this command. Only
+`PYNQ_WIFI_PEER_PREFLIGHT_PASS` proves the local interface is up with IPv4 and
+that its peer TCP port is reachable. The currently tested PYNQ has `wlan0` but
+it is down and unconfigured, so this check correctly fails until an authorized
+Wi-Fi network/topology is configured.
+
 攝影機輸入不縮小：640×480 只在偵測模型底部補至 640×640，不縮圖。公開照片為了固定測試座標，先等比例放入 640×480 畫布；這是測試照片的前處理，和攝影機原生解析度不同。
 
 `detections.json` 保存每幀人物框、信心值、追蹤 ID 及 tentative/confirmed 狀態。兩次觀測後為 confirmed。漏抓時保留短期追蹤狀態最多 8 幀，但不把預測位置假裝成實際偵測結果；超時後新出現的人使用新 ID。

@@ -398,3 +398,11 @@
 - 實機驗證：`--single-b /dev/video0` 協商 320×240 YUYV、10 FPS，輸出 307,200 words；A nonzero=0、B nonzero=307,176。此結果與 `--single-a` 的反向 lane 結果一起確認 lane selection。
 - 驗證界線／未完成：仍是同一實體板／相機，不是第二板、Wi-Fi、AXI DMA、PL 或 DPU；暫存 ELF/output 已清除且未變更 SD/system settings。
 - Git：已提交為 `0f08f57`（`Record Vitis B-lane hardware verification`）並成功推送至 `origin/main`；本行的同步結果將由下一筆文件提交記錄。
+
+## 2026-11-11 — Read-only two-board Wi-Fi preflight
+
+- 需求／決策：在尚未取得第二板／授權 SSID 前，建立不會改網路設定的 gate，避免把有 `wlan0` 介面誤說成已可交換 metadata。
+- 實際完成：新增 `pynq_wifi_peer_preflight.py` 和 4 個 offline contract tests。gate 要求 interface up、IPv4；給 `--peer-host` 時還要求 peer TCP 可達。支援任意 interface name 並只做一次 TCP connect。
+- 實機驗證：暫傳至現有 PYNQ `/tmp` 以 `wlan0` 執行，JSON 證實 interface exists 但 down、沒有 IPv4，預期 exit=1／FAIL；暫存檔已移除。
+- 驗證界線／未完成：沒有 SSID scan/join、沒有 network write、沒有第二板或 Wi-Fi packet。未來需在共同 Wi-Fi/AP 上啟動 peer receiver 後，以 `--peer-host` 通過。
+- Git：本次程式與進度紀錄待同一筆提交推送至 `origin/main`；提交後在此紀錄補上結果。

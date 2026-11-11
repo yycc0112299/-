@@ -679,3 +679,9 @@
 - `wlan0` 對應 SDIO `mmc1:0001:1`，driver path 是 `/sys/bus/sdio/drivers/wilc_sdio`，network type=1；dmesg 顯示 `wilc_sdio ... Driver Initializing success`。因此目前不是缺失 Wi-Fi hardware/driver 的情況。
 - kernel 同時記錄 `regulatory.db` direct firmware load error `-2`／`cfg80211: failed to load regulatory.db`，以及未連線時 `Failed to get RSSI value`。這些是 image/network-preparation blockers，不能把介面存在當成可直接 peer exchange。
 - 驗證界線：只讀 sysfs/dmesg，未 `ip link set up`、scan/join SSID、寫 regulatory database 或改任何 Linux/board setting。未來兩板 Wi-Fi path 仍需合法 SSID credentials、第二板以及先解決/確認 regulatory database requirement。
+
+### 2026-11-11：Wi-Fi regulatory.db package recheck（更正）
+
+- 為驗證 dmesg 的 `regulatory.db` error -2，透過 UART 只讀查詢 `/lib/firmware/regulatory.db`、`.p7s`、`dpkg-query` 和 `apt-cache policy`。兩個檔案存在，`wireless-regdb` 為 `install ok installed` version `2021.08.28-0ubuntu1`，candidate 相同。
+- 因此上一項不可描述為 root filesystem「缺少 regulatory.db」。正確事實是 kernel boot log 曾出現 direct firmware load failure，但 rootfs 上的 package/artifact 隨後可見；可能是 early-boot/rootfs availability 或 another load-time condition，尚未透過啟用 interface/association 實測。
+- 驗證界線：仍未 `ip link up`、scan/join SSID、reload driver 或改 initramfs。後續不應盲目重裝 package；應先在授權 Wi-Fi environment 下啟用並取得 dmesg/association result，再決定是否需要 Linux image change。

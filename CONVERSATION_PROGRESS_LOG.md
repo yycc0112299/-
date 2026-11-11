@@ -488,3 +488,11 @@
 - 實際完成：UART 讀取 sysfs/dmesg；`wlan0` 是 SDIO `mmc1:0001:1` 的 `wilc_sdio` driver，dmesg 明示 `Driver Initializing success`。但 `cfg80211` 無法載入 `regulatory.db`（error -2），並有未連線 RSSI read failure。
 - 驗證界線／未完成：未啟用 interface、未設定 regulatory data/SSID/peer，沒有第二板。這證實 driver/hardware initialization，不能證實 wireless association、IP addressing、TCP peer 或雙板工作。
 - Git：已提交為 `8c366ad`（`Record PYNQ WiFi driver diagnosis`）並成功推送至 `origin/main`；本行的同步結果由下一筆文件提交補上。
+
+## 2026-11-11 — Corrected regulatory database conclusion by package audit
+
+- 需求／決策：驗證 boot dmesg `regulatory.db` error -2 是否代表 rootfs 真缺少 wireless regulatory database，避免未經證據重裝/修改 image。
+- 實際完成：UART read-only check 證實 `/lib/firmware/regulatory.db`（4,160 bytes）與 `.p7s` 都存在；`wireless-regdb` package status 是 `install ok installed`，installed/candidate 均為 `2021.08.28-0ubuntu1`。
+- 更正：先前記錄的 kernel load error 仍是事實，但不能推論為 package/file missing；目前較合理的未驗證原因是 early boot/load timing 或 association 前的 driver state。未來應在授權 SSID 下啟用/association diagnostics 後才決定 image repair。
+- 驗證界線／未完成：沒有 network writes、reload/installation、interface up 或 scan；仍無第二板/SSID/peer test。
+- Git：本項更正與進度文件將以本輪 commit 推送至 `origin/main`；下一筆紀錄補上結果。

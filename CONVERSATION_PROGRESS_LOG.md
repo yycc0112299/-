@@ -296,3 +296,10 @@
 - 實際驗證：6 個 unit tests PASS；在 PYNQ 暫存 bundle 啟動 `peer_protocol receive --bind 127.0.0.1`，再由 `pynq_yolov8_peer.py --camera 0 --frames 1` 實跑。receiver 接收 `pynq-a:0`，packet 有正確 320×240 dimensions、schema 與空 detections。tar 對開發機時間戳印出 future-time warning，但解壓、執行與 packet 驗證皆成功。
 - 驗證範圍／未完成：loopback 不是 Wi-Fi／第二板／跨網路斷線測試；未在 live camera 得到 person positive packet，非 DPU/VART。
 - Git／同步：已提交為 `bf2a0fb`（`Add PYNQ YOLOv8 peer producer`）並成功推送至 `origin/main`。模型、wheel、影像、帳密與 `/tmp` bundle 均未上傳。
+
+## 2026-11-11 — DPU Linux build-host recheck
+
+- 需求／決策：確認現有主機是否能接續 Vivado/Vitis handoff 建置 PYNQ-ZU B512 的 matching Linux DPU runtime，而非將 absence 視為可略過的步驟。
+- 實際驗證：Windows `wsl.exe` 存在但沒有任何 installed Linux distribution；未找到 Docker command。Xilinx 安裝樹沒有 PetaLinux executable/settings，僅有 installer EULA 與 lopper helper。
+- 驗證範圍／未完成：本機確實不能建置 PetaLinux/VART/DPU driver image；未嘗試安裝 WSL、PetaLinux、重刷 SD 或下載 DPU bitstream。DPU Linux build 仍需要受支援 Linux host 的外部環境，不影響已驗證 CPU YOLOv8 path。
+- Git／同步：本項環境紀錄將提交至 `main`；確切提交與推送結果會在後續同步紀錄寫入。

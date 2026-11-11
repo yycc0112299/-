@@ -317,4 +317,4 @@
 - 需求／決策：使用者表示板子已重新接線，需先以系統偵測結果區分 Composite 網路與 UART/JTAG，避免對 Vivado 連線狀態誤判。
 - 實際驗證：Windows 偵測到 PYNQ-USB、Remote NDIS（VID `03FD:010C`）且 `乙太網路 3` 為 Up；主機 `192.168.3.102` 對 `192.168.3.1:22` TCP 成功。非互動式 SSH 因沒有 key 回覆 `Permission denied (publickey,password)`，未登入或執行任何板端命令。
 - 驗證界線／未完成：未偵測到 Xilinx/FTDI UART/JTAG 或新增 COM port，因此這是 Composite USB 恢復，不是 Vivado Hardware Manager JTAG 連線。未更動 boot switch、SD、bitstream、板端檔案或任何帳密。
-- Git：本次硬體連線紀錄待同一筆提交推送至 `origin/main`；提交後在此紀錄補上結果。
+- Git：已提交為 `f5ff5eb`（`Record PYNQ composite reconnect`）並成功推送至 `origin/main`。沒有上傳私人資料、模型、bitstream 或板端檔案。

@@ -390,4 +390,4 @@
 - 實際完成：`uvc_v4l2_packer.c` 新增 `--single-a`／`--single-b`，未使用的 32-bit RGB lane 維持黑色，並修正 packed-frame partial-write handling。Vitis 2024.2 AArch64 compile 以 `-Werror` 先檢出 declaration-order error；修正後產生 ELF。
 - 實機驗證：暫存 ELF 到 `192.168.3.1:/tmp`，`--single-a /dev/video0` 協商 320×240 YUYV、10 FPS，輸出 2,457,600 bytes、307,200 words；A nonzero=307,160，B nonzero=0。測後 `/tmp/uvc_v4l2_packer`、`/tmp/vitis_single_a.bin` 已清除。
 - 驗證界線／未完成：尚無 contiguous DMA/AXI DMA/PL/DPU、第二板或 Wi-Fi 結果；未改 SD 卡或系統設定。現有兩 C270 shared-hub STREAMON failure 仍有效。
-- Git：本次程式與進度紀錄待同一筆提交推送至 `origin/main`；提交後在此紀錄補上結果。
+- Git：已提交為 `f64bf98`（`Add Vitis single-camera packed lane mode`）並成功推送至 `origin/main`；本行的同步結果將由下一筆文件提交記錄。

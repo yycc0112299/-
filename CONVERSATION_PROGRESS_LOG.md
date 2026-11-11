@@ -324,4 +324,4 @@
 - 需求／決策：使用者已將兩個孔同時插上；須確認它們可並存，並讓 Vivado 對真正 JTAG target 做最終偵測。
 - 實際驗證：Composite 仍提供 PYNQ-USB/RNDIS/`COM4`；Vivado Hardware Manager 成功連至 `localhost/xilinx_tcf/Xilinx/1234-tulA`，列出 `xczu5_0`（`xczu5`）與 `arm_dap_1`。兩條線可同時使用：Composite 給 Linux 網路，UART/JTAG 給 Vivado。
 - 驗證界線／未完成：Hardware Manager 顯示 `xczu5_0` 已 Programmed 且其 Programming file 欄為 DPU wrapper，但本輪沒有可獨立證明新一次 Program 成功的 log。JTAG 開啟後 TCP 22 保持可達但 SSH banner 被板端 reset，未再對板子寫入、燒錄或重刷。需保留兩線並實體斷電重開、SD boot 後重新驗證 Linux/SSH，不能宣稱 DPU/VART inference。
-- Git：本次硬體連線紀錄待同一筆提交推送至 `origin/main`；提交後在此紀錄補上結果。
+- Git：已提交為 `eb42e95`（`Record simultaneous PYNQ JTAG connection`）並成功推送至 `origin/main`。沒有上傳私人資料、模型、bitstream 或板端檔案。

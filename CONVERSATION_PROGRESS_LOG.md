@@ -518,3 +518,10 @@
 - 安裝清理：installer 的 `--dir` 在此 flow 未生效。首次誤產生於 repo 的未追蹤 outputs 已移至 `C:\\pynq_wsl_setup\\quarantine_peta_wrong_target_20261112`，partial WSL install 已移至 `/home/petalinux/quarantine_partial_install_20261112`；兩者均非 Git 資產，repo worktree 確認乾淨。
 - 驗證界線／未完成：PetaLinux setup 不等於已建立 rootfs、DPU driver/VART/XIR、matching 2024.1 XSA、Docker/Vitis AI compiler、xmodel、SD boot、camera/DMA 或 Wi-Fi peer。installer 只有 non-blocking TFTP warning。未觸碰板子、SD、PL 或相機；現有 2024.2 USB-video artifact 仍不構成 DPU 2024.1 deployment verification。
 - Git：已提交為 `a182ced`（`Record PetaLinux WSL host installation`）並成功推送至 `origin/main`；PetaLinux/WSL installers、SDK、quarantine artifacts 均不納入 repository。
+
+## 2026-11-12 — Revalidated DPU build gate from installed WSL PetaLinux host
+
+- 需求／決策：確認 PetaLinux installation 真正解除哪一項 DPU Linux-image blocker，避免把 SDK install 誤稱為完整 DPU deployment。
+- 實際完成：在 WSL `bash` source `/home/petalinux/xilinx/petalinux/2024.1/settings.sh` 後，使用 exact generated `arch.json` 執行 tracked preflight。結果確認 `petalinux-create=true`、arch JSON exists、PetaLinux=2024.1；gate 仍 FAIL，但明確只剩 Docker/`vai_c_xir` Vitis AI 3.5 compiler route 與 Vivado hardware=2024.2（需 2024.1）。
+- 驗證界線／未完成：沒有建立或燒錄 image、沒有安裝 VART/XIR/driver/xmodel、沒有把 2024.2 XSA 當成相容、沒有接觸板子/SD/相機/Wi-Fi。Docker installer 等待 Windows UAC completion，不以下載或 installer process 視為 Docker available。
+- Git：本次 preflight evidence 與同步結果將由後續提交記錄。

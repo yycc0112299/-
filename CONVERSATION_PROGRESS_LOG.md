@@ -525,3 +525,10 @@
 - 實際完成：在 WSL `bash` source `/home/petalinux/xilinx/petalinux/2024.1/settings.sh` 後，使用 exact generated `arch.json` 執行 tracked preflight。結果確認 `petalinux-create=true`、arch JSON exists、PetaLinux=2024.1；gate 仍 FAIL，但明確只剩 Docker/`vai_c_xir` Vitis AI 3.5 compiler route 與 Vivado hardware=2024.2（需 2024.1）。
 - 驗證界線／未完成：沒有建立或燒錄 image、沒有安裝 VART/XIR/driver/xmodel、沒有把 2024.2 XSA 當成相容、沒有接觸板子/SD/相機/Wi-Fi。Docker installer 等待 Windows UAC completion，不以下載或 installer process 視為 Docker available。
 - Git：已提交為 `4f301a7`（`Record installed PetaLinux DPU preflight`）並成功推送至 `origin/main`。
+
+## 2026-11-12 — Created matching-family PetaLinux project skeleton
+
+- 需求／決策：在 PetaLinux host 可用後建立 ZynqMP project foundation，但不得把已知 2024.2 XSA 匯入 2024.1 DPU contract，避免產生看似可用但不相容的 deployment image。
+- 實際完成：以 sourced PetaLinux 2024.1 Bash environment 成功執行 `petalinux-create project --template zynqMP --name pynq_zu_dpu_2024_1`，新 project 位於外部 WSL path `/home/petalinux/work/pynq_zu_dpu_2024_1`。
+- 驗證界線／未完成：尚未 config hardware description、build rootfs、加 DPU/VART/driver、compile xmodel 或寫 SD；無硬體/board/network side effect。此 generated project 不進 Git，仍待 matching Vivado 2024.1 XSA。
+- Git：本次 project-skeleton evidence 與同步結果將由後續提交記錄。

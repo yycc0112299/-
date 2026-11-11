@@ -368,6 +368,7 @@
 
 ## 2026-11-11：YOLOv8 已在板上以 CPU 跑通
 
+- 兩板資料封包 producer 已同步到 GitHub `main`（`bf2a0fb`）。
 - 正樣人像驗證紀錄已同步到 GitHub `main`（`bf9a830`）。
 - pipeline/bundle 的 YOLOv8 接入已同步到 GitHub `main`（`fac5fee`）。
 - 此次 YOLOv8 程式與實板驗證已同步到 GitHub `main`（`fbed6fe`）。

@@ -503,6 +503,7 @@
 
 ### 2026-11-11：PYNQ CPU YOLOv8 fallback 實測
 
+- peer producer 同步結果：已提交為 `bf2a0fb`（`Add PYNQ YOLOv8 peer producer`）並成功推送至 `origin/main`。
 - 正樣人物實測同步結果：已提交為 `bf9a830`（`Record PYNQ YOLOv8 positive inference`）並成功推送至 `origin/main`。
 - pipeline/bundle 接入同步結果：已提交為 `fac5fee`（`Use YOLOv8 in PYNQ tracking pipeline`）並成功推送至 `origin/main`。
 - 同步結果：YOLOv8 adapter、exporter、tests 與進度文件已提交為 `fbed6fe`（`Add PYNQ CPU YOLOv8 fallback`）並成功推送至 `origin/main`。

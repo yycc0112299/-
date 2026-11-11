@@ -465,4 +465,4 @@
 - 實際完成：新增 `verify_pynq_zu_usb_video_handoff.py` 和兩個 offline tests。gate 讀取 archive/HWH，要求 bitstream、HWH、system definition、PS init source，並核對 AXI DMA=`0xA0000000`、frame GPIO=`0xA0010000`、video RTL mailbox=`0xA0020000`。test-first run 先得到 missing-module failure；第一次真實 artifact run 又發現 HWH `0X` prefix normalization 和 missing-bitstream diagnostics 的缺口，已修正。
 - 驗證：FPGA tests 7/7 PASS；對剛重新建出的 1,573,588-byte XSA 回傳 `PYNQ_ZU_USB_VIDEO_XSA_PASS`，addresses 與 Vitis `xparameters.h` 對齊。
 - 驗證界線／未完成：gate 是 host read-only structural verification；未載入 bitstream、未跑 A53 ELF/UVC/DMA/PL/DPU/Wi-Fi，產物未上傳 Git。
-- Git：程式、測試與進度文件將以本輪 commit 推送至 `origin/main`；下一筆紀錄補上結果。
+- Git：已提交為 `48ea575`（`Verify USB video Vivado handoff`）並成功推送至 `origin/main`；本行的同步結果由下一筆文件提交補上。

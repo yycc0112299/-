@@ -509,4 +509,4 @@
 - 需求／決策：使用者已在電腦前，開始 PetaLinux 所需 Linux host 的系統前置設定；避免自動關閉正在運行的 Vivado/Vitis。
 - 實際完成：以 elevated Windows command 啟用 `Microsoft-Windows-Subsystem-Linux` 與 `VirtualMachinePlatform`，exit code=0、使用 `-NoRestart`。讀取 reboot markers 結果為 CBS `RebootPending=True`、`PendingFileRenameOperations=True`；`wsl --list --verbose` 尚無 Linux distribution，符合重開前預期。
 - 驗證界線／未完成：未重開 Windows，未安裝 Ubuntu/PetaLinux/Docker/Vitis AI，未執行 3.07-GiB PetaLinux installer，未變更 board/SD/FPGA。需使用者先儲存 GUI work 並確認 reboot，重開後再建立受支援 Ubuntu 22.04。
-- Git：本紀錄與進度文件將以本輪 commit 推送至 `origin/main`；下一筆紀錄補上結果。
+- Git：已提交為 `622f52b`（`Record WSL prerequisite enablement`）並成功推送至 `origin/main`；本行的同步結果由下一筆文件提交補上。

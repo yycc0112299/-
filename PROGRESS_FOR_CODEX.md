@@ -661,3 +661,9 @@
 - 新增 `fpga/verify_pynq_zu_usb_video_handoff.py` 與 offline tests。它唯讀開啟 XSA zip archive，要求 bitstream、HWH、`sysdef.xml`、`psu_init.c`，解析主 HWH 的 `C_BASEADDR`，並要求 DMA=`0xA0000000`、frame GPIO=`0xA0010000`、video mailbox=`0xA0020000`。
 - 採 test-first：初始 import failure 後實作；第一次真實 XSA run 抓到 Vivado HWH 使用 `0X` prefix 的大小寫正規化缺口與不明確的 missing-bitstream 訊息。修正後 FPGA tests 7/7 PASS，對 `C:\pynq_zu_usb_video_rebuild_20261111\pynq_zu_usb_video.xsa` 實跑輸出 `PYNQ_ZU_USB_VIDEO_XSA_PASS`，三個 address 均與 Vitis generated `xparameters.h` 一致。
 - 驗證界線：這證明 build artifact 的結構/AXI control mapping，並不執行 A53 ELF、板端 DMA/UVC/PL/DPU，亦不改 board/SD 或把 bitstream/XSA 加入 Git。
+
+### 2026-11-11：UART 唯讀板端 runtime recheck
+
+- Windows PnP 盤點確認 PYNQ USB CDC serial 在 COM4；以 115200 baud、DTR/RTS=false 開啟、全程不寫入或重設，讀到 PYNQ Linux console：Ubuntu 22.04 base、`Linux 6.6.10-xilinx-v2024.1-gb6067dbebcc8 aarch64`。
+- 接著只執行 shell 查詢：`/dev/video0`～`/dev/video3` 存在；沒有 `/dev/dpu*`、live DT 中沒有 `xlnx,dpuczdx8g-4.0`、沒有 `xdputil`，Python `vart=False`、`xir=False`。`wlan0` 存在但 `DOWN`、MAC 為全零且沒有 IPv4。
+- 驗證界線：UART session 僅送出讀取命令，沒有上傳檔案、program PL、reset、寫 SD、連 Wi-Fi 或開相機。這是在現有 SD Linux 上的 runtime evidence；DPU bitstream、VART/Linux image、兩支 simultaneous C270、Wi-Fi peer 與 YOLOv8 DPU inference 仍未完成。

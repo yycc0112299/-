@@ -466,3 +466,10 @@
 - 驗證：FPGA tests 7/7 PASS；對剛重新建出的 1,573,588-byte XSA 回傳 `PYNQ_ZU_USB_VIDEO_XSA_PASS`，addresses 與 Vitis `xparameters.h` 對齊。
 - 驗證界線／未完成：gate 是 host read-only structural verification；未載入 bitstream、未跑 A53 ELF/UVC/DMA/PL/DPU/Wi-Fi，產物未上傳 Git。
 - Git：已提交為 `48ea575`（`Verify USB video Vivado handoff`）並成功推送至 `origin/main`；本行的同步結果由下一筆文件提交補上。
+
+## 2026-11-11 — Read-only live PYNQ UART runtime recheck
+
+- 需求／決策：在不需要使用者操作、SSH password 或燒錄板子的前提下，確認目前已連線 UART 的 PYNQ-ZU Linux/DPU/camera/Wi-Fi 真實狀態。
+- 實際完成：Windows 偵測 COM4 為 USB CDC serial；使用 115200 baud、DTR/RTS disabled 讀到 Linux prompt。只送出 read-only shell queries，證實 kernel `6.6.10-xilinx-v2024.1-gb6067dbebcc8` AArch64，`/dev/video0..3` 存在；`/dev/dpu*`、DPU compatible DT node、`xdputil` 均不存在，Python VART/XIR 皆 false。`wlan0` 存在但 DOWN/zero MAC/no IPv4。
+- 驗證界線／未完成：沒有寫 console data、上傳、PL program/reset、SD/network/camera state change。此結果不能替代 matching DPU Linux image/VART/xmodel、C270 simultaneous streaming、second board 或 Wi-Fi peer test。
+- Git：本紀錄與進度文件將以本輪 commit 推送至 `origin/main`；下一筆紀錄補上結果。

@@ -457,4 +457,4 @@
 - 需求／決策：補齊 USB-video Vitis control source 的 executable unit test，不安裝額外工具、不改系統。
 - 實際完成：重新盤點既有 Xilinx install 後找到 Vitis bundled MinGW GCC，臨時加入 process PATH，以 `-std=c11 -Wall -Wextra -Werror` 編譯並執行 `video_control.c` + `test_video_control.c`，輸出 `VIDEO_CONTROL_TEST_PASS`。測試覆蓋 frame ID、bbox payload 與最後 CONTROL commit 的 register write ordering，以及遺失必要地址時的拒絕；暫存 executable 已移除。
 - 驗證界線／未完成：此為 host pure-C contract，不觸碰硬體，未執行 A53 ELF、UVC、DMA、DPU 或 Wi-Fi。前一筆 Vivado/XSA/Vitis build evidence 與 Linux deployment blockers 維持不變。
-- Git：本紀錄與進度文件將以本輪 commit 推送至 `origin/main`；下一筆紀錄補上結果。
+- Git：已提交為 `c6af6b1`（`Verify Vitis controller host contract`）並成功推送至 `origin/main`；本行的同步結果由下一筆文件提交補上。

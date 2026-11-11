@@ -480,4 +480,4 @@
 - 實際完成：UART read-only query 顯示 `video0..3` 都是 C270 HD WEBCAM；`lsusb` 顯示兩支 `046d:0825` C270（bus 001 device 006/007）共用 `0424:2744` USB2 hub。另有 board 的 `0424:5744` USB3 hub；C270 的兩個 V4L2 node pattern 表示實物為兩支相機，非四支。
 - 實際 Wi-Fi evidence：`/sys/class/net/wlan0/address` 為 all-zero MAC，與既有 DOWN/no IPv4 一致。沒有第二板/SSID，故未連線或修改網路。
 - 驗證界線／未完成：不重跑 simultaneous capture；先前 real `ENOSPC` remains applicable。未寫 SD/PL、未開 UVC/DPU/VART/YOLO/Wi-Fi peer；兩板各一鏡頭仍是後續 deployment route。
-- Git：本紀錄與進度文件將以本輪 commit 推送至 `origin/main`；下一筆紀錄補上結果。
+- Git：已提交為 `cd8857a`（`Record C270 USB topology verification`）並成功推送至 `origin/main`；本行的同步結果由下一筆文件提交補上。

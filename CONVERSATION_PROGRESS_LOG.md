@@ -451,3 +451,10 @@
 - 驗證：FPGA static contracts 5/5 PASS，Vitis direct AArch64 compiler 以 warnings-as-errors 成功編譯 `video_control.c`。host C unit executable 未能執行，因本機沒有 host C compiler；不以此掩蓋，且 Vitis ELF build 本身已完成。
 - 驗證界線／未完成：未將這次 bitstream/ELF 寫入板子或 SD，未開相機、未配置 DMA-BUF/CMA、未解決同 hub 雙 C270 bandwidth、未跑 DPU/VART/YOLOv8/Linux or Wi-Fi。所有 large artifacts 保持在 `C:\pynq_zu_usb_video_rebuild_20261111`／`C:\pynq_vitis_usb_video_rebuild_20261111`，不進 Git。
 - Git：已提交為 `8ceb710`（`Record USB video hardware and Vitis rebuild`）並成功推送至 `origin/main`；本行的同步結果由下一筆文件提交補上。
+
+## 2026-11-11 — Executed Vitis controller host unit test
+
+- 需求／決策：補齊 USB-video Vitis control source 的 executable unit test，不安裝額外工具、不改系統。
+- 實際完成：重新盤點既有 Xilinx install 後找到 Vitis bundled MinGW GCC，臨時加入 process PATH，以 `-std=c11 -Wall -Wextra -Werror` 編譯並執行 `video_control.c` + `test_video_control.c`，輸出 `VIDEO_CONTROL_TEST_PASS`。測試覆蓋 frame ID、bbox payload 與最後 CONTROL commit 的 register write ordering，以及遺失必要地址時的拒絕；暫存 executable 已移除。
+- 驗證界線／未完成：此為 host pure-C contract，不觸碰硬體，未執行 A53 ELF、UVC、DMA、DPU 或 Wi-Fi。前一筆 Vivado/XSA/Vitis build evidence 與 Linux deployment blockers 維持不變。
+- Git：本紀錄與進度文件將以本輪 commit 推送至 `origin/main`；下一筆紀錄補上結果。

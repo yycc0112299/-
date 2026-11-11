@@ -493,3 +493,8 @@
 - USB C270 的 Block Design 已從目前程式重新建立、實作並輸出 bitstream/XSA。時序通過、所有可路由連線都完成，沒有 routing error。
 - 新 XSA 已成功讓 Vitis 產生 A53 控制 ELF；Vitis 取得的 DMA、frame ID、PL mailbox 位址與 Vivado 對得上。
 - USB 相機仍是 PS USB/Linux UVC，不是 FPGA 腳位；這份控制 ELF 目前是合成影格的 DMA/PL 驗證。兩支 C270 同時 Linux 串流、DPU/VART/YOLOv8 及兩板 Wi-Fi 尚未完成或驗證。
+
+## 2026-11-11：Vitis 控制程式單元測試通過
+
+- 找到 Vitis 內附的 C 編譯器，已實際執行控制程式單元測試並通過。
+- 測試確認 Vitis 寫入 frame ID、人物框資料與最後啟動控制命令的順序正確；仍不是板上相機或 DPU 測試。

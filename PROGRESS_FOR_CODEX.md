@@ -649,3 +649,9 @@
 - 實作 evidence：bitstream 7,797,821 bytes；XSA 1,573,588 bytes，archive 含 `.bit`、`.hwh`、`psu_init.*`、`sysdef.xml`、`xsa.json` 與 `xsa.xml`。route report 為 16,007/16,007 routable nets fully routed、0 routing errors；routed signoff WNS `+0.752 ns`、WHS `+0.020 ns`，all user specified timing constraints met。
 - 使用這份新 XSA 於 `C:\pynq_vitis_usb_video_rebuild_20261111` 實跑 Vitis Embedded 2024.2 build，輸出 352,272-byte `pynq_zu_usb_video_app.elf`。generated `xparameters.h` 與 BD 一致：AXI DMA `0xA0000000`、frame ID GPIO `0xA0010000`、YOLOX video RTL mailbox `0xA0020000`；readelf 確認為 ELF64 little-endian AArch64。`video_control.c` 另以 Vitis direct AArch64 GNU compiler `-Wall -Wextra -Werror` 產出外部 object 成功。
 - 驗證界線：fpga Python contract tests 5/5 PASS。這台 Windows 沒有 host `gcc`/`clang`/`cl`，所以 `test_video_control.c` 的 host executable 未重跑；Vitis AArch64 ELF 已實際 build。此 standalone controller 是 synthetic DDR→DMA→PL bring-up，並不包含 Linux UVC capture、CMA DMA-BUF handoff、同步雙 C270、DPU/VART/YOLOv8 inference 或 Wi-Fi；新 bitstream/XSA/ELF 均在外部 build paths，沒有寫入板子、SD 或 Git。
+
+### 2026-11-11：Vitis controller host unit test 補驗
+
+- 先前僅檢查 PATH，因而誤以為 host C compiler 不存在；重新盤點已安裝的 Vitis tree 後找到 `C:\Xilinx\Vitis\2024.2\tps\mingw\10.0.0\win64.o\nt\bin\gcc.exe`。不需安裝或改系統，僅臨時加入 process PATH。
+- 以 `-std=c11 -Wall -Wextra -Werror` 編譯 `video_control.c` 與 `tests/test_video_control.c`，執行結果 `VIDEO_CONTROL_TEST_PASS`。它實際檢查 frame ID → mailbox payload → CONTROL commit 的寫入順序與必要 AXI address validation；暫存 executable 已刪除。
+- 驗證界線：這是 Windows host 的 pure-C controller contract test，不會執行 A53 ELF、AXI DMA、PL、Linux UVC 或 DPU；前項硬體/XSA/Vitis build 的界線不變。

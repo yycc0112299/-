@@ -450,4 +450,4 @@
 - 實際完成：於新的外部短路徑重新跑 complete tracked flow：PYNQ-ZU project、custom IP Catalog package、Block Design、`validate_bd_design`、synthesis、implementation、bitstream、fixed XSA export。XSA 為 1,573,588 bytes 且含 bitstream/HWH/PS init/system metadata。route report 16,007/16,007 fully routed、0 errors；WNS `+0.752 ns`、WHS `+0.020 ns`，all user timing constraints met。使用同一新 XSA 實跑 Vitis Embedded 2024.2，輸出 352,272-byte AArch64 ELF；platform macro addresses 為 DMA `0xA0000000`、GPIO `0xA0010000`、RTL mailbox `0xA0020000`。
 - 驗證：FPGA static contracts 5/5 PASS，Vitis direct AArch64 compiler 以 warnings-as-errors 成功編譯 `video_control.c`。host C unit executable 未能執行，因本機沒有 host C compiler；不以此掩蓋，且 Vitis ELF build 本身已完成。
 - 驗證界線／未完成：未將這次 bitstream/ELF 寫入板子或 SD，未開相機、未配置 DMA-BUF/CMA、未解決同 hub 雙 C270 bandwidth、未跑 DPU/VART/YOLOv8/Linux or Wi-Fi。所有 large artifacts 保持在 `C:\pynq_zu_usb_video_rebuild_20261111`／`C:\pynq_vitis_usb_video_rebuild_20261111`，不進 Git。
-- Git：本紀錄與進度文件將以本輪 commit 推送至 `origin/main`；下一筆紀錄補上結果。
+- Git：已提交為 `8ceb710`（`Record USB video hardware and Vitis rebuild`）並成功推送至 `origin/main`；本行的同步結果由下一筆文件提交補上。

@@ -520,3 +520,8 @@
 
 - 板子的 Wi‑Fi SDIO 硬體和驅動都已成功啟動，不是完全缺少 Wi‑Fi 功能。
 - 開機紀錄曾顯示 `regulatory.db` 載入失敗，但後續確認檔案與套件其實都已安裝；現階段不能判定需要重裝。仍必須在真實 SSID 和第二塊板環境啟用 Wi‑Fi 後，再看是否真的影響連線。
+
+## 2026-11-12：PetaLinux 已下載完成
+
+- 已確認 PetaLinux 2024.1 installer 下載完成，約 3.07 GiB，並已記錄 SHA-256。
+- 它尚未執行或安裝。下一步仍需要在 Windows 管理員權限下建立 Linux/WSL 環境，再安裝 PetaLinux。

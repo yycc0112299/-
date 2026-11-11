@@ -685,3 +685,9 @@
 - 為驗證 dmesg 的 `regulatory.db` error -2，透過 UART 只讀查詢 `/lib/firmware/regulatory.db`、`.p7s`、`dpkg-query` 和 `apt-cache policy`。兩個檔案存在，`wireless-regdb` 為 `install ok installed` version `2021.08.28-0ubuntu1`，candidate 相同。
 - 因此上一項不可描述為 root filesystem「缺少 regulatory.db」。正確事實是 kernel boot log 曾出現 direct firmware load failure，但 rootfs 上的 package/artifact 隨後可見；可能是 early-boot/rootfs availability 或 another load-time condition，尚未透過啟用 interface/association 實測。
 - 驗證界線：仍未 `ip link up`、scan/join SSID、reload driver 或改 initramfs。後續不應盲目重裝 package；應先在授權 Wi-Fi environment 下啟用並取得 dmesg/association result，再決定是否需要 Linux image change。
+
+### 2026-11-12：PetaLinux 2024.1 installer 已取得（尚未執行）
+
+- 實際盤點 `C:\Users\dsic\Downloads`，確認 AMD installer `petalinux-v2024.1-05202009-installer.run` 存在且大小為 3,296,562,820 bytes（約 3.07 GiB）。SHA-256=`9EFB6191DC9A90AFEB374EAFD8733CBC8C27C2E5D54E2D388FA0302294B5BB93`。
+- 這解除「尚未有 PetaLinux 2024.1 installer」的下載 blocker，但不解除 Linux build host blocker：PetaLinux installer 需要受支援的 Linux host；本機 WSL 尚未啟用／安裝 distribution，Docker/Vitis AI compiler route 和 matching 2024.1 hardware/image 仍未完成。
+- 驗證界線：僅列檔與 hash，沒有執行 `.run`、未安裝/解壓 PetaLinux、未改 Windows、WSL、板子、SD 或 Git。installer 是外部下載資產，不納入 repository。

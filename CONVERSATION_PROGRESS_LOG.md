@@ -496,3 +496,10 @@
 - 更正：先前記錄的 kernel load error 仍是事實，但不能推論為 package/file missing；目前較合理的未驗證原因是 early boot/load timing 或 association 前的 driver state。未來應在授權 SSID 下啟用/association diagnostics 後才決定 image repair。
 - 驗證界線／未完成：沒有 network writes、reload/installation、interface up 或 scan；仍無第二板/SSID/peer test。
 - Git：已提交為 `f237e2e`（`Correct PYNQ regulatory database diagnosis`）並成功推送至 `origin/main`；本行的同步結果由下一筆文件提交補上。
+
+## 2026-11-12 — Verified PetaLinux installer download
+
+- 需求／決策：確認使用者表示已完成的 PetaLinux download 是否實際存在、完成且可供下一步 Linux-host installation 使用；只讀取檔案，不執行 installer。
+- 實際完成：在 Downloads 找到 `petalinux-v2024.1-05202009-installer.run`，大小 3,296,562,820 bytes，SHA-256 `9EFB6191DC9A90AFEB374EAFD8733CBC8C27C2E5D54E2D388FA0302294B5BB93`。
+- 驗證界線／未完成：這是 installer acquisition，不是 PetaLinux/WSL/Vitis AI 安裝或 DPU Linux image build；未執行檔案、未改 Windows/board。大檔保持 Downloads、因外部 installer 且不適合 Git，未上傳 repository。
+- Git：本紀錄與進度文件將以本輪 commit 推送至 `origin/main`；下一筆紀錄補上結果。

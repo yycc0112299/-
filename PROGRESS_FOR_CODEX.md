@@ -462,3 +462,4 @@
 - DPU board audit：目前 PYNQ Linux 為 AArch64，但沒有 `xdputil`、Python `vart` 或 `/dev/dpu`。所以現有 PYNQ image 既沒有 DPU IP/driver，也沒有 VART；不能把 YOLOX/YOLOv8 ONNX 直接稱為 DPU inference。下一硬體 gate 是依 `xczu5eg` 資源與相容 Vitis AI release 加入 DPUCZDX8G、DDR/IRQ/CMA/Linux driver/VART，然後以 matching `arch.json` 將 INT8 YOLOv8 編成 `.xmodel`。
 - 模型名稱決策：現有 assets 是 YOLOX；新 detector target 是 YOLOv8。兩者不能混稱。保留一個 detector adapter output schema，先支援 CPU YOLOv8，再以 VART DPU implementation 取代 backend，避免重寫 tracker/Wi-Fi interface。
 - 驗證邊界：Vitis Linux packer cross-build 和兩路 USB failure 都已實板驗證；單板單鏡頭持續 streaming、第二板、Wi-Fi、DPU Vivado build、VART、YOLOv8 quantization/compile/inference 尚未完成。
+- 同步結果：本項程式、架構與交接文件已提交為 `8391da8`（`Diagnose PYNQ dual UVC and plan DPU architecture`）並成功推送至 `origin/main`。

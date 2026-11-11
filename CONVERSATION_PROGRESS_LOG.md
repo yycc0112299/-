@@ -220,4 +220,4 @@
 - 實際完成：新增 `docs/pynq-zu-two-board-dpu-architecture.md`，規定第一個可交付目標為每板一鏡頭、Linux UVC/V4L2、每板 inference、Wi-Fi versioned detection message；raw video 傳輸留為後續選項。文件也將既有 YOLOX assets 與新 YOLOv8 target 分開，採 detector adapter 保持 tracker/fusion interface。
 - DPU audit：板端實測無 `xdputil`、VART Python module 或 `/dev/dpu`。目前 PYNQ image 不具 DPU hardware/runtime；尚未有 YOLOv8 quantization、`.xmodel`、VART 或 DPU inference。需先為 `xczu5eg` 完成 DPUCZDX8G Vivado integration、matching Linux driver/VART/CMA image 和 DPU-specific `arch.json`。
 - 驗證範圍／未完成：本次已實證實板 USB failure、AArch64 packer build/deploy/run 與 DPU runtime absence；未驗證單鏡頭持續串流、第二板、Wi-Fi、DPU image/bitstream、YOLOv8 inference 或 DMA/CMA handoff。
-- Git／同步：待差異檢查、提交與 push 後補上 commit 結果；本機 `linux/build/` 只有可重建 AArch64 ELF，未上傳。
+- Git／同步：已提交為 `8391da8`（`Diagnose PYNQ dual UVC and plan DPU architecture`）並成功推送至 `origin/main`；本機 `linux/build/` 只有可重建 AArch64 ELF，未上傳。

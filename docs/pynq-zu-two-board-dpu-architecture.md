@@ -136,3 +136,10 @@ image still lacks the matching DPU driver, VART, CMA/device-tree integration,
 an `arch.json` matching this configuration, a compiled INT8 `.xmodel`, and an
 on-board `xdputil`/VART execution test. USB UVC remains PS USB -> Linux V4L2
 -> DDR before a VART application submits a tensor to the DPU.
+
+The XSA was also consumed by complete Vitis Embedded 2024.2. The tracked
+`vitis/pynq_zu_dpu/build_vitis_dpu_platform.py` produced SDT, A53 standalone
+BSP, ZynqMP FSBL, and an exported XPFM. Its generated `xparameters.h` names
+the DPU AXI-Lite window at `0x400000000`. This proves the Vivado-to-Vitis
+hardware handoff, not native-DPU runtime support: VART needs the matching
+Linux image and DPU driver rather than an invented bare-metal register API.

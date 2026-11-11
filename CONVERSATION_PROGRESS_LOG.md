@@ -244,3 +244,11 @@
 - 實際驗證：Vivado 2024.2 成功輸出 2,586,044-byte `pynq_zu_dpu_b512.xsa`；archive 實測含 `.hwh`、`.bit`、`psu_init.*`、`sysdef.xml`、`xsa.json/xml`。
 - 驗證界線／未完成：XSA 是 Vitis handoff，尚未用於 Vitis platform、Linux image/device tree/CMA/DPU driver/VART 或板端 inference；外部 XSA/bitstream/report 未上傳，因 tracked Tcl 可重建。
 - Git／同步：已提交為 `817a8cc`（`Export PYNQ-ZU DPU hardware handoff`）並成功推送至 `origin/main`；下方同步紀錄提交會記錄此結果。
+
+## 2026-11-11 — Embedded Vitis DPU platform handoff
+
+- 需求／決策：驗證 DPU XSA 能由完整 Vitis Embedded 產生 A53 software platform，不用舊 AXI-mailbox application 假裝控制 native DPU。
+- 實際完成：新增 `vitis/pynq_zu_dpu/build_vitis_dpu_platform.py` 和 README；它以一個新的短 workspace 建立 `psu_cortexa53_0` / `standalone_domain` platform 與 FSBL，沒有建立不存在的 DPU bare-metal runtime。
+- 實際驗證：`C:\Xilinx_Embedded_2024_2` 的 Vitis 2024.2 成功生成 SDT、BSP、FSBL、platform export 和 XPFM。生成 `xparameters.h` 實測為 DPU AXI-Lite `0x400000000`，與 Vivado 接線一致；FSBL 為 445,080 bytes。
+- 驗證界線／未完成：這只驗證 Vivado→Vitis hardware handoff。沒有下載板子，沒有 matching Linux/device-tree/CMA/DPU driver/VART、INT8 `.xmodel` 或 DPU inference。workspace/XPFM/FSBL 是可重建本機產物，不上傳。
+- Git／同步：待本輪 script 與三份紀錄檢查、提交與 push 後補上結果。

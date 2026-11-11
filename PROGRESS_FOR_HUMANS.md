@@ -344,3 +344,9 @@
 - XSA 已實際產生並檢查內容；它只是把 Vivado 硬體交給軟體工具，尚不是 Linux DPU driver、VART 或 YOLOv8 已能運作。
 
 本項已同步到 GitHub `main`（`817a8cc`）。
+
+## 2026-11-11：Vitis 已讀取 DPU 硬體檔
+
+- 完整 Embedded Vitis 已成功把 DPU XSA 建成 A53 platform、BSP 與開機用 FSBL；這證明 Vivado 硬體檔能正確交給 Vitis。
+- Vitis 產生的硬體定義已看得到 DPU 控制基址 `0x400000000`。
+- 這仍只是 Vitis 平台建置成功，未做板端下載，也不是 Linux VART 或 YOLOv8 推論完成。

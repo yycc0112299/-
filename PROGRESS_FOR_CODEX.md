@@ -486,3 +486,9 @@
 - 實跑 Vivado 2024.2 成功輸出 2,586,044-byte XSA。以 `tar -tf` 檢查 archive，確認包含 `pynq_zu_dpu.hwh`、`pynq_zu_dpu_b512.bit`、`psu_init.*`、`sysdef.xml`、`xsa.json` 與 `xsa.xml`。這是後續 Vitis platform/Linux boot artifact 的硬體 handoff，不是 VART runtime 或 device-tree 已生成的證據。
 - 驗證界線：XSA、bitstream 與 Vivado build output 均位於 `C:\pynq_zu_dpu_native_build`，可由 tracked Tcl 重建且不納入 Git。仍待以此 XSA 建立相配的 Linux/device-tree/CMA/DPU driver/VART image，並於板端驗證。
 - 同步結果：XSA export script 與交接文件已提交為 `817a8cc`（`Export PYNQ-ZU DPU hardware handoff`）並成功推送至 `origin/main`。
+
+### 2026-11-11：Vitis Embedded DPU platform handoff
+
+- 新增 `vitis/pynq_zu_dpu/build_vitis_dpu_platform.py` 及 README。此 script 要求 `PYNQ_ZU_DPU_XSA` 和新的短路徑 `PYNQ_ZU_DPU_VITIS_WORKSPACE`，以完整 `C:\Xilinx_Embedded_2024_2\Vitis\2024.2\bin\vitis.bat -s` 建立 `psu_cortexa53_0`/`standalone_domain` platform；它刻意不建立 DPU bare-metal application，因 DPU inference 需要 Linux DPU driver/VART 而非未定義的 AXI register write。
+- 實測使用 `pynq_zu_dpu_b512.xsa`：Vitis Embedded 2024.2 成功生成 SDT、A53 standalone domain、ZynqMP FSBL domain，platform build/export 成功並輸出 `pynq_zu_dpu_platform.xpfm`；生成 FSBL 為 445,080 bytes。生成的 `xparameters.h` 含 `XPAR_DPU_CZDX8G_0_BASEADDR` 及 canonical `XPAR_DPUCZDX8G_0_BASEADDR`，兩者均為 `0x400000000`，這與 Vivado address assignment 一致。
+- 驗證界線：本機 Vitis platform/BSP/FSBL build 是 XSA handoff 驗證；build 期間有 embedded software source warnings，但 platform 最終 `Platform Build Finished successfully`。尚未 JTAG/SD 部署此 DPU bitstream/FSBL，未生成 matching Linux image、device tree/CMA/DPU driver/VART，亦未執行 `.xmodel` 或 inference。

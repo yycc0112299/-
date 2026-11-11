@@ -227,4 +227,4 @@
 - 需求／決策：為後續每板一鏡頭、Wi-Fi 互傳資料建立可由 YOLOX 或未來 YOLOv8/DPU 使用的共同介面，先傳 compact detections 而非 raw video。
 - 實際完成：新增 `person_tracking/peer_protocol.py`，實作 versioned TCP newline-JSON schema `pynq-person-detections-v1`、strict packet/box/class validation、single-packet sender、持續 receiver 與 latest-result JSON 輸出；新增 four-case tests。
 - 驗證範圍：`python person_tracking/tests/test_peer_protocol.py` 實測 4 tests PASS，含 localhost TCP framed transfer；`py_compile` PASS。這是開發電腦 loopback，不是兩塊 PYNQ 的 Wi-Fi 或真實 detector/DPU 推論驗證。
-- Git／同步：待本輪差異檢查、提交與 push 後補上 commit 結果。
+- Git／同步：已提交為 `a1ff8f4`（`Add two-board detection peer protocol`）並成功推送至 `origin/main`。

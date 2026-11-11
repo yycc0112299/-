@@ -470,3 +470,4 @@
 - CLI：`receive --bind --port --output` 持續接收並保留最新 validated result；`send --host --port --input` 傳送一個 JSON packet。此 module 可由既有 YOLOX 或未來 YOLOv8/VART adapter 產生相同 schema，不綁定目前 detector。
 - 新增 `person_tracking/tests/test_peer_protocol.py`，實跑四項：normalization round-trip、out-of-range box rejection、非 person/schema rejection、localhost TCP framed send/read。實測 `python tests/test_peer_protocol.py` PASS（4 tests）與 `py_compile` PASS。
 - 驗證邊界：尚未將 packet producer 接到實際 detector，尚未在兩塊 PYNQ Wi-Fi 上執行，且沒有聲稱 DPU/VART 已就緒。
+- 同步結果：本項程式與文件已提交為 `a1ff8f4`（`Add two-board detection peer protocol`）並成功推送至 `origin/main`。

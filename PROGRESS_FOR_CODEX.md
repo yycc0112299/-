@@ -1,5 +1,11 @@
 # 專題狀態與交接記錄（供 Codex）
 
+## 2026-11-11：兩板 Wi-Fi 路徑的板端唯讀診斷
+
+- 實機唯讀檢查：PYNQ-ZU Linux 有 `wlan0` managed interface（`phy#0`），kernel 在 boot 時載入 `wilc_sdio` 並初始化 `wlan0`；因此板載 Wi-Fi 路徑可供後續第二板 metadata peer 使用。
+- 目前狀態：`wlan0` DOWN、沒有 IP；NetworkManager 與 wpa_supplicant 都 inactive，且未掃描或連線至任何 SSID。kernel 僅有 `Failed to get RSSI value`（尚未連線時）與 regulatory.db 缺失訊息；本次沒有網路設定、密碼、SSID、rfkill 或 driver 寫入操作。
+- 下一步需取得使用者指定的受信任 SSID 與連線授權，或由使用者指定兩板 direct/AP 拓撲；之後才可設定兩塊板的不同 IP、啟動 `peer_protocol` receiver/producer，驗證 Wi-Fi packet transfer。既有 TCP schema/loopback 與單板 YOLOv8 不受影響。
+
 ## 2026-11-11：SD 重開後兩支 C270 依序 UVC recheck
 
 - 在 `/home/xilinx/pynq_yolov8_20261111` 用 tracked `pynq_usb_camera_preflight.py` 實跑：列出 `/dev/video0`～`/dev/video3`，並依序以 MJPEG/320×240 開啟 index `0` 與 `2`；兩者皆成功讀到一張三通道影格。

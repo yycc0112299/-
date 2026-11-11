@@ -443,3 +443,11 @@
 - 實際完成：採 test-first 方式新增 offline DPU runtime tests；先得到預期 import failure，證明舊程式沒有 model validation helper。新增 `valid_xmodel()` 後，明確指定的 `.xmodel` 必須是非空一般檔案；空檔、錯誤副檔名或 stat error 一律拒絕。新增的 fake device tree test 只接受 `xlnx,dpuczdx8g-4.0` compatible node。
 - 驗證界線／未完成：全部離線 tests 為 24/24 PASS（person_tracking 19、DPU Linux 5）。沒有登入板子、下載/安裝軟體、改 Windows/AMD 表單或執行 VART；nonempty model 檔也不等於已匹配 B512 architecture 或 inference PASS。
 - Git：已提交為 `71bf3ca`（`Reject empty DPU xmodel artifacts`）並成功推送至 `origin/main`；本行的同步結果由下一筆文件提交補上。
+
+## 2026-11-11 — Rebuilt USB-camera Vivado Block Design and Vitis controller
+
+- 需求／決策：使用者要求以 Vivado Block Design 做硬體檔、Vitis 做控制檔，且目前先以一塊 PYNQ-ZU/兩個 USB C270 為硬體資料路徑；USB C270 必須保持 PS USB MIO/UVC，不可虛構 PL camera pins。
+- 實際完成：於新的外部短路徑重新跑 complete tracked flow：PYNQ-ZU project、custom IP Catalog package、Block Design、`validate_bd_design`、synthesis、implementation、bitstream、fixed XSA export。XSA 為 1,573,588 bytes 且含 bitstream/HWH/PS init/system metadata。route report 16,007/16,007 fully routed、0 errors；WNS `+0.752 ns`、WHS `+0.020 ns`，all user timing constraints met。使用同一新 XSA 實跑 Vitis Embedded 2024.2，輸出 352,272-byte AArch64 ELF；platform macro addresses 為 DMA `0xA0000000`、GPIO `0xA0010000`、RTL mailbox `0xA0020000`。
+- 驗證：FPGA static contracts 5/5 PASS，Vitis direct AArch64 compiler 以 warnings-as-errors 成功編譯 `video_control.c`。host C unit executable 未能執行，因本機沒有 host C compiler；不以此掩蓋，且 Vitis ELF build 本身已完成。
+- 驗證界線／未完成：未將這次 bitstream/ELF 寫入板子或 SD，未開相機、未配置 DMA-BUF/CMA、未解決同 hub 雙 C270 bandwidth、未跑 DPU/VART/YOLOv8/Linux or Wi-Fi。所有 large artifacts 保持在 `C:\pynq_zu_usb_video_rebuild_20261111`／`C:\pynq_vitis_usb_video_rebuild_20261111`，不進 Git。
+- Git：本紀錄與進度文件將以本輪 commit 推送至 `origin/main`；下一筆紀錄補上結果。

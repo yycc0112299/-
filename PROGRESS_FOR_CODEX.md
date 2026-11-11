@@ -642,3 +642,10 @@
 - 新增 `vitis/pynq_zu_dpu/linux/tests/test_verify_dpu_runtime.py`。先以 test 證實舊 gate 缺口：空白但副檔名為 `.xmodel` 的檔案會通過 model existence 條件。
 - `verify_dpu_runtime.py` 現新增 `valid_xmodel()`：明確指定模型時，必須是可讀的正確副檔名、一般檔案且大小大於 0 bytes；空檔、錯誤副檔名和無法 stat 的 path 都會讓 runtime gate FAIL。device-tree test 也確認只接受 `xlnx,dpuczdx8g-4.0` compatible node。
 - 驗證：先得到預期的 import/test failure，再完成修正；`person_tracking` 19 tests 加 DPU Linux tests 5 tests 共 24/24 PASS。沒有板端 DPU runtime claim，非空檔仍不代表它與 B512 architecture 相容或已經成功 VART inference。
+
+### 2026-11-11：USB C270 PS→DDR→AXI DMA Block Design 與 Vitis 控制端重新建置
+
+- 以目前 tracked Tcl 從零建立外部 `C:\pynq_zu_usb_video_rebuild_20261111`：建立 PYNQ-ZU project、package `dual_camera_yolox_axis` IP Catalog、建立 `pynq_zu_usb_video` Block Design、通過 `validate_bd_design`，再完成 synthesis、implementation、bitstream 與固定 XSA export。硬體 mapping 保持 USB0/USB1 在 PS MIO、Linux UVC/DDR 在 PS，AXI DMA MM2S 以 HP0 將 64-bit packed A/B RGB stream 送入 PL custom IP；沒有捏造 C270 的 PL D+/D− pins。
+- 實作 evidence：bitstream 7,797,821 bytes；XSA 1,573,588 bytes，archive 含 `.bit`、`.hwh`、`psu_init.*`、`sysdef.xml`、`xsa.json` 與 `xsa.xml`。route report 為 16,007/16,007 routable nets fully routed、0 routing errors；routed signoff WNS `+0.752 ns`、WHS `+0.020 ns`，all user specified timing constraints met。
+- 使用這份新 XSA 於 `C:\pynq_vitis_usb_video_rebuild_20261111` 實跑 Vitis Embedded 2024.2 build，輸出 352,272-byte `pynq_zu_usb_video_app.elf`。generated `xparameters.h` 與 BD 一致：AXI DMA `0xA0000000`、frame ID GPIO `0xA0010000`、YOLOX video RTL mailbox `0xA0020000`；readelf 確認為 ELF64 little-endian AArch64。`video_control.c` 另以 Vitis direct AArch64 GNU compiler `-Wall -Wextra -Werror` 產出外部 object 成功。
+- 驗證界線：fpga Python contract tests 5/5 PASS。這台 Windows 沒有 host `gcc`/`clang`/`cl`，所以 `test_video_control.c` 的 host executable 未重跑；Vitis AArch64 ELF 已實際 build。此 standalone controller 是 synthetic DDR→DMA→PL bring-up，並不包含 Linux UVC capture、CMA DMA-BUF handoff、同步雙 C270、DPU/VART/YOLOv8 inference 或 Wi-Fi；新 bitstream/XSA/ELF 均在外部 build paths，沒有寫入板子、SD 或 Git。

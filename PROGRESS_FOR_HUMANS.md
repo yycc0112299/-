@@ -487,3 +487,9 @@
 
 - DPU 上板前檢查已補強：即使有人放了一個名稱正確但內容是空的 `.xmodel`，檢查也會失敗，不會誤報模型已部署。
 - 新增檢查後，目前全部 24 項離線測試通過；這是檢查工具品質改善，還不是 DPU 推論完成。
+
+## 2026-11-11：Vivado 硬體檔與 Vitis 控制檔重新做出
+
+- USB C270 的 Block Design 已從目前程式重新建立、實作並輸出 bitstream/XSA。時序通過、所有可路由連線都完成，沒有 routing error。
+- 新 XSA 已成功讓 Vitis 產生 A53 控制 ELF；Vitis 取得的 DMA、frame ID、PL mailbox 位址與 Vivado 對得上。
+- USB 相機仍是 PS USB/Linux UVC，不是 FPGA 腳位；這份控制 ELF 目前是合成影格的 DMA/PL 驗證。兩支 C270 同時 Linux 串流、DPU/VART/YOLOv8 及兩板 Wi-Fi 尚未完成或驗證。

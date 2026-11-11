@@ -1,5 +1,11 @@
 # 專題狀態與交接記錄（供 Codex）
 
+## 2026-11-11：原生 B512 DPU 的精確 `arch.json` 已擷取
+
+- 先前主機搜尋遺漏了 Vivado `pynq_zu_dpu.gen` 產物；現在在已完成的 native DPU build 找到 `project/pynq_zu_dpu.gen/sources_1/bd/pynq_zu_dpu/ip/pynq_zu_dpu_dpu_czdx8g_0_0/arch.json`。其精確 fingerprint 是 `0x101000016010400`。
+- 新增 tracked host helper `fpga/export_pynq_zu_dpu_arch_json.py` 與兩個 unit tests。它從指定的 `PYNQ_ZU_DPU_BUILD_DIR` 提取 generated JSON、驗證 hex fingerprint、輸出最小 JSON；不會 Program FPGA、改寫板子或猜測 board-family architecture。實跑產物為外部 `C:/pynq_zu_dpu_native_build/pynq_zu_dpu_b512_arch.json`，不提交 Git。
+- 重新執行 build-host gate，`has_arch_json=true`；其餘三個 blockers 不變：沒有 Docker/`vai_c_xir`、沒有 PetaLinux，且現有 DPU hardware 為 2024.2 而 Vitis AI 3.5/DPUCZDX8G 4.0 的已驗證矩陣是 2024.1。這個檔案不能替代 matching Linux/device-tree/driver/VART 或 `.xmodel`。
+
 ## 2026-11-11：重開後 DPU bitstream 仍在 PL，Linux runtime 仍不相配
 
 - Vivado Hardware Manager 的目前 `xczu5_0` 狀態為 `Programmed`，Programming file 指向 `C:/pynq_zu_dpu_native_build/project/pynq_zu_dpu.runs/impl_1/pynq_zu_dpu_wrapper.bit`。Tcl Console 有明確 `set_property PROGRAM.FILE ...` 後的 `program_hw_devices [get_hw_devices xczu5_0]` 記錄；不是僅檔案欄位殘留。

@@ -73,3 +73,19 @@ guess a fingerprint or compile an `.xmodel` from a board-family JSON. It prints
 `PYNQ_ZU_DPU_BUILD_HOST_PASS` only for the compatible build contract; it does
 not download software, alter the workstation, build an image or touch the
 board.
+
+From the repository's `ModelSim_YOLOX_PersonTracking` root, the tracked helper
+below extracts that file from a completed Vivado project:
+
+```sh
+python3 fpga/export_pynq_zu_dpu_arch_json.py \
+  --build-dir /path/to/PYNQ_ZU_DPU_BUILD_DIR \
+  --output /path/to/pynq_zu_dpu_b512_arch.json
+```
+
+For the currently generated native B512 hardware it emitted fingerprint
+`0x101000016010400`. The output is deliberately outside Git because it is
+derived from the local Vivado build; regenerate it after any DPU IP
+configuration change. The presence of this architecture file only unlocks the
+correct compiler input—it does not resolve the required 2024.1 build host or
+create a working Linux DPU runtime.

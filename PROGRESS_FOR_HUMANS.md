@@ -1,5 +1,10 @@
 # 專題進度（重點版）
 
+## 2026-11-11：DPU 正確的模型架構檔已找到
+
+- 已從 Vivado 產生的 DPU IP 找到正確的架構檔，fingerprint 是 `0x101000016010400`。這是之後編譯 YOLOv8 DPU 模型時必須使用的精確設定，不是其他板子的範例檔。
+- 已加入可重跑的擷取工具；目前仍缺 Vitis AI compiler、PetaLinux 與相配 Linux runtime，所以還不能產生或執行 DPU YOLOv8 模型。
+
 ## 2026-11-11：DPU 硬體檔目前已在 PL，但尚不能推論
 
 - Vivado 確認 PYNQ‑ZU 的 PL 目前載入 DPU bitstream。

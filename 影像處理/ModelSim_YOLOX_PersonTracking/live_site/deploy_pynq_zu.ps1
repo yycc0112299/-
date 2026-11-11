@@ -69,7 +69,7 @@ Write-Host "Copying bundle (authentication may be requested)..."
 & scp $bundle "${target}:~/pynq_dual_dashboard.tar.gz"
 if ($LASTEXITCODE -ne 0) { throw "SCP copy failed." }
 
-$remoteInstall = "set -eu; test ! -e '$RemoteDir'; mkdir '$RemoteDir'; tar -xzf ~/pynq_dual_dashboard.tar.gz -C '$RemoteDir'; chmod +x '$RemoteDir/live_site/start_pynq_dual.sh'; test -f '$RemoteDir/person_tracking/assets/yolox.onnx'"
+$remoteInstall = "set -eu; test ! -e '$RemoteDir'; mkdir '$RemoteDir'; tar -xzf ~/pynq_dual_dashboard.tar.gz -C '$RemoteDir'; chmod +x '$RemoteDir/live_site/start_pynq_dual.sh'; test -f '$RemoteDir/person_tracking/assets/yolov8n.onnx'"
 Write-Host "Unpacking on board..."
 & ssh $target $remoteInstall
 if ($LASTEXITCODE -ne 0) { throw "Remote unpack validation failed." }

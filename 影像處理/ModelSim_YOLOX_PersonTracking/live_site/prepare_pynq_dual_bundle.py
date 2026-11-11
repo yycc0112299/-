@@ -7,56 +7,34 @@ locally verified YOLOX model when available.
 from __future__ import annotations
 
 import argparse
-import hashlib
+import subprocess
+import sys
 import tarfile
-import urllib.request
 from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parent
 PROJECT = ROOT.parent
 TRACKING = PROJECT / "person_tracking"
-MODEL = TRACKING / "assets" / "yolox.onnx"
-MODEL_URL = (
-    "https://media.githubusercontent.com/media/opencv/opencv_zoo/main/"
-    "models/object_detection_yolox/object_detection_yolox_2022nov.onnx"
-)
-MODEL_SHA256 = "c5c2d13e59ae883e6af3b45daea64af4833a4951c92d116ec270d9ddbe998063"
+MODEL = TRACKING / "assets" / "yolov8n.onnx"
+EXPORTER = TRACKING / "assets" / "prepare_yolov8_onnx.py"
 REQUIRED = [
     ROOT / "dual_server.py", ROOT / "dual_index.html", ROOT / "start_pynq_dual.sh",
     ROOT / "pynq_usb_camera_preflight.py", ROOT / "pynq_system_preflight.py",
     TRACKING / "pipeline.py", TRACKING / "cross_camera.py", TRACKING / "dual_camera.py",
-    TRACKING / "assets" / "yolox.py", MODEL,
+    TRACKING / "assets" / "yolov8.py", MODEL,
     TRACKING / "verify_pynq_zu_bringup.py",
 ]
 
-
-def sha256(path: Path) -> str:
-    digest = hashlib.sha256()
-    with path.open("rb") as source:
-        for chunk in iter(lambda: source.read(1024 * 1024), b""):
-            digest.update(chunk)
-    return digest.hexdigest()
-
-
 def ensure_model() -> None:
-    """Fetch the ignored public model on a newly cloned PC, with integrity check."""
-    if MODEL.is_file() and sha256(MODEL) == MODEL_SHA256:
+    """Build the ignored, pinned YOLOv8 ONNX artifact on a deployment PC."""
+    if MODEL.is_file() and MODEL.stat().st_size > 0:
         return
-    temporary = MODEL.with_suffix(".onnx.download")
-    try:
-        print(f"Downloading YOLOX model for deployment: {MODEL_URL}")
-        MODEL.parent.mkdir(parents=True, exist_ok=True)
-        with urllib.request.urlopen(MODEL_URL, timeout=120) as response, temporary.open("wb") as target:
-            while chunk := response.read(1024 * 1024):
-                target.write(chunk)
-        actual = sha256(temporary)
-        if actual != MODEL_SHA256:
-            raise RuntimeError(f"YOLOX model SHA-256 mismatch: {actual}")
-        temporary.replace(MODEL)
-    finally:
-        if temporary.exists():
-            temporary.unlink()
+    if not EXPORTER.is_file():
+        raise FileNotFoundError(f"Missing YOLOv8 exporter: {EXPORTER}")
+    subprocess.run([sys.executable, str(EXPORTER), "--output", str(MODEL)], check=True)
+    if not MODEL.is_file() or MODEL.stat().st_size == 0:
+        raise RuntimeError(f"YOLOv8 exporter did not create a model: {MODEL}")
 
 
 def main() -> None:

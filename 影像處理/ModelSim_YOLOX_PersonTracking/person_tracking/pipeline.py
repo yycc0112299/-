@@ -6,7 +6,7 @@ BASE=ROOT.parent
 sys.path[:0]=[str(BASE/'camera_deps'),str(ROOT/'assets')]
 import cv2
 import numpy as np
-from yolox import YoloX
+from yolov8 import YoloV8
 
 def read_image(path):
     image=cv2.imdecode(np.fromfile(str(path),dtype=np.uint8),cv2.IMREAD_COLOR)
@@ -76,14 +76,38 @@ class Tracker:
         return sorted(result,key=lambda d:d['track_id'])
 
 class Detector:
-    def __init__(self):
-        model=ROOT/'assets'/'yolox.onnx'
+    @staticmethod
+    def default_backend():
+        return os.environ.get('PERSON_DETECTOR','yolov8').strip().lower()
+    @staticmethod
+    def model_path_for_backend(backend):
+        names={'yolov8':'yolov8n.onnx','yolox':'yolox.onnx'}
+        try:return ROOT/'assets'/names[backend]
+        except KeyError:raise ValueError(f'Unsupported detector backend: {backend}')
+    def __init__(self,backend=None):
+        self.backend=(backend or self.default_backend()).lower()
+        model=self.model_path_for_backend(self.backend)
+        if not model.is_file():
+            raise FileNotFoundError(f'Missing {self.backend} model: {model}')
         self.model_sha256=hashlib.sha256(model.read_bytes()).hexdigest()
         cache=Path(tempfile.gettempdir())/('codex_person_'+self.model_sha256[:16]+'.onnx')
         if not cache.exists() or hashlib.sha256(cache.read_bytes()).hexdigest()!=self.model_sha256:shutil.copy2(model,cache)
-        self.model=YoloX(str(cache),confThreshold=.3,nmsThreshold=.45)
+        if self.backend=='yolov8':
+            self.model=YoloV8(str(cache),confidence_threshold=.3,nms_threshold=.45)
+        else:
+            # Keep the old CPU model available only when explicitly selected;
+            # the YOLOv8 deployment bundle intentionally omits this source.
+            from yolox import YoloX
+            self.model=YoloX(str(cache),confThreshold=.3,nmsThreshold=.45)
         cv2.setNumThreads(4)
     def detect(self,frame):
+        if self.backend=='yolov8':
+            result=[]
+            for row in self.model.infer(frame):
+                box=row['box']
+                if box[2]-box[0]<4 or box[3]-box[1]<4:continue
+                result.append(dict(box=box,confidence=float(row['confidence']),hist=histogram(frame,box)))
+            return result
         # Native 640x480 is padded to the model's 640x640 tensor, never downsampled.
         canvas=np.full((640,640,3),114,dtype=np.float32)
         canvas[:480]=cv2.cvtColor(frame,cv2.COLOR_BGR2RGB)

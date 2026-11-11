@@ -371,3 +371,4 @@
 - 此次 YOLOv8 程式與實板驗證已同步到 GitHub `main`（`fbed6fe`）。
 - YOLOv8n 已改用 ONNX Runtime 在 PYNQ 實跑一張 C270 影格，約 1.017 秒完成一次推論；這次畫面沒有偵測到人，因此只證明相機到模型的流程可執行。
 - PYNQ 的 OpenCV 不能讀這份 YOLOv8 ONNX，已改由 ONNX Runtime CPU fallback；DPU/VART 加速、YOLOv8 INT8 `.xmodel` 與正樣本人像驗證仍未完成。
+- 既有追蹤程式已預設改用 YOLOv8，並在板子上從相機影格跑完整 pipeline 成功；尚未看到人物正樣本，故還不能聲稱人物框與追蹤成果已驗證。

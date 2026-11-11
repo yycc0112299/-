@@ -10,6 +10,7 @@ BROWSER_HOST="${1:?Usage: ./start_pynq_dual.sh <PYNQ-IP-or-hostname>}"
 PORT="${PYNQ_DASHBOARD_PORT:-8766}"
 
 cd "$SCRIPT_DIR"
+export PERSON_DETECTOR="${PERSON_DETECTOR:-yolov8}"
 exec python3 dual_server.py \
   --bind 0.0.0.0 \
   --port "$PORT" \

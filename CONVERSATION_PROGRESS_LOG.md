@@ -273,3 +273,11 @@
 - 實際完成：新增 YOLOv8 adapter、單元測試和可重建 exporter。官方 YOLOv8n 經 Ultralytics 8.3.0 匯出 static 640 ONNX。原 artifact 是 opset 18／IR 10；PYNQ OpenCV 4.5.4 的 Reshape parser 失敗，ONNX Runtime 1.16.3 也先拒絕 IR 10。以 ONNX checker 產生 IR 9 artifact 後，板端 ORT 成功回傳 `(1,84,8400)`，zero input 為 0.845 s；C270 `video0` 320×240 frame 經 adapter CPU inference 為 1.017 s，當次 0 person。
 - 環境／範圍：第三台 PYNQ 的 `xilinx` user site 已安裝 NumPy 1.21.6、ONNX Runtime 1.16.3、flatbuffers/protobuf/coloredlogs 依賴；開發機安裝 Ultralytics 8.3.0、Torch 2.15.0、ONNX/onnxscript 以重建 model。模型、wheel 和 `/tmp` deployment files 不上傳 Git。尚未做含人物的正樣本驗證，這不是 DPU/VART 或 INT8 `.xmodel`。
 - Git／同步：已提交為 `fbed6fe`（`Add PYNQ CPU YOLOv8 fallback`）並成功推送至 `origin/main`。模型、wheel、影像、帳密和 `/tmp` deployment files 均未上傳。
+
+## 2026-11-11 — YOLOv8 接入既有 PYNQ pipeline/bundle
+
+- 需求／決策：讓 YOLOv8 不只是一個 adapter，而是既有 person-tracking pipeline 與 PYNQ dashboard bundle 的預設 detector；YOLOX 僅作 `PERSON_DETECTOR=yolox` 的明確 legacy 回退。
+- 實際完成：`pipeline.Detector` 預設選 YOLOv8，bundle 改含 `yolov8.py`/`yolov8n.onnx` 並將 preflight 擴充為 ONNX Runtime。修正 bundle 在 YOLOv8 mode 仍於 import time 載入未打包 `yolox.py` 的問題，改為只在選 legacy backend 時 lazy import。bundle tar 實測不含 YOLOX model。
+- 實際驗證：4 個 adapter/backend unit tests PASS；打包後暫存至 PYNQ，system preflight PASS（NumPy 1.21.6、OpenCV 4.5.4、ONNX Runtime 1.16.3、13,057,836-byte model）。`pipeline.Detector()` 實測 backend=`yolov8`、讀取 C270 `video0` 320×240、CPU inference 1.255 s，當次 0 detections。
+- 驗證範圍／未完成：暫存 `/tmp` bundle 非持久正式部署；無人物正樣本，未驗證 person box/tracker/dashboard/Wi-Fi peer。仍非 DPU/VART/INT8 `.xmodel`。
+- Git／同步：本項程式與文件將提交至 `main`；確切提交與推送結果會在後續同步紀錄寫入。

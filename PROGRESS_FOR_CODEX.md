@@ -673,3 +673,9 @@
 - 同一 UART read-only session 列舉 `/sys/class/video4linux/video*/name` 與 `lsusb`：`video0`～`video3` 全部為 Logitech C270 HD WEBCAM；USB bus 001 的兩支 C270 是 `046d:0825` device 006/007，並共用 `0424:2744` Microchip/SMSC USB 2.0 hub（bus 001），另有 `0424:5744` USB 3.0 hub（bus 002）。
 - 這是 C270 一支會產生兩個 V4L2 nodes 的實物列舉，非四支相機；也與先前同一 USB2 hub `ENOSPC` simultaneous streaming 診斷一致。不能以 Vivado PL pin assignment 修復此 USB physical topology，兩板各一鏡頭仍是部署方案。
 - 實際讀到 `/sys/class/net/wlan0/address` 為 `00:00:00:00:00:00`，與 interface DOWN/no IP 狀態相符；尚未有第二板/SSID，故沒有變更或連線 Wi-Fi。
+
+### 2026-11-11：UART 唯讀 Wi-Fi driver diagnosis
+
+- `wlan0` 對應 SDIO `mmc1:0001:1`，driver path 是 `/sys/bus/sdio/drivers/wilc_sdio`，network type=1；dmesg 顯示 `wilc_sdio ... Driver Initializing success`。因此目前不是缺失 Wi-Fi hardware/driver 的情況。
+- kernel 同時記錄 `regulatory.db` direct firmware load error `-2`／`cfg80211: failed to load regulatory.db`，以及未連線時 `Failed to get RSSI value`。這些是 image/network-preparation blockers，不能把介面存在當成可直接 peer exchange。
+- 驗證界線：只讀 sysfs/dmesg，未 `ip link set up`、scan/join SSID、寫 regulatory database 或改任何 Linux/board setting。未來兩板 Wi-Fi path 仍需合法 SSID credentials、第二板以及先解決/確認 regulatory database requirement。

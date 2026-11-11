@@ -414,3 +414,10 @@
 - 實機驗證：`--sequential /dev/video0 /dev/video2` 兩者各協商 320×240 YUYV、10 FPS；輸出 307,200 words，A nonzero=307,168、B nonzero=307,112。`/tmp` ELF/output 已清除。
 - 驗證界線／未完成：沒有共同 timestamp／simultaneous streams，沒有 DMA/PL/DPU/person inference 或第二板/Wi-Fi。既有 simultaneous USB bandwidth failure 仍有效。
 - Git：已提交為 `bd525f5`（`Support sequential dual C270 packing`）並成功推送至 `origin/main`；本行的同步結果將由下一筆文件提交記錄。
+
+## 2026-11-11 — Linux CMA / DMA-BUF read-only audit
+
+- 需求／決策：判定 Vitis/Linux packer 下一步是否已有 contiguous allocation source，且不以 standalone physical-address model 或 `/dev/mem` 冒充 Linux DMA ownership。
+- 實際驗證：live PYNQ 有 `/dev/dma_heap/linux,cma`、`/dev/dma_heap/system`，CmaTotal=524288 KiB、CmaFree=517188 KiB。
+- 驗證界線／未完成：沒有 allocate/submit DMA buffer、沒有 DMA-BUF importer/driver、沒有 DMA/PL/DPU transfer；未改 kernel/module/bitstream。需要 matching kernel client/driver attach/map/sync DMA-BUF 才能接 AXI DMA。
+- Git：本次架構／環境紀錄待同一筆提交推送至 `origin/main`；提交後在此紀錄補上結果。

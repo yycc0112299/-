@@ -62,6 +62,23 @@ two-C270 topology is **not** a completed capture path. Use one camera per
 board for the planned two-board Wi-Fi architecture unless the physical USB
 topology is changed and retested.
 
+## Linux DMA buffer handoff boundary
+
+The live PYNQ image has `/dev/dma_heap/linux,cma` and `/dev/dma_heap/system`.
+On 2026-11-11 its CMA report was 524,288 KiB total and 517,188 KiB free, so a
+contiguous Linux allocation source exists. A dma-heap allocation returns a
+DMA-BUF file descriptor, however—not a physical address that a user-space
+Vitis program may hand to AXI DMA. The standalone JTAG smoke test's DDR
+pointer must therefore **not** be copied into this Linux program or worked
+around with `/dev/mem`.
+
+The production next step is a board-specific Linux DMA client/driver that
+imports this DMA-BUF, maps it for the AXI DMA device, synchronizes ownership,
+and submits the transfer (or an existing DMAengine/DMA-BUF importer if the
+matching image supplies one). Only that kernel-side ownership layer can bridge
+the packer's buffer to PL DMA correctly. No such driver is in the current PYNQ
+image, and no DMA transfer is claimed by the packer tests.
+
 Two diagnostic modes are built into the same AArch64 executable:
 
 ```sh

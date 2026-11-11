@@ -1,5 +1,11 @@
 # 專題狀態與交接記錄（供 Codex）
 
+## 2026-11-11：Linux CMA 可用，但 Vitis/Linux AXI DMA 仍需 kernel DMA-BUF ownership layer
+
+- 對 live PYNQ 做唯讀盤點，發現 `/dev/dma_heap/linux,cma`、`/dev/dma_heap/system`；`CmaTotal=524288 KiB`、`CmaFree=517188 KiB`。所以 Linux camera/packer 後有 contiguous-memory allocation source，這是正面硬體／kernel 證據。
+- 關鍵界線：dma-heap 交出的是 DMA-BUF file descriptor，不是 user-space 可安全傳給 AXI DMA 的實體地址。先前 standalone Vitis JTAG DMA test 用的 DDR pointer 不可搬到 Linux；不可用 `/dev/mem` 迴避。下一步需 matching Linux DMA client/driver 將 DMA-BUF attach/map/sync 後送入 AXI DMA，或確認 image 有相容 DMAengine DMA-BUF importer。
+- 本次沒有 allocate buffer、沒有寫 DMA register、沒有載入 module／改 kernel／bitstream。現有 `uvc_v4l2_packer` 仍只到 packed output file，DMA/PL/DPU 不可宣稱完成。
+
 ## 2026-11-11：同板雙 C270 的 Vitis/Linux sequential 格式驗證已通過
 
 - `vitis/pynq_zu_usb_video/linux/uvc_v4l2_packer.c` 新增 `--sequential <camera-a> <camera-b> <output>`。它會完整關閉第一支 C270 後再開啟第二支、各 copy 一張 320×240 YUYV 到 user memory，最後用既有 `pack_dual_yuyv()` 形成 A/B 兩 lane 的 640×480、64-bit packed frame；程式註解與 README 明確禁止將此模式當作同步或同時擷取。

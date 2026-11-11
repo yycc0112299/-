@@ -91,6 +91,18 @@ Model deployment sequence:
 5. YOLOv8: a person image yields detections through the adapter, then the same
    output schema is consumed by the existing tracker/fusion code.
 
+## 2026-11-11: Linux contiguous-memory evidence and DMA ownership boundary
+
+The live PYNQ image exposes `/dev/dma_heap/linux,cma` and `/dev/dma_heap/system`.
+Read-only inspection recorded `CmaTotal: 524288 KiB` and `CmaFree: 517188 KiB`.
+This is useful for a Linux camera-to-PL path, but it does **not** permit a
+Vitis/Linux user process to use the bare physical pointer used by the earlier
+standalone AXI-DMA JTAG smoke test. dma-heap returns a DMA-BUF file descriptor;
+the kernel must map/attach it for the DMA device and perform ownership/cache
+synchronization. The required next component is therefore a matching Linux
+DMA client/driver or existing DMAengine DMA-BUF importer. `/dev/mem` is not a
+valid replacement. No DMA handoff is yet implemented or hardware-verified.
+
 ## References
 
 - AMD [DPUCZDX8G system-integration guidance](https://xilinx.github.io/Vitis-AI/3.5/html/docs/workflow-system-integration)

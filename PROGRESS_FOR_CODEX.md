@@ -1,5 +1,12 @@
 # 專題狀態與交接記錄（供 Codex）
 
+## 2026-11-11：SD 重開後的持久 YOLOv8 CPU 部署與單鏡頭實測
+
+- 使用者完成 SD restart 後，SSH 至 `192.168.3.1` 恢復正常。板端為 Linux `6.6.10-xilinx-v2024.1-gb6067dbebcc8`；`/dev/video0`～`/dev/video3` 存在；DPU `/dev/dpu0`、`xdputil`、Python `vart`/`xir` 仍不存在，故本次沒有 DPU inference claim。
+- 實際部署：由 tracked `prepare_pynq_dual_bundle.py` 建置 13-member、11,104,503-byte bundle，將其解至新的 `/home/xilinx/pynq_yolov8_20261111`，不覆寫既有 `pynq_dual_dashboard_v6/v7`（YOLOX）目錄。system preflight PASS：Python 3.10.4、NumPy 1.21.6、OpenCV 4.5.4、ONNX Runtime 1.16.3、`yolov8n.onnx` 13,057,836 bytes。該 Python 環境沒有 `pynq` module；CPU ONNX 路徑不依賴它。
+- 實際驗證：只開 C270 `video0`，設定 MJPEG/320×240，成功讀取 `(240,320,3)` frame 並以部署的 YOLOv8n ONNX 推論 0.964 s（當下 0 person）。將公開 `bus.jpg` 暫傳 `/tmp` 作正樣本，部署 detector 回傳 4 persons、1.654 s；測試圖已確定刪除。兩支相機未同時開啟，未測 Wi-Fi peer、tracker、dashboard 或 FPGA/DPU。
+- 已經 SD 重開恢復 Composite/SSH；UART/JTAG 仍同時可供 Vivado 偵測 `xczu5`。本次不寫 bitstream、不安裝板端套件、不重刷 SD，也不保留公開圖於 `/tmp`。
+
 ## 2026-11-11：Composite 與 UART/JTAG 同時連線、JTAG target 已確認
 
 - 使用者已同時接上 Composite 與 UART/JTAG。Windows 維持 Composite 的 PYNQ-USB、RNDIS 與 `COM4`；Vivado Hardware Manager 現在實際開啟 `localhost/xilinx_tcf/Xilinx/1234-tulA`，並偵測到 `xczu5_0`（part `xczu5`）及 `arm_dap_1`，證明 JTAG 路徑可用。

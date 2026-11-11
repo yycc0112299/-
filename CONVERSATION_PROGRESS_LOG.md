@@ -325,3 +325,11 @@
 - 實際驗證：Composite 仍提供 PYNQ-USB/RNDIS/`COM4`；Vivado Hardware Manager 成功連至 `localhost/xilinx_tcf/Xilinx/1234-tulA`，列出 `xczu5_0`（`xczu5`）與 `arm_dap_1`。兩條線可同時使用：Composite 給 Linux 網路，UART/JTAG 給 Vivado。
 - 驗證界線／未完成：Hardware Manager 顯示 `xczu5_0` 已 Programmed 且其 Programming file 欄為 DPU wrapper，但本輪沒有可獨立證明新一次 Program 成功的 log。JTAG 開啟後 TCP 22 保持可達但 SSH banner 被板端 reset，未再對板子寫入、燒錄或重刷。需保留兩線並實體斷電重開、SD boot 後重新驗證 Linux/SSH，不能宣稱 DPU/VART inference。
 - Git：已提交為 `eb42e95`（`Record simultaneous PYNQ JTAG connection`）並成功推送至 `origin/main`。沒有上傳私人資料、模型、bitstream 或板端檔案。
+
+## 2026-11-11 — SD restart recovery and persistent YOLOv8 CPU deployment
+
+- 需求／決策：SD restart 後，先確認 Linux 恢復，再將目前 GitHub 的 YOLOv8 bundle 部署到不覆寫舊 YOLOX dashboard 的新資料夾，優先完成單鏡頭可用路徑。
+- 實際完成：SSH 成功登入；建立本機 13-member/11,104,503-byte bundle，部署至 `/home/xilinx/pynq_yolov8_20261111`。board system preflight PASS，確認 Python 3.10.4、NumPy 1.21.6、OpenCV 4.5.4、ONNX Runtime 1.16.3 與 13,057,836-byte YOLOv8 model。
+- 實際驗證：C270 `video0` 在 MJPEG/320×240 成功輸入 YOLOv8，推論 0.964 s、當下 0 person；公開 `bus.jpg` 暫存正樣本測試回傳 4 persons、1.654 s。測試後 `PYNQ_TEMP_IMAGE_REMOVED` 與 persistent deploy file 都已實測。
+- 驗證界線／未完成：僅一支 C270；未同時開兩相機、未測 Wi-Fi/第二板、tracker/dashboard、PL 或 DPU。現有 Linux 仍沒有 `/dev/dpu0`、`xdputil`、VART/XIR；CPU result 不得描述為 DPU。
+- Git：本次部署/驗證紀錄待同一筆提交推送至 `origin/main`；提交後在此紀錄補上結果。板端目錄、模型與公開圖未上傳 Git；公開圖已從 `/tmp` 移除。

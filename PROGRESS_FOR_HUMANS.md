@@ -1,5 +1,12 @@
 # 專題進度（重點版）
 
+## 2026-11-11：重開後 YOLOv8 已重新部署並實測
+
+- 板子重開後 Linux、SSH 與相機節點都已恢復；最新 YOLOv8 程式部署到新的資料夾，沒有覆蓋舊 YOLOX dashboard。
+- 單一 C270 成功讀到 320×240 影格並完成 YOLOv8 CPU 推論，約 0.964 秒；當下畫面沒有偵測到人。
+- 以臨時公開人物圖驗證，同一套板端 YOLOv8 成功找到 4 人，約 1.654 秒；測試圖已刪除。
+- 這仍是 CPU/ONNX Runtime，不是 DPU；DPU driver、VART/XIR、雙鏡頭同時串流、Wi-Fi 第二板與 FPGA DPU 推論都尚未完成。
+
 ## 2026-11-11：兩條線可同時使用，JTAG 已找到
 
 - Composite 與 UART/JTAG 可以同時插；目前 Composite 維持 Linux/網路，Vivado 已實際找到 PYNQ‑ZU 的 `xczu5` JTAG target。

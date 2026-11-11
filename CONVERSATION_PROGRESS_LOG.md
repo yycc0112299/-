@@ -280,4 +280,4 @@
 - 實際完成：`pipeline.Detector` 預設選 YOLOv8，bundle 改含 `yolov8.py`/`yolov8n.onnx` 並將 preflight 擴充為 ONNX Runtime。修正 bundle 在 YOLOv8 mode 仍於 import time 載入未打包 `yolox.py` 的問題，改為只在選 legacy backend 時 lazy import。bundle tar 實測不含 YOLOX model。
 - 實際驗證：4 個 adapter/backend unit tests PASS；打包後暫存至 PYNQ，system preflight PASS（NumPy 1.21.6、OpenCV 4.5.4、ONNX Runtime 1.16.3、13,057,836-byte model）。`pipeline.Detector()` 實測 backend=`yolov8`、讀取 C270 `video0` 320×240、CPU inference 1.255 s，當次 0 detections。
 - 驗證範圍／未完成：暫存 `/tmp` bundle 非持久正式部署；無人物正樣本，未驗證 person box/tracker/dashboard/Wi-Fi peer。仍非 DPU/VART/INT8 `.xmodel`。
-- Git／同步：本項程式與文件將提交至 `main`；確切提交與推送結果會在後續同步紀錄寫入。
+- Git／同步：已提交為 `fac5fee`（`Use YOLOv8 in PYNQ tracking pipeline`）並成功推送至 `origin/main`。模型、wheel、影像、帳密和 `/tmp` bundle 未上傳。

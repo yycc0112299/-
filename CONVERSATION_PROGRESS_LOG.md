@@ -339,4 +339,4 @@
 - 需求／決策：SD restart 後確認兩個已連接的 C270 各自仍能被 Linux/UVC 使用，同時維持先前「不可同時串流」的證據界線。
 - 實際驗證：在新 YOLOv8 deployment 目錄執行 tracked camera preflight；`/dev/video0`～`/dev/video3` 存在，index 0 與 index 2 各自以 MJPEG/320×240 成功讀取一張 frame。
 - 驗證界線／未完成：檢查會先關閉 A 才開 B，未同時開兩支相機，不能宣稱雙鏡頭同時串流已修復。未跑 YOLO/DPU/Wi-Fi/PL，沒有寫入板端資料或變更硬體設定。
-- Git：本次實機 recheck 紀錄待同一筆提交推送至 `origin/main`；提交後在此紀錄補上結果。
+- Git：已提交為 `a9c596f`（`Record restarted dual camera recheck`）並成功推送至 `origin/main`。沒有上傳相機影像、模型、bitstream 或板端檔案。

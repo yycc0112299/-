@@ -18,8 +18,52 @@ from typing import Any
 import cv2
 import numpy as np
 
+from yolov8 import YoloV8
+
 
 Decoder = Callable[[Mapping[str, np.ndarray], int, int], list[dict[str, object]]]
+
+
+def standard_yolov8_decoder(*, output_name: str | None = None,
+                            confidence_threshold: float = .30,
+                            nms_threshold: float = .45) -> Decoder:
+    """Create a decoder for a *verified* raw single-head YOLOv8 output.
+
+    The compiled model must expose one tensor compatible with the raw Ultralytics
+    ONNX layout, either ``(1, 84, candidates)`` or ``(1, candidates, 84)``.
+    DPU compilation can instead expose several feature heads, so callers must
+    inspect the actual `.xmodel` before registering this decoder.
+    """
+    if not 0.0 <= confidence_threshold <= 1.0:
+        raise ValueError("confidence_threshold must be between 0 and 1")
+    if not 0.0 <= nms_threshold <= 1.0:
+        raise ValueError("nms_threshold must be between 0 and 1")
+
+    def decode(outputs: Mapping[str, np.ndarray], source_width: int,
+               source_height: int) -> list[dict[str, object]]:
+        if output_name is None:
+            if len(outputs) != 1:
+                raise RuntimeError(
+                    "standard YOLOv8 decoder requires exactly one standard YOLOv8 output; "
+                    "inspect the compiled model and select a model-specific decoder"
+                )
+            predictions = next(iter(outputs.values()))
+        else:
+            try:
+                predictions = outputs[output_name]
+            except KeyError as error:
+                raise RuntimeError(
+                    f"expected verified YOLOv8 output {output_name!r}, got {sorted(outputs)}"
+                ) from error
+        return YoloV8.decode_predictions(
+            predictions,
+            source_width=source_width,
+            source_height=source_height,
+            confidence_threshold=confidence_threshold,
+            nms_threshold=nms_threshold,
+        )
+
+    return decode
 
 
 def _tensor_fix_point(tensor: Any) -> int:

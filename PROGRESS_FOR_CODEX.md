@@ -1,5 +1,11 @@
 # 專題狀態與交接記錄（供 Codex）
 
+## 2026-11-12：標準單頭 YOLOv8 的 VART→tracker 解碼接點已完成離線驗證
+
+- `person_tracking/assets/yolov8_vart.py` 新增 `standard_yolov8_decoder()`：只接受已確認為 raw Ultralytics YOLOv8 layout 的單一輸出 tensor（`(1,84,N)` 或 `(1,N,84)`），復用 CPU adapter 的 de-letterbox、COCO person-class filtering 與 NMS，輸出既有 tracker/peer schema 所需的 `class_id`/`confidence`/`box`。
+- test-first：先加 decoder import/test 而失敗，再實作；tests 現驗證 `(1,84,1)` raw person head 正確還原成 640×480 來源的 `[160,160,480,320]`，多 head ambiguous output 明確拒絕。VART adapter 5/5、完整 `person_tracking` 21/21 PASS。
+- 嚴格界線：尚無此 B512 的 compiled `.xmodel`，故不知道其真正 DPU outputs 是否符合單頭 ONNX layout；此 decoder **不會**自動註冊為 runtime detector，仍必須先 inspect `.xmodel` tensor names/shapes 並用真實 frame 結果驗證。多 head／feature-map compile output 會維持需要 model-specific decoder，不能據此宣稱 DPU YOLOv8 inference。
+
 ## 2026-11-12：WSL compiler route 已接通，preflight 改採 PetaLinux 實際版本
 
 - Docker Desktop 既有 official `xilinx/vitis-ai:2.5.0` image 在 Windows 端可正常使用，但 WSL 原先沒有 `docker` command。已在 external `/home/petalinux/.local/bin/docker` 建立指向 Docker Desktop CLI 的 user-only symbolic link；WSL 實測 image digest 為 `sha256:eaa85efb06924995ebdb973546e7f69169b003b8cc525764bd9524ad554dddbe`。未拉取新 image、未改 Docker image/board/SD。

@@ -10,7 +10,7 @@ import numpy as np
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "assets"))
 
-from yolov8_vart import VartYoloV8
+from yolov8_vart import VartYoloV8, standard_yolov8_decoder
 
 
 class FakeTensor:
@@ -41,6 +41,22 @@ class FakeRunner:
 
 
 class VartYoloV8Tests(unittest.TestCase):
+    def test_standard_decoder_adapts_a_single_raw_yolov8_head_to_person_boxes(self) -> None:
+        raw = np.zeros((1, 84, 1), dtype=np.float32)
+        raw[0, :4, 0] = [320, 320, 320, 160]
+        raw[0, 4, 0] = .90
+        decoder = standard_yolov8_decoder(confidence_threshold=.30, nms_threshold=.45)
+        detections = decoder({"output": raw}, 640, 480)
+        self.assertEqual(len(detections), 1)
+        self.assertEqual(detections[0]["class_id"], 0)
+        self.assertEqual(detections[0]["box"], [160, 160, 480, 320])
+        self.assertAlmostEqual(float(detections[0]["confidence"]), .90)
+
+    def test_standard_decoder_refuses_ambiguous_multi_head_outputs(self) -> None:
+        decoder = standard_yolov8_decoder()
+        with self.assertRaisesRegex(RuntimeError, "exactly one standard YOLOv8 output"):
+            decoder({"head0": np.zeros((1, 84, 1)), "head1": np.zeros((1, 84, 1))}, 640, 480)
+
     def test_letterboxes_rgb_and_quantizes_for_nhwc_dpu_input(self) -> None:
         runner = FakeRunner(np.zeros((1, 84, 1), dtype=np.int8))
         detector = VartYoloV8.from_runner(

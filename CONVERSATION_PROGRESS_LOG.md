@@ -1,5 +1,12 @@
 # 對話與進度同步紀錄
 
+## 2026-11-12 — Added a conditional standard YOLOv8 VART decoder bridge
+
+- 需求／決策：在尚未能建 target image 時，補上未來 DPU YOLOv8 tensor 到既有 tracker／Wi-Fi person schema 的安全接點；不得假設所有 compiled DPU graph 都輸出 ONNX raw head。
+- 實際完成：`standard_yolov8_decoder()` 只對驗證過的單一 raw Ultralytics layout `(1,84,N)`／`(1,N,84)` 生效，重用既有 de-letterbox/person/NMS contract。test-first：新增 import/test 先因函式缺失失敗；實作後 VART adapter 5/5、完整 person_tracking 21/21 PASS。單頭 synthetic person tensor 還原成 `[160,160,480,320]`，ambiguous multi-head outputs 明確拒絕。
+- 驗證範圍／未完成：沒有 xmodel，沒有真的 VART runner／DPU inference 或 board frame；未註冊任何猜測 decoder。真正 compiled output 若為 multi-head/feature maps 必須另寫並實測 model-specific decoder。
+- Git／同步：待本次程式、文件與完整測試完成後提交並推送 `origin/main`；提交後以後續同步紀錄補上實際 hash。
+
 ## 2026-11-12 — Connected WSL to the verified Vitis AI 2.5 compiler and hardened the version gate
 
 - 需求／決策：讓實際 PetaLinux/WSL host 能使用已下載的 Vitis AI 2.5 compiler image，並避免只因 Docker CLI 或使用者輸入版本字串存在就把不相容 host 誤判為 ready。

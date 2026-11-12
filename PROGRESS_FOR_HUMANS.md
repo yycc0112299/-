@@ -1,5 +1,10 @@
 # 專題進度（重點版）
 
+## 2026-11-12：overlay 載入後兩支相機仍可逐支擷取
+
+- 在 USB-video overlay control-plane 驗證通過後，再以 OpenCV 依序讀取 `/dev/video0`、`/dev/video2`，皆成功得到 `640×480×3`。
+- 這證明本次 PL overlay 下載沒有干擾 PS USB 相機的 sequential capture；不代表畫面已經走 DMA 或 FPGA 影像資料路徑。
+
 ## 2026-11-12：USB-video overlay 的板端控制介面已實測通過
 
 - 板端終端實測 `PYNQ_ZU_USB_VIDEO_OVERLAY_PASS frame_id=0x5a17c0de initial_control=0x00000000`。

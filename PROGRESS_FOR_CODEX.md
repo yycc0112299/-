@@ -1,5 +1,10 @@
 # 專題狀態與交接記錄（供 Codex）
 
+## 2026-11-12：post-overlay UVC sequential capture PASS
+
+- 在 `PYNQ_ZU_USB_VIDEO_OVERLAY_PASS` 後，用 board OpenCV/V4L2 sequentially open/read/release `/dev/video0` 及 `/dev/video2`；兩者皆 `POST_OVERLAY_CAMERA_OK`、shape `(480, 640, 3)`。
+- 這是 overlay coexistence check：證實本次 PL programming 不妨礙 PS USB UVC capture。仍非 AXI DMA stream、FPGA pixels、two-camera simultaneous capture 或 inference evidence。
+
 ## 2026-11-12：板端 USB-video overlay control-plane verifier PASS
 
 - 使用者提供 root verifier terminal evidence：`PYNQ_ZU_USB_VIDEO_OVERLAY_PASS frame_id=0x5a17c0de initial_control=0x00000000`。畫面亦顯示後續從 overlay directory 再次執行 verifier 仍 PASS。

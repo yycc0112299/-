@@ -1,5 +1,12 @@
 # 對話與進度同步紀錄
 
+## 2026-11-12 — Rechecked both USB cameras after USB-video overlay programming
+
+- 需求／決策：確認剛下載的 PL overlay 不破壞 PS USB camera access；採 sequential single-frame capture，避免 USB2 shared-hub bandwidth 的 simultaneous capture 風險。
+- 實際完成：overlay loaded 後，OpenCV/V4L2 對 `/dev/video0` 與 `/dev/video2` 皆得到 `POST_OVERLAY_CAMERA_OK` `(480, 640, 3)`。
+- 驗證界線／未完成：不代表資料經 FPGA/DMA、雙相機同時、DPU、YOLOv8 或 Wi‑Fi peer 成功。
+- Git／同步：本次文件變更待提交並推送到 `origin/main`。
+
 ## 2026-11-12 — Verified USB-video overlay control-plane registers on PYNQ hardware
 
 - 需求／決策：在 PL programming 已確認後，以 root-enabled PYNQ verifier 實測 inert control-plane registers，並保證不啟動 DMA。

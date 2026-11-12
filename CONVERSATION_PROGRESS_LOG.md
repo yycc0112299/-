@@ -5,7 +5,7 @@
 - 需求／決策：在板端 SSH 尚未可驗證時，先完成不需插線的 Linux-overlay handoff；只接受 USB-video Block Design 實作產物，不混用舊 bring-up overlay，且不得寫板子／SD。
 - 實際完成：新增 `prepare_pynq_zu_usb_video_overlay.ps1` 與 test-first static contract test（缺 script 時 FAIL，實作後 1/1 PASS）。script 僅複製 implementation 的 `pynq_zu_usb_video_wrapper.bit` 與 matching BD HWH，輸出同 stem 的 `.bit/.hwh`、檢查非空並列出 SHA-256，沒有 SSH/SCP/bootgen。實跑 external build，產出 7,797,821-byte bit 和 333,915-byte HWH，SHA-256 分別為 `e92ee2cc3f7493ea141e7e363a80893b393225e744562c33093b1011e34cd6c2`、`ac5497244a55b17810c6bc318dd050fec159c3e84005afe3eb91ce31b375c6b5`。
 - 驗證範圍／未完成：artifact 只留在 external `%TEMP%`，不進 Git、未上傳或載入 PYNQ。它證明 Linux bring-up 可取得正確的 matching hardware pair，不代表 UVC、DMA-BUF, two-camera、DPU/YOLOv8/Wi-Fi 或任何 board runtime 已成功。
-- Git／同步：本項 script、test、文件將於本次提交推送；實際提交雜湊與推送結果由下一筆文件同步紀錄補上。
+- Git／同步：已提交為 `912a918`（`Stage USB video PYNQ overlay`）並成功推送至 `origin/main`；本行同步結果由下一筆文件提交補上。
 
 ## 2026-11-12 — Rebuilt the USB-video Vitis ELF using the complete Embedded installation
 

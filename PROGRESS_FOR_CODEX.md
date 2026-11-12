@@ -906,3 +906,9 @@
 - 檢核：top synthesis 0 errors/0 critical warnings；route report 為 15,930/15,930 routable nets fully routed、0 routing errors；final timing WNS `+0.034 ns`、WHS `+0.011 ns`、TNS/THS=0，Vivado 明確回報 all user-specified timing constraints met。`verify_pynq_zu_usb_video_handoff.py --xsa` PASS，重新讀回 DMA/frame GPIO/mailbox= `0xA0000000`/`0xA0010000`/`0xA0020000`。
 - Routed DRC 有 3 warnings、0 errors：AXI DMA IP 的 two NO_CHANGE BRAM collision advisories，及 SmartConnect internal reset-pipe `RTSTAT-10` no-routable-load advisory；它們沒有阻止 bitgen。這是 2022.1 hardware build/export proof，不是 PYNQ board download、Linux UVC DMA、two-camera capture、DPU/VART/YOLO inference proof。generated bit/XSA/reports and background build logs remain external and are not committed.
 
+### 2026-11-13：2022.1 Vitis control ELF 與 handoff header 已驗證
+
+- 新增 `vitis/pynq_zu_usb_video/build_vitis_2022.tcl`，為 2022.1 classic XSCT 的獨立、短 workspace flow；它要求 external XSA，建立 `psu_cortexa53_0`/`standalone_domain` platform，然後建立、匯入並建置 A53 standalone application。2024.2 的 `build_vitis_embedded.py` 保留，但 README 現明確禁止把它用於 2022.1 XSA。
+- 實際以 `C:\pynq_zu_usb_2022_20261113\pynq_zu_usb_video.xsa` 建立 isolated `C:\pynq_vitis_usb_video_2022_20261113b` platform。其 generated `xparameters.h` 與 XSA handoff verifier PASS：DMA/frame-ID GPIO/mailbox=`0xA0000000/0xA0010000/0xA0020000`。使用 Vitis 2022.1 `aarch64-none-elf-gcc`、該 generated BSP 的 `libxil.a` 與 generated linker script，實際產生 external `manual_a53_elf\pynq_zu_usb_video_app.elf`（203,736 bytes）；`readelf`=ELF64/AArch64。
+- 限制與異常：這台 Windows host 上的 2022.1 XSCT/Eclipse application-import service 在 default empty-app project 建好後停止回應，未匯入 tracked `main.c`/`video_control.c`，因此已關閉**本次啟動的 isolated** XSCT/Eclipse background processes。不能把 `build_vitis_2022.tcl` 說成已完整自動跑畢；ELF 是以相同 2022.1 compiler/BSP 的 manual invocation 建出。這不是板端執行、也沒有 program PL/SD、UVC/DMA、DPU/VART/YOLOv8 或 Wi-Fi 驗證。external workspace、ELF、XSA、tool logs 均不入 Git。
+

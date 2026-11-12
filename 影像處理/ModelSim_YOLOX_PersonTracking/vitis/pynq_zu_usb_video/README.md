@@ -7,9 +7,12 @@ It is intentionally not a Jupyter/PYNQ control path.
 
 1. In Vivado, run `create_pynq_zu_usb_video_project.tcl`,
    `create_pynq_zu_usb_video_bd.tcl`, then `export_pynq_zu_usb_video_xsa.tcl`.
-2. Set `PYNQ_ZU_USB_VIDEO_XSA` to the resulting `.xsa`, then run
-   `build_vitis_embedded.py` through Vitis Embedded 2024.2. It creates an A53
-   standalone platform and `pynq_zu_usb_video_app.elf`.
+2. Set `PYNQ_ZU_USB_VIDEO_XSA` to the resulting `.xsa`, then use a Vitis build
+   script that matches the toolchain used for that XSA.  For the verified
+   2022.1 XSA, run `build_vitis_2022.tcl` through the 2022.1 `xsct.bat`; it
+   creates an A53 standalone platform and `pynq_zu_usb_video_app.elf`.
+   `build_vitis_embedded.py` remains the separate Vitis Embedded 2024.2 flow
+   for a 2024.2 XSA and must not be used for the 2022.1 handoff.
 3. Let Vitis generate `xparameters.h`; `main.c` uses those generated base
    addresses and deliberately fails compilation if the expected IP is absent.
 

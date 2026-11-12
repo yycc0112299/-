@@ -1,5 +1,11 @@
 # 專題狀態與交接記錄（供 Codex）
 
+## 2026-11-12：兩板 PYNQ runtime bundle 已補齊 Wi-Fi／VART 元件並實際封裝驗證
+
+- `live_site/prepare_pynq_dual_bundle.py` 將 runtime file list 提取為 `runtime_sources()`，bundle 現額外包含 `person_tracking/pynq_wifi_peer_preflight.py` 和 `person_tracking/assets/yolov8_vart.py`。這使 deployed CPU two-board Wi-Fi readiness gate 與未來 opt-in DPU backend source 隨同同一套板端程式，不會在 target import 時缺檔。
+- test-first：新增 bundle contract test 後因 `runtime_sources` 不存在而 FAIL；最小實作後 test PASS。完整 person tracking tests 22/22 PASS。實際建立 tarball 時首次選 `C:\` root output 得 `PermissionError`；ACL 診斷確認 root 沒有一般 file-create 權限、`%TEMP%` 為使用者 FullControl，改用 `%TEMP%` 的 unique path 後 bundle 成功，`tar -tzf` 確認上述兩個檔案都在 archive。
+- 外部驗證 artifact 為 `C:\Users\dsic\AppData\Local\Temp\pynq_bundle_validation_20261112120349.tar.gz`，不入 Git；沒有 SCP/upload、未改板子/SD/Wi-Fi。這只保證部署包包含 source，不證明 target VART 或 two-board Wi-Fi 已運作。
+
 ## 2026-11-12：兩板 Wi-Fi 文件已修正為可全雙工的 one-camera-per-board 啟動流程
 
 - 更新 `person_tracking/README.md`：舊文字仍說 VART decoder 未接至 `pipeline.Detector`，現已改為實際 opt-in `PERSON_DETECTOR=yolov8_vart`／`PYNQ_VART_XMODEL` contract，並保留 `PYNQ_VART_STANDARD_OUTPUT=1` 必須先對真實 xmodel output 驗證的安全界線。

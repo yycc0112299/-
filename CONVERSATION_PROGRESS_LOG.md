@@ -1,5 +1,12 @@
 # 對話與進度同步紀錄
 
+## 2026-11-12 — Packaged the full two-board Wi-Fi and future VART runtime sources
+
+- 需求／決策：確保實際部署到每塊 PYNQ 的 runtime tarball 包含目前兩板 Wi-Fi gate 與 VART YOLOv8 adapter，而非 repository 有程式但 target bundle 缺檔。
+- 實際完成：新增 `runtime_sources()` 並令 bundle 使用它；加入 Wi-Fi preflight 和 `yolov8_vart.py`。test-first：新的 bundle contract test 先因缺 function FAIL；實作後 1/1 PASS，person_tracking suite 22/22 PASS。實際 tarball 初次輸出到 `C:\` root 失敗，ACL evidence 顯示 root 沒有一般檔案寫入權；改用 user `%TEMP%` 後成功產出 archive，`tar -tzf` 確認兩檔皆存在。
+- 驗證範圍／未完成：artifact 是 local `%TEMP%` 檔，未加入 Git、未 SCP/解壓至 board；不證明 VART runtime、DPU model、Wi-Fi association 或兩板 exchange。未改 SD/PL/network。
+- Git／同步：待本次程式、文件與完整測試完成後提交並推送 `origin/main`；提交後以後續同步紀錄補上實際 hash。
+
 ## 2026-11-12 — Documented the full-duplex one-camera-per-board launch contract
 
 - 需求／決策：把兩板目標從舊的單向 sender example 明確化為全雙工 metadata exchange；每塊板各一個相機、各自收發，且不得硬編碼跨電腦的 IP/camera path。

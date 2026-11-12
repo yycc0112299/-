@@ -18,14 +18,18 @@ PROJECT = ROOT.parent
 TRACKING = PROJECT / "person_tracking"
 MODEL = TRACKING / "assets" / "yolov8n.onnx"
 EXPORTER = TRACKING / "assets" / "prepare_yolov8_onnx.py"
-REQUIRED = [
-    ROOT / "dual_server.py", ROOT / "dual_index.html", ROOT / "start_pynq_dual.sh",
-    ROOT / "pynq_usb_camera_preflight.py", ROOT / "pynq_system_preflight.py",
-    TRACKING / "pipeline.py", TRACKING / "cross_camera.py", TRACKING / "dual_camera.py",
-    TRACKING / "peer_protocol.py", TRACKING / "pynq_yolov8_peer.py",
-    TRACKING / "assets" / "yolov8.py", MODEL,
-    TRACKING / "verify_pynq_zu_bringup.py",
-]
+
+def runtime_sources() -> list[Path]:
+    """Return all tracked runtime sources needed by either PYNQ board role."""
+    return [
+        ROOT / "dual_server.py", ROOT / "dual_index.html", ROOT / "start_pynq_dual.sh",
+        ROOT / "pynq_usb_camera_preflight.py", ROOT / "pynq_system_preflight.py",
+        TRACKING / "pipeline.py", TRACKING / "cross_camera.py", TRACKING / "dual_camera.py",
+        TRACKING / "peer_protocol.py", TRACKING / "pynq_yolov8_peer.py",
+        TRACKING / "pynq_wifi_peer_preflight.py",
+        TRACKING / "assets" / "yolov8.py", TRACKING / "assets" / "yolov8_vart.py", MODEL,
+        TRACKING / "verify_pynq_zu_bringup.py",
+    ]
 
 def ensure_model() -> None:
     """Build the ignored, pinned YOLOv8 ONNX artifact on a deployment PC."""
@@ -45,13 +49,14 @@ def main() -> None:
                         help="optional directory containing pynq_zu_yolox.bit/.hwh")
     args = parser.parse_args()
     ensure_model()
-    missing = [path for path in REQUIRED if not path.is_file()]
+    sources = runtime_sources()
+    missing = [path for path in sources if not path.is_file()]
     if missing:
         raise FileNotFoundError("Missing bundle files: " + ", ".join(map(str, missing)))
     output = args.output.resolve()
     output.parent.mkdir(parents=True, exist_ok=True)
     with tarfile.open(output, "w:gz") as archive:
-        for source in REQUIRED:
+        for source in sources:
             archive.add(source, arcname=source.relative_to(PROJECT))
         if args.overlay_dir is not None:
             overlay_dir = args.overlay_dir.resolve()

@@ -5,7 +5,7 @@
 - 需求／決策：直接反查並修復 USB-video Vitis 重建遭 Lopper path failure 阻塞的 host toolchain；保留既有 external workspace，不對硬體做寫入。
 - 實際完成：比對既有成功 BSP metadata 後，確認正確安裝為 `C:\Xilinx_Embedded_2024_2\Vitis\2024.2`，其 embedded software repository 與 Lopper 1.2.0 都可用；另一套 `C:\Xilinx\Vitis\2024.2` 的 Lopper install log 則記錄 requirements path 缺失。用完整安裝及新的 external workspace 重跑 tracked build script，實際產出 352,344-byte A53 ELF。對同一 external XSA 與新 generated `xparameters.h` 執行 handoff verifier PASS：DMA `0xA0000000`、frame GPIO `0xA0010000`、mailbox `0xA0020000`；verifier tests 3/3 PASS。
 - 驗證範圍／未完成：只驗證 host platform/application build 與 control-plane address contract；external workspace/ELF/log 均不入 Git。未 JTAG program、未寫 SD/PL，也不代表 UVC capture、Linux DMA ownership、two-camera、DPU/YOLOv8 或 Wi-Fi 已在板端運作。
-- Git／同步：本項程式外建置與三份進度文件將於本次提交推送；實際提交雜湊與推送結果由下一筆文件同步紀錄補上。
+- Git／同步：已提交為 `d68e05c`（`Rebuild USB video Vitis platform`）並成功推送至 `origin/main`；本行同步結果由下一筆文件提交補上。
 
 ## 2026-11-12 — Reopened and verified the USB-camera Block Design in Vivado
 

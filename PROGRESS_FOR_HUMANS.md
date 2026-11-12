@@ -718,3 +718,9 @@
 - 2022.1 的 PS IP 版本與 2024.2 不同，程式已改成自動選相容版本；DMA、frame ID、控制 mailbox 的三個位址也已固定，Vitis 可繼續沿用控制合約。
 - 這仍不是完成硬體：尚未用 2022.1 synthesize、產生 bitstream/XSA、建 Vitis 控制檔或上板測試。
 
+## 2026-11-13：2022.1 硬體檔已完成輸出
+
+- 2022.1 已完成 synthesis、implementation、bitstream 和給 Vitis 用的 XSA。
+- 最終時序通過，所有需要路由的網路都已完成；XSA 也已自動檢查，Vitis 要使用的三個硬體位址正確。
+- 這只完成了可交接的硬體檔，尚未把它下載到板子，也還不是兩鏡頭、DPU 或 YOLOv8 實機結果。
+

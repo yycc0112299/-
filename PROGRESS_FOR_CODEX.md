@@ -900,3 +900,9 @@
 - 更新 `fpga/create_pynq_zu_usb_video_bd.tcl`：只允許並明確選擇 PS IP `3.5`、`3.4` 或 `3.3` 的可用版本，缺少則失敗；同時把 AXI control ABI 透過 `assign_bd_address -force` 固定。2022.1 的 auto-assignment 初值是 mailbox/DMA/GPIO=`A000/A001/A002`，現改為 Vitis/overlay contract 所需 DMA=`0xA0000000`、frame GPIO=`0xA0010000`、mailbox=`0xA0020000`；以 temporary `A0030000` rotation 避免中間位址重疊。
 - 驗證：offline contract tests 3/3 PASS；2022.1 `validate_bd_design` 通過，read-only `verify_pynq_zu_usb_video_bd.tcl` 印出三個正確位址及 `PYNQ_ZU_USB_VIDEO_BD_VERIFY_PASS`。在 2022.1 仍有 HP0 high/OCM 非適用 address-aperture warnings；DMA 的有效 DDR-low mapping 未被當成 error。尚未 synth/implement/bitgen/export 2022.1 XSA、未建 matching Vitis application、未上板或驗證 UVC/DPU inference。
 
+### 2026-11-13：Vivado 2022.1 USB-video bitstream/XSA build PASS
+
+- 同一 external `C:\pynq_zu_usb_2022_20261113` build 已完成 top synthesis、implementation、bitstream 與 `write_hw_platform -fixed -include_bit`。輸出 `pynq_zu_usb_video_wrapper.bit`=7,797,821 bytes、`pynq_zu_usb_video.xsa`=1,612,457 bytes；XSA archive 含 bitstream、main HWH、PS init、sysdef 與 XSA metadata。
+- 檢核：top synthesis 0 errors/0 critical warnings；route report 為 15,930/15,930 routable nets fully routed、0 routing errors；final timing WNS `+0.034 ns`、WHS `+0.011 ns`、TNS/THS=0，Vivado 明確回報 all user-specified timing constraints met。`verify_pynq_zu_usb_video_handoff.py --xsa` PASS，重新讀回 DMA/frame GPIO/mailbox= `0xA0000000`/`0xA0010000`/`0xA0020000`。
+- Routed DRC 有 3 warnings、0 errors：AXI DMA IP 的 two NO_CHANGE BRAM collision advisories，及 SmartConnect internal reset-pipe `RTSTAT-10` no-routable-load advisory；它們沒有阻止 bitgen。這是 2022.1 hardware build/export proof，不是 PYNQ board download、Linux UVC DMA、two-camera capture、DPU/VART/YOLO inference proof。generated bit/XSA/reports and background build logs remain external and are not committed.
+

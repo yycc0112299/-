@@ -767,3 +767,10 @@
 - 驗證範圍／未完成：仍未 synthesize/implement/bitgen/export 2022.1 XSA、建立 2022.1 Vitis application、program board、capture UVC、run DPU/VART/YOLOv8 或 Wi-Fi peer。external build output 不進 Git；PS IP version and address repair source does。
 - Git／同步：本項 source、tests 和三份進度紀錄將隨本次提交推送至 `main`。
 
+## 2026-11-13 — Built the 2022.1 USB-video bitstream and Vitis XSA
+
+- 需求／決策：以已驗證的 2022.1 Block Design 建立可交給 matching Vitis 2022.1 的硬體 handoff，不把 BD-only success 當成 FPGA deliverable。
+- 實際完成：external build 的 top synthesis、implementation、bitgen 和 fixed include-bit XSA export 全部成功。bitstream=7,797,821 bytes，XSA=1,612,457 bytes；archive verification PASS，control addresses 為 DMA/frame GPIO/mailbox=`A0000000/A0010000/A0020000`。
+- 驗證範圍／未完成：routing 15,930/15,930、routing errors=0；final WNS/WHS=`+0.034/+0.011 ns` and timing constraints met。Routed DRC 有 3 warnings、0 errors（DMA BRAM NO_CHANGE advisory、SmartConnect internal no-load advisory）。此結果沒有下載到 board、沒有 Linux UVC/CMA/DMA、DPU/VART/YOLOv8 或 Wi-Fi peer 驗證；generated artifacts/logs 是 external state，不進 Git。
+- Git／同步：本結果的三份進度文件將隨本次提交推送；hardware source compatibility repair 已在前一提交 `7c65322` 推送。
+

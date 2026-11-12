@@ -1,5 +1,11 @@
 # 專題進度（重點版）
 
+## 2026-11-12：Vitis 控制程式已用正確 Embedded 安裝重新編出
+
+- 找到完整的 Embedded Vitis 2024.2 安裝，修正另一套 Vitis 因 Lopper 缺失而「表面 exit code 成功、實際平台建立失敗」的問題。
+- 已重新產生 A53 的 USB-video 控制 ELF，並再次核對 DMA、frame ID、mailbox 三個位址都和 Vivado XSA 一致。
+- 這是電腦端建置驗證；尚未燒錄或在板上執行相機、DPU 或 Wi-Fi。
+
 ## 2026-11-12：Vivado 已重新開啟並驗證 USB 相機 Block Design
 
 - 已用 Vivado 2024.2 實際打開完成的 Block Design，硬體設計維持有效。

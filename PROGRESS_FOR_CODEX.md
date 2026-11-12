@@ -1,5 +1,11 @@
 # 專題狀態與交接記錄（供 Codex）
 
+## 2026-11-12：以完整 Embedded Vitis 2024.2 重新建立 USB-video A53 平台與 ELF
+
+- 先前使用 `C:\Xilinx\Vitis\2024.2` 建 platform 時雖回傳 process exit 0，實際卻因 `Invalid Lopper Installation Directory path 'null'` 失敗；不可把該 exit code 當成功。唯讀比對既有成功 workspace 的 BSP metadata 後，找到完整安裝為 `C:\Xilinx_Embedded_2024_2\Vitis\2024.2`：含 `data\embeddedsw` 及可執行的 Lopper 1.2.0。另一套的自動 lopper 安裝紀錄也證實缺少 requirements 檔。
+- 使用完整 Embedded Vitis，並以新、未重用的 external workspace `C:\pynq_vitis_usb_video_reverify_20261112b` 重跑 tracked `vitis/pynq_zu_usb_video/build_vitis_embedded.py`。實際生成 `pynq_zu_usb_video_app.elf`（352,344 bytes）。再以 tracked handoff verifier 對 external XSA 與這次 Vitis generated `xparameters.h` 驗證 PASS；DMA=`0xA0000000`、frame-ID GPIO=`0xA0010000`、mailbox=`0xA0020000`。verifier unit tests 3/3 PASS。
+- 此為 host-side platform/application rebuild 與 hardware address contract 證據；workspace、ELF、Vitis logs 均為 external artifact，不入 Git。未 JTAG program、未改 SD/PL，也沒有 Linux UVC、DMA-BUF、two-camera、DPU/YOLOv8 或 Wi-Fi 實機驗證。
+
 ## 2026-11-12：Vivado-native USB Block Design reopen／address verification 已實際通過
 
 - 新增 `fpga/verify_pynq_zu_usb_video_bd.tcl`，需要 external `PYNQ_ZU_BUILD_DIR`。它只開啟既有 `.xpr`／`.bd`、呼叫 Vivado `validate_bd_design`、從 `zynq_ultra_ps_e_0/Data` address space 檢查 `axi_dma_0=0xA0000000`、`frame_id_gpio_0=0xA0010000`、`yolox_video_rtl_0=0xA0020000`，輸出 `PYNQ_ZU_USB_VIDEO_BD_VERIFY_PASS`。不 export／implementation／program hardware。

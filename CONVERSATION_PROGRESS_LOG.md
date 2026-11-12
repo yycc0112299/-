@@ -1,5 +1,12 @@
 # 對話與進度同步紀錄
 
+## 2026-11-12 — Completed host-side person-tracking and deployment contract tests while toolchain installation runs
+
+- 需求／決策：安裝 Vivado/Vitis 2022.1 期間先完成不需工具鏈或板端線材的工作。
+- 實際完成：`person_tracking/tests` 24/24 PASS；`live_site/tests` 2/2 PASS，涵蓋 YOLOv8/VART、peer protocol、Wi‑Fi preflight、USB overlay 與雙板 bundle contracts。
+- 驗證界線：僅 host-side tests，不是 DPU、xmodel、UVC、DMA、相機或雙板 Wi‑Fi 實測；2022.1 安裝仍進行。無二進位檔上傳。
+- Git／同步：本次文件變更待提交並推送到 `origin/main`。
+
 ## 2026-11-12 — Diagnosed the post-JTAG-reset recovery state through the actual FTDI UART
 
 - 需求／決策：在 SSH 未回來時以 UART 判斷板子是否有正常回到 SD/Linux，不向板子寫入命令；區分目前 cable 的 UART 與已消失的其他 serial device。

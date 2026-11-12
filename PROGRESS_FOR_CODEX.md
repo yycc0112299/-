@@ -1,5 +1,11 @@
 # 專題狀態與交接記錄（供 Codex）
 
+## 2026-11-12：安裝等待期間完成 Python／部署合約測試
+
+- 工具鏈安裝期間以 Python `unittest` 執行 `person_tracking/tests`：24/24 PASS，涵蓋 YOLOv8 backend、VART xmodel gate、解碼/量化、peer protocol、Wi‑Fi preflight 與 USB overlay verifier。
+- `live_site/tests`：2/2 PASS，確認雙板 bundle 仍包含 Wi‑Fi gate、VART adapter 與 USB verifier。
+- 驗證限於 host-side；未宣稱板端登入、UVC、DMA、DPU runtime、xmodel 或雙板 Wi‑Fi 成功。無產物加入 Git。
+
 ## 2026-11-12：使用者重開板子後的 transport recheck
 
 - 唯讀檢查結果：`Test-Connection 192.168.3.1` 成功；自訂 3 秒 TCP connect 確認 `192.168.3.1:22` 為 OPEN。這證明板端網路／SSH listener 恢復，不代表帳密驗證成功。

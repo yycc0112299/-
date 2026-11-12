@@ -695,5 +695,5 @@
 - 需求／決策：使用者表示已重新開機板子；先以唯讀方式確認 SSH/network 是否恢復，不猜測 UART 或登入密碼。
 - 實際完成：`192.168.3.1` ping PASS、TCP/22 OPEN；Windows 重新枚舉 USB serial COM4。COM4 以 115200 讀取 4 秒為 0 bytes。
 - 驗證界線／未完成：SSH credentials 尚未驗證，UART prompt 未取得；未上傳程式、未載入 overlay、未執行 Vitis ELF、未測 UVC/DMA/DPU/YOLOv8/Wi-Fi。唯一 2022.1 installer 視窗保留但尚未完成安裝。
-- Git／同步：本次文件變更將和本項記錄一起提交並推送至 `origin/main`。
+- Git／同步：已提交為 `4808af3`（`Record PYNQ reboot transport recovery`）並成功推送至 `origin/main`。本同步註記將由下一筆文件提交記錄。
 

@@ -760,3 +760,10 @@
 - 驗證範圍／未完成：僅證明核心 tools 可啟動，未證明 post-install tasks、完整 device/IP coverage 或 2022.1 DPU/USB-video build 成功；未改板子、SD、USB 相機、Wi-Fi 或 tracked program source。下一步以隔離 build directory 做 real project/IP validation。
 - Git／同步：本紀錄與兩份進度文件將隨本次文件提交推送；installer tree 與 logs 為本機工具狀態，不納入 Git。
 
+## 2026-11-13 — Rebuilt and validated the USB-video Block Design in Vivado 2022.1
+
+- 需求／決策：以正確 DPU 4.0/2022.1 toolchain 重做硬體檔，並保持 USB UVC camera 在 PS/Linux、DDR/AXI DMA 到 PL 的真實硬體邊界。
+- 實際完成：在 external `C:\pynq_zu_usb_2022_20261113` 建立 project、封裝 custom IP、建立 BD。第一次實跑發現 2022.1 的 ZynqMP PS IP 是 `3.4`、且 auto address order 與 Vitis contract 不同；修正 tracked Tcl 以 selected compatible PS VLNV 及強制 DMA/GPIO/mailbox = `0xA0000000/0xA0010000/0xA0020000`。2022.1 `validate_bd_design` 與 read-only address verifier 都 PASS；Python contract tests 3/3 PASS。
+- 驗證範圍／未完成：仍未 synthesize/implement/bitgen/export 2022.1 XSA、建立 2022.1 Vitis application、program board、capture UVC、run DPU/VART/YOLOv8 或 Wi-Fi peer。external build output 不進 Git；PS IP version and address repair source does。
+- Git／同步：本項 source、tests 和三份進度紀錄將隨本次提交推送至 `main`。
+

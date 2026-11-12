@@ -32,7 +32,24 @@ if {[llength $existing_bd] != 0} { remove_files $existing_bd }
 if {[file exists $bd_dir]} { file delete -force $bd_dir }
 create_bd_design $bd_name
 
-create_bd_cell -type ip -vlnv xilinx.com:ip:zynq_ultra_ps_e:3.5 zynq_ultra_ps_e_0
+# The MPSoC PS IP version is tied to the Vivado release: 2024.2 provides
+# 3.5, while the required 2022.1 DPU toolchain provides 3.4.  Select only a
+# known compatible release, rather than silently accepting an unrelated VLNV.
+set ps_ip_vlnv ""
+foreach candidate [list \
+ xilinx.com:ip:zynq_ultra_ps_e:3.5 \
+ xilinx.com:ip:zynq_ultra_ps_e:3.4 \
+ xilinx.com:ip:zynq_ultra_ps_e:3.3] {
+ if {[llength [get_ipdefs -all $candidate]] != 0} {
+  set ps_ip_vlnv $candidate
+  break
+ }
+}
+if {$ps_ip_vlnv eq ""} {
+ error "No supported Zynq UltraScale+ MPSoC PS IP found (tried 3.5, 3.4, 3.3)"
+}
+puts "PYNQ_ZU_PS_IP_VLNV=$ps_ip_vlnv"
+create_bd_cell -type ip -vlnv $ps_ip_vlnv zynq_ultra_ps_e_0
 apply_bd_automation -rule xilinx.com:bd_rule:zynq_ultra_ps_e -config {apply_board_preset "1"} [get_bd_cells zynq_ultra_ps_e_0]
 # USB D+/D- are PS MIO pins (USB0 MIO 52 .. 63; USB1 MIO 64 .. 75), never
 # make them external PL ports.  Keep both preset USB host controllers enabled.
@@ -107,6 +124,34 @@ connect_bd_net [get_bd_pins axi_dma_0/mm2s_introut] [get_bd_pins video_irq_or_0/
 connect_bd_net [get_bd_pins video_irq_or_0/Res] [get_bd_pins zynq_ultra_ps_e_0/pl_ps_irq0]
 
 assign_bd_address
+# Vivado 2022.1 assigns these peripherals in a different discovery order from
+# 2024.2.  The Vitis controller and overlay verifier use this stable public
+# control ABI, so keep it explicit instead of accepting tool-version-dependent
+# automatic offsets.
+set ps_data_space [get_bd_addr_spaces zynq_ultra_ps_e_0/Data]
+proc get_ps_control_segment {address_space instance} {
+ set segments [get_bd_addr_segs -quiet -of_objects $address_space -filter "NAME =~ *${instance}*"]
+ if {[llength $segments] != 1} {
+  error "Expected exactly one PS address segment for $instance, found [llength $segments]"
+ }
+ return [lindex $segments 0]
+}
+proc assign_ps_control_address {address_space instance offset segment} {
+ set range [get_property RANGE $segment]
+ assign_bd_address -force -offset $offset -range $range -target_address_space $address_space $segment
+ puts "PYNQ_ZU_CONTROL_ADDRESS_${instance}=$offset"
+}
+set dma_control_segment [get_ps_control_segment $ps_data_space axi_dma_0]
+set frame_control_segment [get_ps_control_segment $ps_data_space frame_id_gpio_0]
+set mailbox_control_segment [get_ps_control_segment $ps_data_space yolox_video_rtl_0]
+# Rotate the initial 2022.1 auto-layout through a free temporary address first.
+# The release starts mailbox/DMA/GPIO at A000/A001/A002 respectively, whereas
+# the public Vitis ABI needs DMA/GPIO/mailbox there.  Keep each reassignment
+# mapped (rather than excluding a segment) so validation sees the PS path.
+assign_ps_control_address $ps_data_space yolox_video_rtl_0 0xA0030000 $mailbox_control_segment
+assign_ps_control_address $ps_data_space axi_dma_0 0xA0000000 $dma_control_segment
+assign_ps_control_address $ps_data_space frame_id_gpio_0 0xA0010000 $frame_control_segment
+assign_ps_control_address $ps_data_space yolox_video_rtl_0 0xA0020000 $mailbox_control_segment
 validate_bd_design
 save_bd_design
 puts "PYNQ_ZU_USB_VIDEO_BD_CREATED=[get_property FILE_NAME [current_bd_design]]"

@@ -712,3 +712,9 @@
 - 但 Vivado 2022.1 和 Vitis 2022.1 的主要命令都能實際啟動，Zynq UltraScale+ 裝置資料也已存在。
 - 接下來會用獨立的硬體重建測試確認這個安裝是否足夠；在驗證完成前，不把它說成完整安裝成功或已完成 DPU 硬體。
 
+## 2026-11-13：2022.1 Block Design 已重新建立
+
+- Vivado 2022.1 已真正建立 PYNQ‑ZU 的 USB/DDR/DMA Block Design，並通過其設計驗證。
+- 2022.1 的 PS IP 版本與 2024.2 不同，程式已改成自動選相容版本；DMA、frame ID、控制 mailbox 的三個位址也已固定，Vitis 可繼續沿用控制合約。
+- 這仍不是完成硬體：尚未用 2022.1 synthesize、產生 bitstream/XSA、建 Vitis 控制檔或上板測試。
+

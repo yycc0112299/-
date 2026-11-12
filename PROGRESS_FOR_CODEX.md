@@ -894,3 +894,9 @@
 - 直接唯讀驗證已安裝樹：`C:\Xilinx\Vivado\2022.1\Vivado\2022.1\bin\vivado.bat -mode batch -nolog -nojournal -version` 回報 Vivado 2022.1 且 exit code=0；`Vitis\2022.1\bin\xsct.bat -help` 亦 exit code=0。Zynq UltraScale+ part data 已存在於 Vivado data tree。這證明 Vivado/Vitis 核心可啟動，不等於 installer post-install、所有附屬元件或 DPU build 已驗證。
 - 後續 2022.1 rebuild 必須使用獨立 external build directory，並在 first real project/IP run 中確認缺少元件與否；不要因為版本字串可回應而誤稱 2022.1 全安裝成功。沒有變更板子、SD、現有 project source 或 Git-tracked hardware artifacts。
 
+### 2026-11-13：Vivado 2022.1 USB-video Block Design compatibility repair（BD PASS）
+
+- 在獨立的 `C:\pynq_zu_usb_2022_20261113` 實跑目前 USB-video flow：project creation 與 packaged custom IP 成功。首次 BD run 證實 2022.1 提供 `zynq_ultra_ps_e:3.4`，而非 2024.2 script 原本硬編的 `:3.5`；這是 Vivado release IP-version difference，不是 ZynqMP device package 遺失。
+- 更新 `fpga/create_pynq_zu_usb_video_bd.tcl`：只允許並明確選擇 PS IP `3.5`、`3.4` 或 `3.3` 的可用版本，缺少則失敗；同時把 AXI control ABI 透過 `assign_bd_address -force` 固定。2022.1 的 auto-assignment 初值是 mailbox/DMA/GPIO=`A000/A001/A002`，現改為 Vitis/overlay contract 所需 DMA=`0xA0000000`、frame GPIO=`0xA0010000`、mailbox=`0xA0020000`；以 temporary `A0030000` rotation 避免中間位址重疊。
+- 驗證：offline contract tests 3/3 PASS；2022.1 `validate_bd_design` 通過，read-only `verify_pynq_zu_usb_video_bd.tcl` 印出三個正確位址及 `PYNQ_ZU_USB_VIDEO_BD_VERIFY_PASS`。在 2022.1 仍有 HP0 high/OCM 非適用 address-aperture warnings；DMA 的有效 DDR-low mapping 未被當成 error。尚未 synth/implement/bitgen/export 2022.1 XSA、未建 matching Vitis application、未上板或驗證 UVC/DPU inference。
+

@@ -24,6 +24,13 @@ class PynqZuUsbVideoBdContractTests(unittest.TestCase):
             "CONFIG.c_sg_length_width {23}",
             "CONFIG.c_m_axis_mm2s_tdata_width {64}",
             "project.local:video:dual_camera_yolox_axis:1.0",
+            "PYNQ_ZU_PS_IP_VLNV=$ps_ip_vlnv",
+            "xilinx.com:ip:zynq_ultra_ps_e:3.4",
+            "get_ps_control_segment $ps_data_space axi_dma_0",
+            "assign_ps_control_address $ps_data_space yolox_video_rtl_0 0xA0030000 $mailbox_control_segment",
+            "assign_ps_control_address $ps_data_space axi_dma_0 0xA0000000 $dma_control_segment",
+            "assign_ps_control_address $ps_data_space frame_id_gpio_0 0xA0010000 $frame_control_segment",
+            "assign_ps_control_address $ps_data_space yolox_video_rtl_0 0xA0020000 $mailbox_control_segment",
             "validate_bd_design",
         ):
             self.assertIn(required, source)

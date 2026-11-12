@@ -688,5 +688,5 @@
 - 需求／決策：取得與現有 DPUCZDX8G 4.0／Vitis AI 2.5 相配的 2022.1 Windows 工具鏈，避免再以現有 2024.2 或最新 2026.1 混建。
 - 實際完成：AMD export-address validation 後，實際讀取 `C:\Users\dsic\Downloads\Xilinx_Unified_2022.1_0420_0327_Win64.exe`，大小為 215,919,904 bytes，對應官方列出的 205.92-MB Windows Unified Web Installer。
 - 驗證界線／未完成：未啟動或安裝 EXE、未選元件、未改現有 2024.2、未取得/安裝 PetaLinux 2022.1、未重建 DPU/XSA/image/xmodel，且未觸及 SD、板子、相機或 Wi-Fi。installer 是外部 binary，不上傳 Git。
-- Git／同步：本次文件變更將和本項記錄一起提交並推送至 `origin/main`。
+- Git／同步：已提交為 `6d731ea`（`Record Vivado 2022.1 installer acquisition`）並成功推送至 `origin/main`。本同步註記將由下一筆文件提交記錄。
 

@@ -102,6 +102,24 @@ read `0x1002` (idle plus IOC completion). This proves the A53 → DDR → AXI DM
 → PL AXI4-Stream path for a complete frame. It does not prove USB UVC capture,
 two-camera stability, real YOLOX results, or the IRQ handler.
 
+`fpga/scan_pynq_zu_jtag.tcl` is a Vivado Hardware Manager read-only cable and
+device scanner. `fpga/run_pynq_zu_usb_video_jtag.tcl` is the corresponding
+volatile XSDB launcher: it requires external `PYNQ_ZU_JTAG_BIT`,
+`PYNQ_ZU_JTAG_PMUFW`, `PYNQ_ZU_JTAG_FSBL`, `PYNQ_ZU_JTAG_ELF`, and
+`PYNQ_ZU_JTAG_RESULT_ADDR` values. It can explicitly preserve already-loaded
+PL and an SD-initialized PS with `PYNQ_ZU_JTAG_SKIP_FPGA=1`,
+`PYNQ_ZU_JTAG_SKIP_RESET=1`, and `PYNQ_ZU_JTAG_SKIP_BOOT=1`; this is only
+appropriate after a hardware operator has established the exact state. Neither
+script writes SD, QSPI, eMMC, or configuration flash. A power-cycle restores
+the selected boot source.
+
+On 2026-11-12 Vivado Hardware Manager actually enumerated `xczu5_0` and
+programmed the USB-video bitstream with `End of startup status: HIGH`. XSDB's
+generic target reported an incompatible bitstream even with revision checking
+disabled; do not use its skip-device-compatibility option. A direct Vitis ELF
+attempt then stopped at `Cannot halt processor core, timeout`, so it is **not**
+evidence of Vitis execution. Power-cycle back to SD/Linux before retrying.
+
 ## SD/Linux overlay staging
 
 For a later SD-booted PYNQ Linux test, stage the exact implemented hardware

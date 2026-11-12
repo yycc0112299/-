@@ -1,10 +1,16 @@
 # 專題狀態與交接記錄（供 Codex）
 
-## 2026-11-12：同時插接的 UART／網路可用；JTAG target 尚未由 XSDB 枚舉
+## 2026-11-12：Vivado 已實際下載 USB-video PL；Vitis JTAG ELF 仍受 A53 halt timeout 阻擋
 
-- 使用者確認板上兩條連線都已插接。Windows 裝置盤點顯示 USB UART 為 `COM4`，另有 FTDI USB serial-converter A/B 介面；`Test-NetConnection 192.168.3.1 -Port 22` 實測 PASS。因此 SD/Linux 的 UART 與 SSH network transport 可以同時存在，兩者不互斥。
-- 使用 Embedded Vitis 2024.2 的 XSDB／hw_server 作純讀取 `connect; targets -target-properties; disconnect` 掃描，沒有列出 FPGA target。未 program bitstream、未 reset、未寫 PL／SD；temporary hw_server 亦未持續留在背景。USB 裝置「被 Windows 看見」不等於 JTAG chain 已可下載。
-- 後續若要走 JTAG Vitis test，需讓 XSDB 能列出 `xczu5_0`（再檢查 board power、JTAG cable/driver/port）；但這不阻礙目前 SD boot + SSH 的 Linux overlay deployment path。尚無 authenticated SSH login，故也尚未上傳或執行 USB-video overlay verifier。
+- 新增 read-only `fpga/scan_pynq_zu_jtag.tcl` 和 static test。因 repository 路徑含中文，Vivado batch source 必須先複製到 external ASCII `%TEMP%` path；實測 Hardware Manager 成功枚舉 `xczu5_0`（XCZU5EG）、ARM DAP、正常 startup/config status，證實 JTAG chain 完整可用。先前 XSDB 空白輸出是 Tcl batch command 沒有 `puts`，不是 cable failure。
+- 實際以 Vivado Hardware Manager 對 external `pynq_zu_usb_video_wrapper.bit` 執行 temporary PL program PASS，訊息為 `End of startup status: HIGH`，且 `PROGRAM.HW_BITSTREAM` 指向該 bitstream；沒有 debug core 是預期設計結果。未寫 SD/flash。XSDB 的 `fpga` 即使使用 revision-only `-n` 仍因 generic target `xczu5_0` 而報 compatibility failure，因此不可用 `skip_compatibility_check` 硬繞過；後續 PL programming 使用 Vivado Hardware Manager。
+- 新增 `run_pynq_zu_usb_video_jtag.tcl` 與 test-first source contract。它以 external environment artifact paths 驅動、支援 explicit skip-reset/skip-FPGA/skip-boot mode，最後讀回 Vitis ELF 的 result words；不含 cfgmem/bootgen/flash 指令。實際嘗試保留已載入 PL、對 SD-initialized A53 #0 執行 Vitis ELF，JTAG `stop` 回報 `Cannot halt processor core, timeout`，所以 PMU/FSBL/app 沒有成功下載或執行。先前的 system reset 也使 SSH 暫時失聯；需物理 power-cycle 讓 SD/Linux recovery 後才再嘗試。不可把 PL program PASS 說成 Vitis control PASS。
+
+## 2026-11-12：初次 XSDB scan 未列 target；後續 Vivado Hardware Manager 已確認 JTAG chain
+
+- 使用者確認板上兩條連線都已插接。Windows 裝置盤點顯示 USB UART 為 `COM4`，另有 FTDI USB serial-converter A/B 介面；當時 `Test-NetConnection 192.168.3.1 -Port 22` 實測 PASS。因此 SD/Linux 的 UART 與 SSH network transport 可以同時存在，兩者不互斥。
+- 初次 Embedded Vitis XSDB scan 未將 target list print 出來，當時不能據此判定 JTAG 可用；後續 Vivado Hardware Manager 已直接枚舉並 program `xczu5_0`，請以本檔較新的「Vivado 已實際下載 USB-video PL」項目為準。此段不再是 JTAG failure evidence。
+- SSH authentication 仍未成功；而較新的 JTAG reset 目前使 SSH temporary unavailable，需 physical power-cycle 回到 SD/Linux 後再作 overlay verifier。
 
 ## 2026-11-12：USB-video overlay 的板端下載／control-MMIO 檢查已接進 deployment bundle
 

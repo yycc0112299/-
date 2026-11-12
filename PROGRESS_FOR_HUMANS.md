@@ -1,10 +1,16 @@
 # 專題進度（重點版）
 
-## 2026-11-12：兩條線可同時插，但 JTAG 尚未真正連到 FPGA
+## 2026-11-12：USB 硬體已成功由 Vivado 暫時下載到 FPGA
 
-- 已確認 UART 是 COM4，板子 SSH 網路埠也可連線，兩者可以同時使用。
-- Windows 看得到 JTAG 相關 USB 介面，但 Vivado/XSDB 目前沒有列出 FPGA，所以還不能做 JTAG 下載。
-- Linux 的 SD／SSH 路線不受這個 JTAG 問題影響；目前仍缺可用的 SSH 登入資料才能上傳並跑實機檢查。
+- Vivado 現在確定可看到 FPGA，並已成功把 USB-video 的 bitstream 暫時下載到 PL；沒有寫 SD 或 flash。
+- Vitis 的 A53 控制程式還未實跑：JTAG 無法暫停目前核心，工具逾時後已停止，不會假裝成功。
+- 先前 JTAG reset 令 Linux 網路暫時消失。請將板子斷電再開，讓 SD/Linux 正常開機後再繼續。
+
+## 2026-11-12：兩條線可同時插；JTAG 後續已由 Vivado 確認
+
+- 已確認 UART 是 COM4，板子 SSH 網路埠當時也可連線，兩者可以同時使用。
+- 初次 XSDB 顯示不完整；後續 Vivado 已實際看到 FPGA 並完成暫時 PL 下載，請以本檔較新的 USB 硬體項目為準。
+- 目前因 JTAG reset 暫時失去 SSH；斷電重開回到 SD/Linux 後，仍需要可用登入資料才能上傳並跑實機檢查。
 
 ## 2026-11-12：USB 硬體檔已有專用的板端安全檢查
 

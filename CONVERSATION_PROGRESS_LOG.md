@@ -1,5 +1,12 @@
 # 對話與進度同步紀錄
 
+## 2026-11-12 — Verified JTAG hardware discovery and programmed the USB-video PL, while stopping safely at A53 debug timeout
+
+- 需求／決策：使用者同時接上線後，將 USB-video Block Design 由 Vivado 直接下載到實體 PL，並嘗試讓 Vitis ELF 接管 A53；所有結果需區分 PL program 和 Vitis execution，不能因為其中一步 PASS 宣稱完整成功。
+- 實際完成：新增 read-only Hardware Manager scan Tcl/test。Vivado 實測枚舉 `xczu5_0`/ARM DAP，並成功 temporary program external USB-video bitstream，`End of startup status: HIGH`、program property 指向預期 bitstream；未寫 SD/flash。新增 test-first JTAG Vitis launch Tcl（external artifacts、volatile actions、result mrd、可 explicit skip modes）。XSDB 的 generic target compatibility check 阻擋 `fpga`，故沒有使用 skip-device-compatibility。利用 Vivado 已載入 PL、SD-initialized PS 的 skip mode 嘗試 A53 #0 時，`stop` 收到 `Cannot halt processor core, timeout`，立即停止；PMU/FSBL/app 均未下載執行。
+- 驗證範圍／未完成：PL program PASS 只證明 bitstream 可在 FPGA config，沒有驗證 Vitis DMA/control、UVC、two cameras、DPU/YOLO/Wi-Fi。JTAG reset 後 SSH temporarily unavailable，需要 physical power-cycle return to SD/Linux before any further board action。外部 artifacts/temporary Tcl/log 不入 Git。
+- Git／同步：本項 reproducible scan/JTAG helper、tests、文件將於本次提交推送；實際提交雜湊與推送結果由下一筆文件同步紀錄補上。
+
 ## 2026-11-12 — Checked simultaneous UART, SSH, and JTAG transport state without programming hardware
 
 - 需求／決策：使用者已同時插接兩條板端連線，需以實際 enumeration 區分 UART/SSH/JTAG 是否各自可用，而非以插頭存在推斷；只允許 read-only inspection。

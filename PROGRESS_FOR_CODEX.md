@@ -1,5 +1,11 @@
 # 專題狀態與交接記錄（供 Codex）
 
+## 2026-11-12：使用者重開板子後的 transport recheck
+
+- 唯讀檢查結果：`Test-Connection 192.168.3.1` 成功；自訂 3 秒 TCP connect 確認 `192.168.3.1:22` 為 OPEN。這證明板端網路／SSH listener 恢復，不代表帳密驗證成功。
+- 本次 Windows 裝置盤點顯示 PYNQ USB serial 為 COM4；以 `pyserial` 115200、timeout 0.5 秒讀取 4 秒共 0 bytes。USB serial 存在但沒有可讀 boot log，不能宣稱 UART Linux prompt 已驗證。沒有送出 serial bytes。
+- 安裝器方面只保留一個 2022.1 Java installer 視窗；沒有重新啟動其他 installer，也未修改 Vivado/Vitis/板子。
+
 ## 2026-11-12：取得 DPU 4.0 matching 的 Vivado/Vitis 2022.1 Windows web installer
 
 - AMD account 的 export-address validation 完成後，`C:\Users\dsic\Downloads\Xilinx_Unified_2022.1_0420_0327_Win64.exe` 已實際存在，檔案大小 `215,919,904` bytes；此值對應 AMD 2022.1 頁面標示的 205.92-MB Windows Self Extracting Web Installer。這是正確的 DPUCZDX8G 4.0 → Vitis AI 2.5 → Vivado/Vitis/PetaLinux 2022.1 路線，不是 2024.2 或 2026.1。

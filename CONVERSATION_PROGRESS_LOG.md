@@ -690,3 +690,10 @@
 - 驗證界線／未完成：未啟動或安裝 EXE、未選元件、未改現有 2024.2、未取得/安裝 PetaLinux 2022.1、未重建 DPU/XSA/image/xmodel，且未觸及 SD、板子、相機或 Wi-Fi。installer 是外部 binary，不上傳 Git。
 - Git／同步：已提交為 `6d731ea`（`Record Vivado 2022.1 installer acquisition`）並成功推送至 `origin/main`。本同步註記將由下一筆文件提交記錄。
 
+## 2026-11-12 — Rechecked PYNQ transport after user power-cycle
+
+- 需求／決策：使用者表示已重新開機板子；先以唯讀方式確認 SSH/network 是否恢復，不猜測 UART 或登入密碼。
+- 實際完成：`192.168.3.1` ping PASS、TCP/22 OPEN；Windows 重新枚舉 USB serial COM4。COM4 以 115200 讀取 4 秒為 0 bytes。
+- 驗證界線／未完成：SSH credentials 尚未驗證，UART prompt 未取得；未上傳程式、未載入 overlay、未執行 Vitis ELF、未測 UVC/DMA/DPU/YOLOv8/Wi-Fi。唯一 2022.1 installer 視窗保留但尚未完成安裝。
+- Git／同步：本次文件變更將和本項記錄一起提交並推送至 `origin/main`。
+

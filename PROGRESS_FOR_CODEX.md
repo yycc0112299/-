@@ -1,5 +1,11 @@
 # 專題狀態與交接記錄（供 Codex）
 
+## 2026-11-12：Vivado USB Block Design 與 Vitis 控制位址已作實際交叉驗證
+
+- 擴充 `fpga/verify_pynq_zu_usb_video_handoff.py`：除 XSA archive/HWH 必要物外，現在可收 Vitis auto-generated `xparameters.h`，要求 `XPAR_AXI_DMA_0_BASEADDR`、`XPAR_FRAME_ID_GPIO_0_BASEADDR`、`XPAR_YOLOX_VIDEO_RTL_0_BASEADDR` 分別等於 Vivado hardware contract 的 `0xA0000000`、`0xA0010000`、`0xA0020000`。CLI 用 `--xparameters` 啟用；unit tests 3/3 PASS。
+- 實際用 external 已完成 Vivado XSA `C:\pynq_zu_usb_video_rebuild_20261111\pynq_zu_usb_video.xsa` 與 Vitis standalone platform generated header 跑 verifier，得到 `PYNQ_ZU_USB_VIDEO_XSA_PASS`；HWH 與 Vitis header 的 DMA/GPIO/mailbox 位址全相符。這是具體證據，證實本專案的 USB-camera Block Design export → Vitis generated platform → C controller macros 控制面一致。
+- 限制：這仍是 hardware handoff/build artifact 檢查；未重新跑 Vivado implementation、未 JTAG program／改 SD，也不取代 Linux UVC、DMA-BUF ownership、雙 C270 simultaneous 或 DPU/YOLO inference 實機驗證。external XSA/Vitis workspaces 不入 Git。
+
 ## 2026-11-12：既有 Detector 已加入 opt-in `yolov8_vart` DPU backend
 
 - `person_tracking/pipeline.py` 的 `Detector` 現支援 `PERSON_DETECTOR=yolov8_vart`。必須明確提供 `PYNQ_VART_XMODEL=/path/to/model.xmodel`；不存在或非 `.xmodel` 時明確失敗。它會 hash artifact、經 `VartYoloV8.from_xmodel()` 建立 VART runner，並把偵測結果送進既有 histogram/tracker/Wi-Fi packet flow。既有 default 仍為 CPU `yolov8`，`yolox` 仍是 explicit legacy backend。

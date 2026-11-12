@@ -1,5 +1,10 @@
 # 專題進度（重點版）
 
+## 2026-11-12：Vivado 與 Vitis 的控制介面已實際核對
+
+- 已實際比對 Vivado 匯出的硬體檔與 Vitis 自動產生的控制位址：DMA、frame ID、影像處理 mailbox 三個位址全部一致。
+- 這證明硬體 Block Design 與 Vitis 控制程式使用同一套控制介面；尚不是相機或 DPU 的上板執行測試。
+
 ## 2026-11-12：人物偵測程式已預留 DPU 模式
 
 - 原本的偵測程式現在有可選 `yolov8_vart` 模式；日後提供 DPU `.xmodel` 即可走同一個 tracker／Wi‑Fi 流程。

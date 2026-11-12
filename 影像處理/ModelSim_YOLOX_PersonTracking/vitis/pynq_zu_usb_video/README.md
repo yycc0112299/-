@@ -13,6 +13,19 @@ It is intentionally not a Jupyter/PYNQ control path.
 3. Let Vitis generate `xparameters.h`; `main.c` uses those generated base
    addresses and deliberately fails compilation if the expected IP is absent.
 
+After Vitis creates the platform, cross-check the handoff rather than assuming
+the generated addresses match the source controller:
+
+```sh
+python3 fpga/verify_pynq_zu_usb_video_handoff.py \
+  --xsa /path/to/pynq_zu_usb_video.xsa \
+  --xparameters /path/to/standalone_domain/include/xparameters.h
+```
+
+It requires the Vivado HWH and Vitis header to agree on AXI DMA `0xA0000000`,
+frame-ID GPIO `0xA0010000`, and video mailbox `0xA0020000`. This is a build
+artifact contract only; it does not program the PL or exercise camera capture.
+
 ## IP Catalog / Block Design mapping
 
 | Role | Vivado IP or module | Connection |

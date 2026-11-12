@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import json
 from pathlib import Path
+import re
 import xml.etree.ElementTree as ElementTree
 import zipfile
 
@@ -14,6 +15,11 @@ EXPECTED_ADDRESSES = {
     "axi_dma_0": "0xA0000000",
     "frame_id_gpio_0": "0xA0010000",
     "yolox_video_rtl_0": "0xA0020000",
+}
+XPAR_BASEADDR_MACROS = {
+    "axi_dma_0": "XPAR_AXI_DMA_0_BASEADDR",
+    "frame_id_gpio_0": "XPAR_FRAME_ID_GPIO_0_BASEADDR",
+    "yolox_video_rtl_0": "XPAR_YOLOX_VIDEO_RTL_0_BASEADDR",
 }
 REQUIRED_ARTIFACTS = (".bit", ".hwh", "sysdef.xml", "psu_init.c")
 ARTIFACT_LABELS = {
@@ -76,11 +82,43 @@ def verify_xsa(path: Path) -> dict[str, object]:
     }
 
 
+def verify_vitis_xparameters(path: Path) -> dict[str, object]:
+    """Check generated Vitis addresses against the Vivado/Vitis handoff contract."""
+    errors: list[str] = []
+    addresses: dict[str, str] = {}
+    try:
+        source = path.read_text(encoding="utf-8")
+    except OSError as error:
+        errors.append(f"Cannot read xparameters.h: {type(error).__name__}: {error}")
+        source = ""
+    for instance, macro in XPAR_BASEADDR_MACROS.items():
+        match = re.search(rf"^\s*#define\s+{re.escape(macro)}\s+(0x[0-9a-fA-F]+)\b",
+                          source, re.MULTILINE)
+        if match is None:
+            errors.append(f"xparameters.h is missing {macro}")
+            continue
+        actual = f"0x{int(match.group(1), 0):08X}"
+        addresses[instance] = actual
+        if actual != EXPECTED_ADDRESSES[instance]:
+            errors.append(
+                f"{macro} is {actual}, expected {EXPECTED_ADDRESSES[instance]}"
+            )
+    return {"xparameters": str(path), "addresses": addresses,
+            "errors": errors, "ok": not errors}
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--xsa", required=True, type=Path)
+    parser.add_argument("--xparameters", type=Path,
+                        help="Vitis-generated standalone xparameters.h to cross-check")
     arguments = parser.parse_args()
     report = verify_xsa(arguments.xsa)
+    if arguments.xparameters is not None:
+        xparameters_report = verify_vitis_xparameters(arguments.xparameters)
+        report["xparameters"] = xparameters_report
+        report["errors"].extend(xparameters_report["errors"])
+        report["ok"] = not report["errors"]
     print(json.dumps(report, indent=2, sort_keys=True))
     print("PYNQ_ZU_USB_VIDEO_XSA_PASS" if report["ok"] else "PYNQ_ZU_USB_VIDEO_XSA_FAIL")
     return 0 if report["ok"] else 1

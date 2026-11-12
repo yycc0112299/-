@@ -10,7 +10,7 @@ import zipfile
 FPGA_DIR = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(FPGA_DIR))
 
-from verify_pynq_zu_usb_video_handoff import verify_xsa
+from verify_pynq_zu_usb_video_handoff import verify_vitis_xparameters, verify_xsa
 
 
 HWH = b'''<?xml version="1.0"?>
@@ -43,6 +43,19 @@ class UsbVideoHandoffTests(unittest.TestCase):
             report = verify_xsa(self.make_xsa(Path(temporary), include_bitstream=False))
         self.assertFalse(report["ok"])
         self.assertIn("bitstream", " ".join(report["errors"]).lower())
+
+    def test_accepts_vitis_generated_addresses_matching_the_hardware_contract(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            xparameters = Path(temporary) / "xparameters.h"
+            xparameters.write_text(
+                "#define XPAR_AXI_DMA_0_BASEADDR 0xa0000000\n"
+                "#define XPAR_FRAME_ID_GPIO_0_BASEADDR 0xa0010000\n"
+                "#define XPAR_YOLOX_VIDEO_RTL_0_BASEADDR 0xa0020000\n",
+                encoding="utf-8",
+            )
+            report = verify_vitis_xparameters(xparameters)
+        self.assertTrue(report["ok"])
+        self.assertEqual(report["addresses"]["yolox_video_rtl_0"], "0xA0020000")
 
 
 if __name__ == "__main__":

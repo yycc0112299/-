@@ -1,5 +1,12 @@
 # 對話與進度同步紀錄
 
+## 2026-11-13 — Audited board Wi‑Fi readiness without changing network configuration
+
+- 需求／決策：在 Vivado 安裝仍進行時，先以唯讀 SSH 檢查目標端將來兩板 Wi‑Fi 互傳的基本條件。
+- 實際完成：`wlan0` 存在但不 associated、MAC 皆為 zero；`nmcli`、`rfkill` 不存在，沒有已知 Wi‑Fi profile。現有可用連線為 USB gadget `usb0`。
+- 驗證界線／未完成：未設定 SSID/password、未啟用或掃描 WLAN、未連 AP、未執行兩板 peer protocol；不能宣稱 Wi‑Fi readiness。
+- Git／同步：本次文件變更待提交並推送到 `origin/main`。
+
 ## 2026-11-12 — Rechecked both USB cameras after USB-video overlay programming
 
 - 需求／決策：確認剛下載的 PL overlay 不破壞 PS USB camera access；採 sequential single-frame capture，避免 USB2 shared-hub bandwidth 的 simultaneous capture 風險。

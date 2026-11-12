@@ -1,5 +1,11 @@
 # 專題狀態與交接記錄（供 Codex）
 
+## 2026-11-13：Wi‑Fi transport read-only preflight
+
+- Board SSH diagnostic: `wlan0` is managed but `ESSID:off/any`, `Access Point: Not-Associated`, MAC `00:00:00:00:00:00`; `usb0` remains the working host connection.
+- `nmcli` and `rfkill` are absent, so there is no NetworkManager connection profile or rfkill state to use for configuration. This is not sufficient hardware/runtime evidence for future two-board Wi‑Fi.
+- Do not claim Wi‑Fi peer readiness. Need a valid WLAN adapter/driver (nonzero MAC) and an actual AP/peer association before running the tracked Wi‑Fi preflight/sender/receiver flow.
+
 ## 2026-11-12：post-overlay UVC sequential capture PASS
 
 - 在 `PYNQ_ZU_USB_VIDEO_OVERLAY_PASS` 後，用 board OpenCV/V4L2 sequentially open/read/release `/dev/video0` 及 `/dev/video2`；兩者皆 `POST_OVERLAY_CAMERA_OK`、shape `(480, 640, 3)`。

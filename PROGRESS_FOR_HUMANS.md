@@ -1,5 +1,11 @@
 # 專題進度（重點版）
 
+## 2026-11-13：板端 Wi‑Fi 目前尚不可作為兩板互傳通道
+
+- `wlan0` 介面存在但未連線，顯示 `ESSID:off/any`、`Not-Associated`，MAC 為全 0。
+- 板上沒有 `nmcli` 或 `rfkill`，沒有可讀取的已設定 Wi‑Fi 連線資訊。
+- 因此目前可用的板端網路仍是 USB gadget `usb0`；雙板 Wi‑Fi 必須等待真正可用的 WLAN 硬體／驅動與網路設定後再實測。
+
 ## 2026-11-12：overlay 載入後兩支相機仍可逐支擷取
 
 - 在 USB-video overlay control-plane 驗證通過後，再以 OpenCV 依序讀取 `/dev/video0`、`/dev/video2`，皆成功得到 `640×480×3`。

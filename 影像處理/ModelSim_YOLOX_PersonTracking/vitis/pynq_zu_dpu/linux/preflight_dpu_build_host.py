@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """Report whether a host can build the matching PYNQ-ZU DPU Linux image.
 
-This check covers the DPUCZDX8G IP from the Vitis AI v4.0 branch and its
-Vitis AI 3.5 runtime/compiler contract. It makes no downloads and changes no
-system configuration.
+This check covers the released DPUCZDX8G IP and Vitis AI 3.5 runtime/compiler
+contract. Vitis AI 3.5 is verified against the 2023.1 Xilinx tool release. It
+makes no downloads and changes no system configuration.
 """
 
 from __future__ import annotations
@@ -15,7 +15,7 @@ from pathlib import Path
 
 
 SUPPORTED_VITIS_AI = "3.5"
-SUPPORTED_XILINX_TOOLS = "2024.1"
+SUPPORTED_XILINX_TOOLS = "2023.1"
 
 
 def evaluate_build_contract(*, commands: dict[str, bool], has_arch_json: bool,
@@ -42,7 +42,8 @@ def evaluate_build_contract(*, commands: dict[str, bool], has_arch_json: bool,
         )
     if vivado_version != SUPPORTED_XILINX_TOOLS or petalinux_version != SUPPORTED_XILINX_TOOLS:
         blockers.append(
-            "DPUCZDX8G 4.0 + Vitis AI 3.5 is verified for Vivado/PetaLinux 2024.1, not 2024.2."
+            "Vitis AI 3.5 and its released DPU IP are verified for Vivado/PetaLinux 2023.1, "
+            f"not {vivado_version if vivado_version != SUPPORTED_XILINX_TOOLS else petalinux_version}."
         )
     return {
         "status": "PASS" if not blockers else "FAIL",

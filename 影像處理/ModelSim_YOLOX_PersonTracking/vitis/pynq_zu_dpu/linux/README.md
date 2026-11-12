@@ -56,18 +56,18 @@ read-only gate:
 python3 preflight_dpu_build_host.py \
   --arch-json /path/to/the/exact/DPU/arch.json \
   --vitis-ai-version 3.5 \
-  --vivado-version 2024.1 \
-  --petalinux-version 2024.1
+  --vivado-version 2023.1 \
+  --petalinux-version 2023.1
 ```
 
-The Vitis-AI `v4.0` release notes state that the DPU IP in that branch and
-Vitis AI 3.5 are verified with Vivado, Vitis and PetaLinux **2024.1**. Here
-`v4.0` identifies the DPU IP source branch; the runtime/compiler version to
-pass to this preflight remains `3.5`, not a guessed `4.0` runtime. The
-present hardware was successfully built with Vivado 2024.2, but that is not
-the published compatible toolchain for this DPU Linux path. Do not infer
+AMD's Vitis AI 3.5 release notes and embedded runtime instructions verify the
+released DPU IP with Vivado, Vitis and PetaLinux **2023.1**. Here `v4.0`
+identifies a historical DPU source-branch label, not the runtime/compiler
+version; pass `3.5` to this preflight. The present hardware was built with
+Vivado 2024.2 and the installed PetaLinux host is 2024.1, neither of which is
+the published compatible toolchain for the Vitis AI 3.5 path. Do not infer
 runtime compatibility from a successful Vivado implementation. Rebuild the
-DPU/XSA on the 2024.1 toolchain before making a deployable Linux image.
+DPU/XSA and target image on the 2023.1 toolchain before deployment.
 
 The preflight requires a compiler route (Docker with Vitis AI or `vai_c_xir`),
 PetaLinux and the exact DPU-generated `arch.json`. It intentionally refuses to

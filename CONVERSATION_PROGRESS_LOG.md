@@ -532,3 +532,10 @@
 - 實際完成：以 sourced PetaLinux 2024.1 Bash environment 成功執行 `petalinux-create project --template zynqMP --name pynq_zu_dpu_2024_1`，新 project 位於外部 WSL path `/home/petalinux/work/pynq_zu_dpu_2024_1`。
 - 驗證界線／未完成：尚未 config hardware description、build rootfs、加 DPU/VART/driver、compile xmodel 或寫 SD；無硬體/board/network side effect。此 generated project 不進 Git，仍待 matching Vivado 2024.1 XSA。
 - Git：已提交為 `d8ef2b7`（`Record PetaLinux ZynqMP project skeleton`）並成功推送至 `origin/main`。
+
+## 2026-11-12 — Corrected Vitis AI 3.5 toolchain contract
+
+- 需求／決策：重新核對官方版本矩陣，防止以錯誤的 2024.1 host 產生 DPU Linux image。
+- 實際完成：官方 Vitis AI 3.5 release、embedded quick-start 與 recipes 均證實相容版本是 Vivado/Vitis/PetaLinux 2023.1。採 test-first 修正 tracked preflight 由 2024.1 改為 2023.1；preflight tests 3/3、person_tracking tests 19/19 PASS。
+- 驗證界線／未完成：已安裝 PetaLinux 2024.1、現有 Vivado 2024.2、external 2024.1 project skeleton 都不可當作 Vitis AI 3.5 deployable contract；仍待 matching 2023.1 toolchain/XSA/image/DPU runtime。Docker 已完成 engine verification，但尚未 pull Vitis AI container。
+- Git：本次 correction 與同步結果將由後續提交記錄。

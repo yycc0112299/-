@@ -551,7 +551,7 @@
 - 需求／決策：在不依賴 AMD account login 的情況下自行取得可驗證的官方 DPU source，釐清目前 bitstream 的真實出處與下一個工具鏈下載目標。
 - 實際完成：從 AMD official `download.amd.com/opendownload/xlnx/DPUCZDX8G.tar.gz` 取得 61,086,986-byte bundle（SHA-256 `2888c035f73c907e29de1ae524e2caf4474b05a59ba30aeac3ebe2c818557603`），保存在外部 `C:\pynq_toolchain_sources\DPUCZDX8G_official`。其中 component IP=4.0、changelog=Vitis AI 2.5/Vivado 2022.1；其 component.xml 與既有 native B512 build 的 SHA-256 都是 `70e6c6c4923b872d907d9b007c0308393eda30bbc0a30e515843b630f329fb3d`，確認 byte-identical。另 clone Vitis-AI v3.5 tag `7a0d5a695027b0dc1494c7299918959608c3fab2` 供 version matrix 離線查核。
 - 驗證範圍／未完成：source acquisition／hash verification 不是 2022.1 安裝、hardware rebuild、PetaLinux image、VART、xmodel 或 board inference。public 4.0 bundle 沒有可驗證的 DPU 4.1 source；仍不得混用 3.5 container 或 2024.x 工具鏈。
-- Git／同步：此紀錄與進度文件將同一提交推送；下載 archive、clone、bitstream、模型及任何帳密均不進 Git。
+- Git／同步：已提交為 `cde24b6`（`Record official DPU source verification`）並成功推送至 `origin/main`；下載 archive、clone、bitstream、模型及任何帳密均不進 Git。本行同步結果由下一筆文件提交補上。
 
 ## 2026-11-12 — Verified fixed Vitis AI 3.5 compiler container
 

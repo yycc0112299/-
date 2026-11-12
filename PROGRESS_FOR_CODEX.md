@@ -1,5 +1,11 @@
 # 專題狀態與交接記錄（供 Codex）
 
+## 2026-11-12：PYNQ SD Linux 的 SSH transport 可達，但目前無有效唯讀登入憑證
+
+- Windows 對 `192.168.3.1:22` 的 TCP check PASS，表示目前 Composite/SSH transport 有回應。為避免 interactive terminal 阻塞，host 安裝 user-local Python `paramiko` 5.1.0，並以使用者先前提供的 `xilinx` 預設登入資料嘗試**一次** password authentication。
+- 結果為 `paramiko.ssh_exception.AuthenticationException: Authentication failed.`。因此 remote command 沒有開始執行；沒有讀取板端 video/DPU/Wi-Fi 狀態，也沒有寫入 SD、PL、檔案、帳戶或網路。先前 shell 的 BatchMode 也曾得到 `Permission denied (publickey,password)`，兩者一致。
+- 後續要再做板端 runtime check 時，需可用的既有 SSH key 或使用者提供／在本機互動輸入的目前密碼；不可猜測替代密碼。`paramiko` 是本機 user-site support dependency，不進 Git，也不構成 target Python runtime。
+
 ## 2026-11-12：DPU artifact identity gate 已實作並驗證現有 B512 hardware
 
 - 新增 `vitis/pynq_zu_dpu/linux/verify_dpu_artifact_contract.py`。它唯讀讀取 DPU `component.xml`、generated `arch.json`、bitstream、XSA，解析 DPU IP version 和 hex fingerprint、產生四個 SHA-256，並且缺檔／無效 metadata 時 FAIL。此 gate 不將外部絕對路徑或 binary 放進 Git。

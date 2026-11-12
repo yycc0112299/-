@@ -1,5 +1,12 @@
 # 對話與進度同步紀錄
 
+## 2026-11-12 — Confirmed PYNQ SSH transport without assuming board access
+
+- 需求／決策：重新取得 board-side runtime evidence，但只作唯讀登入；不因為 TCP 22 開放就假設可執行板端檢查。
+- 實際完成：`192.168.3.1:22` TCP PASS。為免 interactive SSH prompt 阻塞，host user-site 安裝 `paramiko` 5.1.0，以使用者先前提供的 default credentials 對 `xilinx` user 嘗試一次 password authentication。結果為 `AuthenticationException: Authentication failed`。
+- 驗證範圍／未完成：沒有 remote command 送達或執行，故沒有重新驗證 video nodes/DPU/VART/Wi-Fi；沒有 SD/PL/account/network writes，也沒有嘗試其他密碼。後續需要可用 key 或使用者在本機輸入 current password。
+- Git／同步：待本次文件檢查完成後提交並推送 `origin/main`；提交後以後續同步紀錄補上實際 hash。
+
 ## 2026-11-12 — Recorded verifiable identity for the native DPU B512 artifacts
 
 - 需求／決策：讓後續 2022.1 Linux／model deployment 能以 exact DPU artifact identity 取代易混淆的資料夾名稱或版本猜測。

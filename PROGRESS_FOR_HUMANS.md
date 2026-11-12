@@ -1,5 +1,10 @@
 # 專題進度（重點版）
 
+## 2026-11-12：DPU 4.0 所需的 2022.1 Windows 安裝程式已取得
+
+- 已在 `Downloads` 實際確認 AMD Unified Installer：`Xilinx_Unified_2022.1_0420_0327_Win64.exe`，大小為 215,919,904 bytes（AMD 頁面標示 205.92 MB）。這是目前 DPUCZDX8G 4.0／Vitis AI 2.5 所需的 2022.1 工具鏈取得步驟。
+- 尚未執行安裝程式，也沒有移除現有 Vivado/Vitis 2024.2、建立 2022.1 專案、重建 DPU 硬體、改寫 SD 或碰板子；下載完成不等於 DPU／YOLOv8 已可上板。
+
 ## 2026-11-12：目前必須斷電重開板子
 
 - 正確的 PYNQ UART 是 COM5；可開啟但沒有收到開機訊息，SSH 網路也仍不能連。

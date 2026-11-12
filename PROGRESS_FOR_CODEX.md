@@ -1,5 +1,11 @@
 # 專題狀態與交接記錄（供 Codex）
 
+## 2026-11-12：取得 DPU 4.0 matching 的 Vivado/Vitis 2022.1 Windows web installer
+
+- AMD account 的 export-address validation 完成後，`C:\Users\dsic\Downloads\Xilinx_Unified_2022.1_0420_0327_Win64.exe` 已實際存在，檔案大小 `215,919,904` bytes；此值對應 AMD 2022.1 頁面標示的 205.92-MB Windows Self Extracting Web Installer。這是正確的 DPUCZDX8G 4.0 → Vitis AI 2.5 → Vivado/Vitis/PetaLinux 2022.1 路線，不是 2024.2 或 2026.1。
+- 此檔僅為 Windows web installer，尚未啟動、未選擇安裝元件，亦未建立 `C:\Xilinx\2022.1` 或修改目前 `C:\Xilinx_Embedded_2024_2\Vitis\2024.2`。後續必須以不同安裝目錄保留既有 2024.2，再以 2022.1 重建 matching DPU hardware/XSA 與 Linux image；PetaLinux 2022.1 的 Linux installer 仍需另取得。
+- 下載檔為外部 binary，不納入 Git。這不是 hardware rebuild、xmodel、VART runtime、SD boot、UVC/DMA、YOLOv8 DPU inference 或 Wi-Fi peer 的完成證據。
+
 ## 2026-11-12：JTAG reset 後的 UART／network recovery 診斷
 
 - 為取得只讀 UART evidence，host user-local Python 安裝 `pyserial 3.5`（外部 user-site，不入 Git）。JTAG cable 對應 FTDI `VID_0403&PID_6010`，其 UART 為 **COM5**；先前的 COM4（不同 `VID_03FD` USB serial device）在此次盤點已消失，不可再當成目前 PYNQ UART。

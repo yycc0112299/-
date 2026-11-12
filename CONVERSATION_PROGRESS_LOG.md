@@ -1,5 +1,12 @@
 # 對話與進度同步紀錄
 
+## 2026-11-12 — Verified USB-video overlay control-plane registers on PYNQ hardware
+
+- 需求／決策：在 PL programming 已確認後，以 root-enabled PYNQ verifier 實測 inert control-plane registers，並保證不啟動 DMA。
+- 實際完成：使用者提供板端 output `PYNQ_ZU_USB_VIDEO_OVERLAY_PASS frame_id=0x5a17c0de initial_control=0x00000000`。這證明 GPIO 和 mailbox frame-ID write/read 成功、initial DMA control 為 zero；verifier finally 清零 tested registers。
+- 驗證界線／未完成：沒有 DMA CONTROL/UVC stream/DPU/YOLOv8/Wi‑Fi peer 或雙板成功聲稱。bit/HWH 與 SSH key 為外部板端/host state，不進 Git。
+- Git／同步：本次文件變更待提交並推送到 `origin/main`。
+
 ## 2026-11-12 — Programmed the USB-video overlay from PYNQ Linux and isolated root-only MMIO follow-up
 
 - 需求／決策：修復 XRT device access 後，使用既有安全 overlay verifier 下載 USB-video bitstream；以 kernel/XRT 事實區分 PL programming 與控制面驗證。

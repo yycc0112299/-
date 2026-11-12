@@ -1,5 +1,11 @@
 # 專題進度（重點版）
 
+## 2026-11-12：USB-video overlay 的板端控制介面已實測通過
+
+- 板端終端實測 `PYNQ_ZU_USB_VIDEO_OVERLAY_PASS frame_id=0x5a17c0de initial_control=0x00000000`。
+- 這確認下載到 FPGA 的 USB-video Block Design 可由 PYNQ 存取 frame-ID GPIO 與 mailbox frame-ID 暫存器，且起始 DMA control 為 0。
+- verifier 不會寫 DMA CONTROL、不會啟動 DMA 或相機串流；因此仍未完成影像經 DMA、DPU／YOLOv8 或雙板 Wi‑Fi 實測。
+
 ## 2026-11-12：USB-video 硬體檔已由 PYNQ Linux 成功下載至 FPGA
 
 - 完成 `render` 群組設定後，XRT 已能辨識 Pynq-ZU device；使用 sudo 執行 overlay verifier 時，kernel 記錄 `writing pynq_zu_usb_video.bin to Xilinx ZynqMP FPGA Manager`，並有 XRT xclbin 成功讀取紀錄。

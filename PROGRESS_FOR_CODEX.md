@@ -1,5 +1,11 @@
 # 專題狀態與交接記錄（供 Codex）
 
+## 2026-11-12：板端 USB-video overlay control-plane verifier PASS
+
+- 使用者提供 root verifier terminal evidence：`PYNQ_ZU_USB_VIDEO_OVERLAY_PASS frame_id=0x5a17c0de initial_control=0x00000000`。畫面亦顯示後續從 overlay directory 再次執行 verifier 仍 PASS。
+- 此結果與之前 kernel evidence 合併證明：matching bit/HWH 已 download 到 PL，PYNQ 可對 `0xA0010000` frame-ID GPIO 與 `0xA0020004` mailbox frame-ID 安全 write/read，初始 mailbox CONTROL (`0xA0020000`) 為 zero；verifier finally 清零兩個 tested frame-ID registers。
+- 驗證範圍仍刻意排除 DMA CONTROL write、UVC-to-DMA stream、Vitis control ELF、DPU, YOLOv8 及 Wi‑Fi peer。不要把 control-plane PASS 說成影像 pipeline 或推論成功。
+
 ## 2026-11-12：PYNQ USB-video overlay programming PASS；user MMIO readback still requires root
 
 - 使用者執行 `sudo usermod -aG render xilinx` 並重新登入後，新 SSH session 具 `render` group。`xbutil examine` 現在列出 ready Pynq-ZU device `[0000:00:00.0]`。

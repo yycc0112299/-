@@ -1,5 +1,12 @@
 # 對話與進度同步紀錄
 
+## 2026-11-12 — Documented the full-duplex one-camera-per-board launch contract
+
+- 需求／決策：把兩板目標從舊的單向 sender example 明確化為全雙工 metadata exchange；每塊板各一個相機、各自收發，且不得硬編碼跨電腦的 IP/camera path。
+- 實際完成：更新 `person_tracking/README.md`，要求 A/B 均先啟動 receiver、兩邊皆以 real peer address 通過 read-only Wi-Fi gate，再以相反 peer IP／本機 camera index 啟動 sender；加入 `--frames 1` bring-up guidance。同步修正 VART 文件為現有 opt-in `yolov8_vart` Detector backend 的實際 contract。
+- 驗證範圍／未完成：文件與既有 loopback/retry coverage 不等於 Wi-Fi 實測；目前仍無第二板、authorized Wi-Fi topology 或 full-duplex run。本次未改 SSID/network/board/SD/PL。
+- Git／同步：待本次文件檢查完成後提交並推送 `origin/main`；提交後以後續同步紀錄補上實際 hash。
+
 ## 2026-11-12 — Verified the actual Vivado XSA to Vitis control-address handoff
 
 - 需求／決策：直接驗證本專案「Vivado Block Design 硬體檔→Vitis 控制檔」的 control-plane address contract，而非只依賴固定 C test address。

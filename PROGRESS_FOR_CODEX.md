@@ -1,5 +1,11 @@
 # 專題狀態與交接記錄（供 Codex）
 
+## 2026-11-12：兩板 Wi-Fi 文件已修正為可全雙工的 one-camera-per-board 啟動流程
+
+- 更新 `person_tracking/README.md`：舊文字仍說 VART decoder 未接至 `pipeline.Detector`，現已改為實際 opt-in `PERSON_DETECTOR=yolov8_vart`／`PYNQ_VART_XMODEL` contract，並保留 `PYNQ_VART_STANDARD_OUTPUT=1` 必須先對真實 xmodel output 驗證的安全界線。
+- 新增 full-duplex two-board deployment sequence：A/B 各自先啟動 `peer_protocol.py receive`、分別輸出 `/tmp/peer_from_<other>.json`，再在**兩台都** Wi-Fi preflight PASS 後，各以自己的 `--board-id`、`--camera` 和對方實際 IP 啟動 `pynq_yolov8_peer.py`。不將相機 index、IP、SSID 或 output path 硬寫到共享程式碼。
+- 這只是可重跑操作文件，尚未擁有第二板／授權 Wi-Fi topology 或實機 full-duplex run；也未改 Wi-Fi、板子、SD、PL 或模型。現有 protocol loopback/retry tests 不能取代兩板驗證。
+
 ## 2026-11-12：Vivado USB Block Design 與 Vitis 控制位址已作實際交叉驗證
 
 - 擴充 `fpga/verify_pynq_zu_usb_video_handoff.py`：除 XSA archive/HWH 必要物外，現在可收 Vitis auto-generated `xparameters.h`，要求 `XPAR_AXI_DMA_0_BASEADDR`、`XPAR_FRAME_ID_GPIO_0_BASEADDR`、`XPAR_YOLOX_VIDEO_RTL_0_BASEADDR` 分別等於 Vivado hardware contract 的 `0xA0000000`、`0xA0010000`、`0xA0020000`。CLI 用 `--xparameters` 啟用；unit tests 3/3 PASS。

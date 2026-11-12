@@ -86,8 +86,13 @@ It intentionally does **not** pretend every compiled YOLOv8 graph has the
 same output heads as the CPU ONNX model. Until an exact PYNQ-ZU B512 `.xmodel`
 exists and its output decoder is validated with a known person frame,
 `VartYoloV8.infer()` raises an error rather than emitting guessed boxes. The
-remaining integration is to bind that verified decoder into `pipeline.Detector`
-so tracker and `pynq_yolov8_peer.py` retain the same person-packet schema.
+integration point is now available through the explicit
+`PERSON_DETECTOR=yolov8_vart` backend. It requires
+`PYNQ_VART_XMODEL=/path/to/model.xmodel`. It keeps its decoder unregistered by
+default; set `PYNQ_VART_STANDARD_OUTPUT=1` only after inspecting that exact
+model and proving it has one raw standard YOLOv8 output. Otherwise it stops
+rather than guessing boxes, while the tracker and `pynq_yolov8_peer.py` retain
+the same person-packet schema.
 
 ## Two-board detection packets
 
@@ -127,6 +132,40 @@ Start `peer_protocol.py receive` on the other board before this command. Only
 that its peer TCP port is reachable. The currently tested PYNQ has `wlan0` but
 it is down and unconfigured, so this check correctly fails until an authorized
 Wi-Fi network/topology is configured.
+
+### Full-duplex two-board startup
+
+For the intended one-camera-per-board deployment, each board runs both a
+receiver and a sender. Do not put the same board ID, camera index, output path,
+or IP address into shared source code; choose the local values when starting
+each board. After both boards are associated with the authorized Wi-Fi network:
+
+```sh
+# Board A: first terminal (keep running)
+python3 person_tracking/peer_protocol.py receive \
+  --bind 0.0.0.0 --port 8790 --output /tmp/peer_from_b.json
+# Board B: first terminal (keep running)
+python3 person_tracking/peer_protocol.py receive \
+  --bind 0.0.0.0 --port 8790 --output /tmp/peer_from_a.json
+```
+
+Then run the read-only Wi-Fi gate on each board using the other board's actual
+address. Only after both gates pass, start one sender on each board:
+
+```sh
+# Board A: its own camera and board B's address
+python3 person_tracking/pynq_yolov8_peer.py \
+  --board-id pynq-a --camera <camera-index-on-a> --peer-host <board-b-ip>
+# Board B: its own camera and board A's address
+python3 person_tracking/pynq_yolov8_peer.py \
+  --board-id pynq-b --camera <camera-index-on-b> --peer-host <board-a-ip>
+```
+
+This creates bidirectional metadata exchange, not raw-video streaming. Use
+`--frames 1` on both senders for first bring-up. The protocol has loopback TCP
+coverage and retry tests, but this sequence still needs two physical boards,
+an authorized Wi-Fi topology, and an actual two-board run before it can be
+called verified Wi-Fi operation.
 
 攝影機輸入不縮小：640×480 只在偵測模型底部補至 640×640，不縮圖。公開照片為了固定測試座標，先等比例放入 640×480 畫布；這是測試照片的前處理，和攝影機原生解析度不同。
 

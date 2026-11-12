@@ -10,6 +10,10 @@
 #   set PYNQ_ZU_DPU_BUILD_DIR=<short writable build directory>
 
 set script_dir [file dirname [file normalize [info script]]]
+set board_root [file join $script_dir board_repos XilinxBoardStore-master boards]
+if {![file exists [file join $board_root TUL pynqzu 1.1 board.xml]]} {
+    error "PYNQ-ZU board files are missing under $board_root"
+}
 if {![info exists ::env(DPUCZDX8G_HOME)] || $::env(DPUCZDX8G_HOME) eq ""} {
     error "Set DPUCZDX8G_HOME to AMD's extracted DPUCZDX8G source root"
 }
@@ -34,6 +38,7 @@ if {[file exists $staged_parent]} { file delete -force $staged_parent }
 file mkdir $staged_parent
 file copy -force [file join $vendor_root dpu_ip] $staged_parent
 
+set_param board.repoPaths [list $board_root]
 create_project -force pynq_zu_dpu $project_dir -part xczu5eg-sfvc784-1-e
 set_property board_part tul.com.tw:pynqzu:part0:1.1 [current_project]
 set_property ip_repo_paths $staged_ip_root [current_project]
@@ -41,9 +46,28 @@ update_ip_catalog
 set dpu_vlnv [lindex [get_ipdefs -all xilinx.com:ip:dpuczdx8g:4.0] 0]
 if {$dpu_vlnv eq ""} { error "Native DPUCZDX8G IP was not found in $staged_ip_root" }
 
+# 2024.2 supplies ZynqMP PS 3.5 while 2022.1 supplies 3.4.  The PS block
+# design is otherwise identical for this use, so select only a known release
+# compatible version rather than hard-coding the newer catalog entry.
+set ps_ip_vlnv ""
+foreach candidate [list \
+    xilinx.com:ip:zynq_ultra_ps_e:3.5 \
+    xilinx.com:ip:zynq_ultra_ps_e:3.4 \
+    xilinx.com:ip:zynq_ultra_ps_e:3.3] {
+    set available [get_ipdefs -all $candidate]
+    if {[llength $available] > 0} {
+        set ps_ip_vlnv [lindex $available 0]
+        break
+    }
+}
+if {$ps_ip_vlnv eq ""} {
+    error "No supported Zynq UltraScale+ MPSoC PS IP was found (tried 3.5, 3.4, 3.3)"
+}
+puts "PYNQ_ZU_DPU_PS_IP_VLNV=$ps_ip_vlnv"
+
 set bd_name pynq_zu_dpu
 create_bd_design $bd_name
-create_bd_cell -type ip -vlnv xilinx.com:ip:zynq_ultra_ps_e:3.5 zynq_ultra_ps_e_0
+create_bd_cell -type ip -vlnv $ps_ip_vlnv zynq_ultra_ps_e_0
 apply_bd_automation -rule xilinx.com:bd_rule:zynq_ultra_ps_e -config {apply_board_preset "1"} [get_bd_cells zynq_ultra_ps_e_0]
 
 # USB controllers stay on PS MIO. No USB pin is made external to PL.
@@ -123,5 +147,10 @@ connect_bd_net [get_bd_pins dpu_czdx8g_0/dpu0_interrupt] [get_bd_pins zynq_ultra
 assign_bd_address
 validate_bd_design
 save_bd_design
+set dpu_control_segments [get_bd_addr_segs -of_objects [get_bd_addr_spaces zynq_ultra_ps_e_0/Data] \
+    -filter {NAME =~ "*dpu_czdx8g_0*"}]
+if {[llength $dpu_control_segments] != 1} {
+    error "Expected one DPU AXI-Lite segment in the PS address space, found: $dpu_control_segments"
+}
 puts "PYNQ_ZU_DPU_BD_CREATED=[get_property FILE_NAME [current_bd_design]]"
-puts "PYNQ_ZU_DPU_CONTROL_ADDRESS=[get_property OFFSET [get_bd_addr_segs dpu_czdx8g_0/S_AXI/reg0]]"
+puts "PYNQ_ZU_DPU_CONTROL_ADDRESS=[get_property OFFSET $dpu_control_segments]"

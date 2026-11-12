@@ -912,3 +912,9 @@
 - 實際以 `C:\pynq_zu_usb_2022_20261113\pynq_zu_usb_video.xsa` 建立 isolated `C:\pynq_vitis_usb_video_2022_20261113b` platform。其 generated `xparameters.h` 與 XSA handoff verifier PASS：DMA/frame-ID GPIO/mailbox=`0xA0000000/0xA0010000/0xA0020000`。使用 Vitis 2022.1 `aarch64-none-elf-gcc`、該 generated BSP 的 `libxil.a` 與 generated linker script，實際產生 external `manual_a53_elf\pynq_zu_usb_video_app.elf`（203,736 bytes）；`readelf`=ELF64/AArch64。
 - 限制與異常：此 host 的 XSCT/Eclipse channel 在 app build request 時又出現 `xsct server communication channel has closed unexpectedly`/`Connection reset`。新增 `finish_vitis_2022_app.tcl` 會重新 import platform/app project；它已實際把 tracked `main.c`、`video_control.c`、`.h` 匯入 external app directory，但後端在 project build 前停止回應，故已關閉**本次啟動的 isolated** XSCT/Eclipse processes。不能把任一 Tcl script 說成已完整自動跑畢；ELF 是以相同 2022.1 compiler/BSP 的 manual invocation 建出。這不是板端執行、也沒有 program PL/SD、UVC/DMA、DPU/VART/YOLOv8 或 Wi-Fi 驗證。external workspace、ELF、XSA、tool logs 均不入 Git。
 
+### 2026-11-13：2022.1 native DPU 4.0 B512 Block Design PASS
+
+- 修正 `fpga/create_pynq_zu_dpu_bd.tcl` 的兩個 2022.1 compatibility gaps：它現在設定 tracked PYNQ-ZU board repository，並明確選可用的 ZynqMP PS IP `3.5`、`3.4`、`3.3`，實跑此 host 選中 `3.4`。新增 static BD contract tests（3/3 PASS），保護 board repository、PS version fallback、PS USB MIO boundary、三條 DPU data interfaces 與 DPU AXI-Lite address discovery。
+- 實際 external build `C:\pynq_zu_dpu_2022_20261113` 用 official `C:\pynq_toolchain_sources\DPUCZDX8G_official\DPUCZDX8G` source 成功讀入 native `xilinx.com:ip:dpuczdx8g:4.0`、套用 B512 settings、完成 `validate_bd_design`/save。read-only reopen 也確認 PS=3.4、DPU visible pins/interfaces exist。DPU data0/data1/instruction 分別接 PS HP0/HP1/HP2，control segment=`0x0400000000`（16 MiB）。USB0/USB1 保持 PS MIO；沒有把 C270 D+/D−假接為 PL pins。
+- 限制：尚未跑 2022.1 DPU synthesis/implementation/bitstream/XSA、尚未建立 2022.1 matching PetaLinux image/device tree/DPU driver/VART、編譯 YOLOv8 `.xmodel` 或上板執行。DPU build output、official source、logs 不入 Git。
+

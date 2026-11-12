@@ -731,3 +731,9 @@
 - Vitis 的圖形/後端在「自動建立/建置應用專案」時通訊中斷；但已成功把控制程式原始碼匯入應用目錄。已只關閉本次產生的背景程序；自動化腳本已加入，但尚未能宣稱它在此主機完整跑完。
 - 尚未把 ELF 或 bitstream 下載到板子，沒有驗證相機、DMA、DPU、YOLOv8 或 Wi-Fi。
 
+## 2026-11-13：DPU 硬體 Block Design 已在 2022.1 重建
+
+- 已用官方 DPU 4.0 原始碼，在 Vivado 2022.1 真正建立 PYNQ-ZU 的 B512 DPU Block Design。
+- DPU 的控制、記憶體通道和中斷都已連到 PS；USB 相機仍由 Linux 的 PS USB 接管，不會錯接到 FPGA 腳位。
+- 還沒有開始完整綜合、產生新的 DPU bitstream 或上板。Linux DPU driver、VART、YOLOv8 模型和兩板 Wi-Fi 也尚未完成。
+

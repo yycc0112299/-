@@ -781,3 +781,10 @@
 - 驗證範圍／未完成：第二次以新增 `finish_vitis_2022_app.tcl` 重新 import project 時，已實際寫入 tracked C/H sources，但 XSCT/Eclipse 在 build request 前報 `xsct server communication channel has closed unexpectedly`/`Connection reset`；僅關閉這次 isolate workspace 的 processes，未改 installer、board、SD、USB/UART 或網路。因此 tracked Tcl 尚未在此主機端 full completion verified。manual ELF compilation 與 address contract 不代表 JTAG/Linux execution、PL programming、UVC dual capture、DPU/VART/YOLOv8 或 Wi-Fi peer。
 - Git／同步：本次 source/README/三份 progress documents 將提交並推送到 `main`；external XSA/workspace/BSP/ELF/logs 不入 Git。
 
+## 2026-11-13 — Rebuilt the native DPUCZDX8G 4.0 B512 Block Design in Vivado 2022.1
+
+- 需求／決策：將 exact DPU 4.0/Vitis AI 2.5/2022.1 route 從先前 2024.2 build 移至 matching Vivado 2022.1，並維持 USB UVC 在 PS/Linux 而不是虛構 PL camera pins。
+- 實際完成：新增 DPU BD contract tests，先證明 2022.1 scripts 缺少 PS 3.4 fallback 與 PYNQ-ZU board repo setup，再實作它們。tests 3/3 PASS。external `C:\pynq_zu_dpu_2022_20261113` real Vivado run 讀入 official DPUCZDX8G 4.0 source，選擇 `zynq_ultra_ps_e:3.4`，完成 BD validate/save；read-only reopen 讀到 DPU native pins，control segment=`0x0400000000` (16 MiB)，data0/data1/instruction 接 HP0/HP1/HP2。
+- 驗證範圍／未完成：這不是 DPU synthesis/bitstream/XSA，更不是 PetaLinux 2022.1 image、device tree/driver/VART、xmodel/YOLOv8、board camera/DMA 或 Wi-Fi peer。沒有改 board/SD/UART/network。official source and generated build are external/non-Git.
+- Git／同步：本次 scripts/tests/三份 progress documents 將提交並推送到 `main`。
+

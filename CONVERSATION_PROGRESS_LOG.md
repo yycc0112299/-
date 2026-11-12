@@ -538,4 +538,4 @@
 - 需求／決策：重新核對官方版本矩陣，防止以錯誤的 2024.1 host 產生 DPU Linux image。
 - 實際完成：官方 Vitis AI 3.5 release、embedded quick-start 與 recipes 均證實相容版本是 Vivado/Vitis/PetaLinux 2023.1。採 test-first 修正 tracked preflight 由 2024.1 改為 2023.1；preflight tests 3/3、person_tracking tests 19/19 PASS。
 - 驗證界線／未完成：已安裝 PetaLinux 2024.1、現有 Vivado 2024.2、external 2024.1 project skeleton 都不可當作 Vitis AI 3.5 deployable contract；仍待 matching 2023.1 toolchain/XSA/image/DPU runtime。Docker 已完成 engine verification，但尚未 pull Vitis AI container。
-- Git：本次 correction 與同步結果將由後續提交記錄。
+- Git：已提交為 `a078ede`（`Correct Vitis AI 3.5 toolchain contract`）並成功推送至 `origin/main`。

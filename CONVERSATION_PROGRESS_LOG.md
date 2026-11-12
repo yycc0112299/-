@@ -544,7 +544,7 @@
 - 需求／決策：使用者要求自行找出正確工具鏈；以實際已建 DPU B512 產物與 AMD 官方 matrix 為準，不用相近版本猜測。
 - 實際完成：讀取 `C:\\pynq_zu_dpu_native_build\\native_dpu_ip\\dpu_ip\\DPUCZDX8G_v4_0_0\\component.xml`，確認 IP=`4.0`。將 build-host preflight 改成明確矩陣：4.0→Vitis AI 2.5→2022.1；4.1→Vitis AI 3.5→2023.1，並新增 `--dpu-ip-version`。test-first 證據：先因舊函式不接受新參數而得到 4 個預期 TypeError，實作後 4/4 PASS。
 - 驗證範圍／未完成：尚未取得 2022.1 或 DPU 4.1 source／2023.1，未重新 build hardware、Linux image 或模型。現有 4.0 bitstream、2024.2 Vivado、2024.1 PetaLinux、3.5 compiler Docker 不可宣稱互相可部署。仍未碰板子、SD、相機或 Wi-Fi。
-- Git／同步：本項程式、README 與兩份進度文件將在同一提交推送；外部 IP、bitstream、模型及帳密不進 Git。
+- Git／同步：已提交為 `33add7e`（`Correct DPU IP toolchain contract`）並成功推送至 `origin/main`；外部 IP、bitstream、模型及帳密不進 Git。本行同步結果由下一筆文件提交補上。
 
 ## 2026-11-12 — Verified fixed Vitis AI 3.5 compiler container
 

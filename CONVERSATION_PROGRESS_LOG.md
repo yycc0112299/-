@@ -5,7 +5,7 @@
 - 需求／決策：讓後續 2022.1 Linux／model deployment 能以 exact DPU artifact identity 取代易混淆的資料夾名稱或版本猜測。
 - 實際完成：新增 read-only artifact verifier，讀 component XML、arch JSON、bitstream、XSA，輸出 IP version、fingerprint 與 SHA-256。test-first：synthetic test 先因 module absent FAIL，實作後 1/1 PASS。對 external B512 build 實跑 PASS：IP 4.0、fingerprint `0x101000016010400`，bitstream SHA `1e173c9a707d050defca9a4d7235e8f2e51e680fd40040d976256b24ee46e29e`，XSA SHA `8b0f59c19d239de34dbe5366eb61f826a299c9caae78a671738407addeb9cc57`。
 - 驗證範圍／未完成：identity record 不證明 image/device tree/driver/VART/xmodel/model output 或 board inference；未寫 PL/SD/board。external binary paths 和 artifacts 不進 Git。
-- Git／同步：待本次程式、文件與完整測試完成後提交並推送 `origin/main`；提交後以後續同步紀錄補上實際 hash。
+- Git／同步：已提交為 `3147429`（`Verify DPU deployment artifact identity`）並成功推送至 `origin/main`；本行同步結果由下一筆文件提交補上。
 
 ## 2026-11-12 — Packaged the full two-board Wi-Fi and future VART runtime sources
 

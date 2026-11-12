@@ -5,7 +5,7 @@
 - 需求／決策：直接驗證本專案「Vivado Block Design 硬體檔→Vitis 控制檔」的 control-plane address contract，而非只依賴固定 C test address。
 - 實際完成：XSA verifier 新增 optional `--xparameters`，讀 Vitis generated `xparameters.h` 並與 HWH contract 比對 DMA=`0xA0000000`、frame GPIO=`0xA0010000`、mailbox=`0xA0020000`。test-first：新增 function import test 先失敗；實作後 verifier tests 3/3 PASS。用 external completed Vivado XSA 和 Vitis platform header 實跑，輸出 `PYNQ_ZU_USB_VIDEO_XSA_PASS`，全部 address match。
 - 驗證範圍／未完成：這驗證已完成 2024.2 USB-video hardware build 的 handoff/compile address interface；不代表 camera UVC stream、Linux DMA ownership、IRQ, DPU、YOLOv8 或 two-board Wi-Fi 已在板端運作。未 program PL/改 SD；外部 XSA/workspace 不入 Git。
-- Git／同步：待本次程式、文件與完整測試完成後提交並推送 `origin/main`；提交後以後續同步紀錄補上實際 hash。
+- Git／同步：已提交為 `20e546a`（`Verify Vivado to Vitis address handoff`）並成功推送至 `origin/main`；本行同步結果由下一筆文件提交補上。
 
 ## 2026-11-12 — Connected the opt-in DPU backend to the existing detector facade
 

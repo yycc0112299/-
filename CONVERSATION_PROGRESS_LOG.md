@@ -539,6 +539,13 @@
 - 實際完成：官方 Vitis AI 3.5 release、embedded quick-start 與 recipes 均證實相容版本是 Vivado/Vitis/PetaLinux 2023.1。採 test-first 修正 tracked preflight 由 2024.1 改為 2023.1；preflight tests 3/3、person_tracking tests 19/19 PASS。
 - 驗證界線／未完成：已安裝 PetaLinux 2024.1、現有 Vivado 2024.2、external 2024.1 project skeleton 都不可當作 Vitis AI 3.5 deployable contract；仍待 matching 2023.1 toolchain/XSA/image/DPU runtime。Docker 已完成 engine verification，但尚未 pull Vitis AI container。
 - Git：已提交為 `a078ede`（`Correct Vitis AI 3.5 toolchain contract`）並成功推送至 `origin/main`。
+## 2026-11-12 — Corrected DPU IP/toolchain mapping
+
+- 需求／決策：使用者要求自行找出正確工具鏈；以實際已建 DPU B512 產物與 AMD 官方 matrix 為準，不用相近版本猜測。
+- 實際完成：讀取 `C:\\pynq_zu_dpu_native_build\\native_dpu_ip\\dpu_ip\\DPUCZDX8G_v4_0_0\\component.xml`，確認 IP=`4.0`。將 build-host preflight 改成明確矩陣：4.0→Vitis AI 2.5→2022.1；4.1→Vitis AI 3.5→2023.1，並新增 `--dpu-ip-version`。test-first 證據：先因舊函式不接受新參數而得到 4 個預期 TypeError，實作後 4/4 PASS。
+- 驗證範圍／未完成：尚未取得 2022.1 或 DPU 4.1 source／2023.1，未重新 build hardware、Linux image 或模型。現有 4.0 bitstream、2024.2 Vivado、2024.1 PetaLinux、3.5 compiler Docker 不可宣稱互相可部署。仍未碰板子、SD、相機或 Wi-Fi。
+- Git／同步：本項程式、README 與兩份進度文件將在同一提交推送；外部 IP、bitstream、模型及帳密不進 Git。
+
 ## 2026-11-12 — Verified fixed Vitis AI 3.5 compiler container
 
 - 實際完成：Docker Desktop 4.99.0 已以 `hello-world` pull/run 驗證；固定 tag `xilinx/vitis-ai-pytorch-cpu:ubuntu2004-3.5.0.306` 已拉取。container activate `vitis-ai-pytorch` 後確認 `vai_c_xir`、`vaic`、`xcompiler`、`xir` 均為 3.5.0。

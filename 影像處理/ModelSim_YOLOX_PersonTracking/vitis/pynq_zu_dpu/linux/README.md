@@ -55,19 +55,21 @@ read-only gate:
 ```sh
 python3 preflight_dpu_build_host.py \
   --arch-json /path/to/the/exact/DPU/arch.json \
-  --vitis-ai-version 3.5 \
-  --vivado-version 2023.1 \
-  --petalinux-version 2023.1
+  --dpu-ip-version 4.0 \
+  --vitis-ai-version 2.5 \
+  --vivado-version 2022.1 \
+  --petalinux-version 2022.1
 ```
 
-AMD's Vitis AI 3.5 release notes and embedded runtime instructions verify the
-released DPU IP with Vivado, Vitis and PetaLinux **2023.1**. Here `v4.0`
-identifies a historical DPU source-branch label, not the runtime/compiler
-version; pass `3.5` to this preflight. The present hardware was built with
+The generated hardware's `component.xml` identifies it as DPUCZDX8G **4.0**.
+AMD's compatibility matrix pairs that IP with Vitis AI **2.5** and
+Vivado/Vitis/PetaLinux **2022.1**. Vitis AI 3.5's 2023.1 contract applies to
+DPUCZDX8G **4.1**, not this bitstream. The present hardware was built with
 Vivado 2024.2 and the installed PetaLinux host is 2024.1, neither of which is
-the published compatible toolchain for the Vitis AI 3.5 path. Do not infer
-runtime compatibility from a successful Vivado implementation. Rebuild the
-DPU/XSA and target image on the 2023.1 toolchain before deployment.
+the published compatible toolchain for this DPU 4.0 build. Do not infer
+runtime compatibility from a successful Vivado implementation. Either rebuild
+this IP using the 2.5/2022.1 contract, or first replace it with DPU 4.1 and
+then use the 3.5/2023.1 contract.
 
 The preflight requires a compiler route (Docker with Vitis AI or `vai_c_xir`),
 PetaLinux and the exact DPU-generated `arch.json`. It intentionally refuses to
@@ -89,5 +91,5 @@ For the currently generated native B512 hardware it emitted fingerprint
 `0x101000016010400`. The output is deliberately outside Git because it is
 derived from the local Vivado build; regenerate it after any DPU IP
 configuration change. The presence of this architecture file only unlocks the
-correct compiler input—it does not resolve the required 2024.1 build host or
+correct compiler input—it does not resolve the required matching build host or
 create a working Linux DPU runtime.

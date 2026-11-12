@@ -1,9 +1,10 @@
 # 專題狀態與交接記錄（供 Codex）
 
-## 2026-11-12：DPU branch 與 Vitis AI runtime 版本更正
+## 2026-11-12：DPU IP 版本與工具鏈契約再次校正
 
-- 官方 Vitis AI 3.5 release、embedded quick-start 與 recipes 都指定 Vivado/Vitis/PetaLinux **2023.1**。先前將 historical `v4.0` DPU source branch 誤推為 2024.1 toolchain；此處明確更正。`v4.0` 不是 `--vitis-ai-version`，compiler/runtime 仍為 `3.5`。
-- `preflight_dpu_build_host.py` 與 test-first tests 已改為只接受 2023.1；先以更新後 test 得到舊常數預期 failure，再修正並驗證 preflight tests 3/3、person_tracking tests 19/19 PASS。已安裝 PetaLinux 2024.1 是可用 host SDK，但對此 Vitis AI 3.5 deployment contract 不相容；現有 Vivado 2024.2 亦不相容。
+- 直接讀取目前外部 build 的 `DPUCZDX8G_v4_0_0/component.xml`，確認現有 B512 bitstream 的 **實際 DPU IP 是 4.0**，不是「v4.0 source branch」標籤。AMD official compatibility matrix 指定：DPU 4.0 → Vitis AI 2.5 → Vivado/Vitis/PetaLinux 2022.1；DPU 4.1 → Vitis AI 3.5 → 2023.1。故先前把現有 DPU 4.0 說成 Vitis AI 3.5/2023.1 的表述不正確，已以本段覆蓋。
+- `preflight_dpu_build_host.py` 現需 `--dpu-ip-version`，將 4.0/2.5/2022.1 與 4.1/3.5/2023.1 明確分流，拒絕不明 IP 或將目前 4.0 bitstream 混接 3.5。test-first：先新增參數的 tests 失敗（舊函式無此參數），再完成 mapping；4/4 unit tests PASS。
+- 決策仍待實作：若保留已完成的 4.0 B512 hardware，要取得 2022.1 Vivado/Vitis/PetaLinux 與 Vitis AI 2.5；若以 YOLOv8/Vitis AI 3.5 為優先，需取得 DPU 4.1 source 並以 2023.1 重建，不能重用當前 bitstream/`arch.json`。已安裝 PetaLinux 2024.1、現有 Vivado 2024.2，以及目前 Vitis AI 3.5 Docker image 都不構成任一路線的完整 deployment contract。
 
 ## 2026-11-11：Linux CMA 可用，但 Vitis/Linux AXI DMA 仍需 kernel DMA-BUF ownership layer
 

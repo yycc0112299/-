@@ -1,9 +1,9 @@
 # 專題進度（重點版）
 
-## 2026-11-12：更正 DPU 所需版本組合
+## 2026-11-12：DPU 工具鏈已按實際 IP 更正
 
-- DPU IP 的 v4.0 是來源分支名稱；實際 runtime/compiler 使用 Vitis AI 3.5，官方驗證組合是 Vivado/Vitis/PetaLinux 2023.1（不是先前誤記的 2024.1）。
-- 現已裝的 PetaLinux 2024.1 與現有 Vivado 2024.2 都不能當作正式 DPU 部署工具鏈；模型架構檔仍正確，但需要 2023.1 matching hardware/image。
+- 讀到現有 DPU 硬體的實際 IP 為 **4.0**。它的官方搭配是 Vitis AI 2.5＋Vivado/Vitis/PetaLinux 2022.1；若要用 Vitis AI 3.5／YOLOv8 路線，必須先換成 DPU IP 4.1，再用 2023.1 重建。
+- 因此現有的 Vivado 2024.2、PetaLinux 2024.1、DPU 4.0 bitstream 與 Vitis AI 3.5 Docker image 不能直接組成可部署系統。已新增檢查，會明確擋下這種混版。
 
 ## 2026-11-11：找到 Linux 的連續影像記憶體，但 DMA 還不能直接使用
 

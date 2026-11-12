@@ -1,5 +1,12 @@
 # 對話與進度同步紀錄
 
+## 2026-11-12 — Diagnosed the post-JTAG-reset recovery state through the actual FTDI UART
+
+- 需求／決策：在 SSH 未回來時以 UART 判斷板子是否有正常回到 SD/Linux，不向板子寫入命令；區分目前 cable 的 UART 與已消失的其他 serial device。
+- 實際完成：host user-site 安裝 external `pyserial 3.5`。現存 Xilinx TUL FTDI 介面為 A/B + COM5；COM4（VID_03FD）已不再 present。以 115200 只讀 COM5 12 秒得到 0 bytes；同時 `192.168.3.1:22` TCP/ping FAIL。沒有 transmit serial data 或變更 board config。
+- 驗證範圍／未完成：這表示 JTAG cable 枚舉存在但 board 尚未輸出 SD boot/Linux networking；需 physical power-cycle 才能恢復並做 SSH/overlay/camera checks。不能據此判定 UVC/DMA/DPU/YOLO/Wi-Fi success or failure。pyserial 是 host 外部 dependency，不入 Git。
+- Git／同步：本環境/硬體診斷與三份進度文件將於本次提交推送；實際提交雜湊與推送結果由下一筆文件同步紀錄補上。
+
 ## 2026-11-12 — Verified JTAG hardware discovery and programmed the USB-video PL, while stopping safely at A53 debug timeout
 
 - 需求／決策：使用者同時接上線後，將 USB-video Block Design 由 Vivado 直接下載到實體 PL，並嘗試讓 Vitis ELF 接管 A53；所有結果需區分 PL program 和 Vitis execution，不能因為其中一步 PASS 宣稱完整成功。

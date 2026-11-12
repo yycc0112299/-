@@ -1,5 +1,11 @@
 # 專題狀態與交接記錄（供 Codex）
 
+## 2026-11-12：JTAG reset 後的 UART／network recovery 診斷
+
+- 為取得只讀 UART evidence，host user-local Python 安裝 `pyserial 3.5`（外部 user-site，不入 Git）。JTAG cable 對應 FTDI `VID_0403&PID_6010`，其 UART 為 **COM5**；先前的 COM4（不同 `VID_03FD` USB serial device）在此次盤點已消失，不可再當成目前 PYNQ UART。
+- COM5 可被正常開啟並以 115200 baud 只讀 12 秒，但收 0 bytes；同時 `192.168.3.1:22` TCP/Ping 都 FAIL。FTDI A/B 和 COM5 仍枚舉，故 cable/USB host detection 在，但板端尚未回到 SD/Linux boot output/network service。沒有向 serial 寫入任何 bytes。
+- 結論：JTAG reset 後需要實體 power-cycle 才能恢復 selected SD boot；重開後應先重新確認 COM5 UART boot log、SSH TCP 與登入，再部署 USB-video overlay。這不是證明任一相機／DPU runtime failure。
+
 ## 2026-11-12：Vivado 已實際下載 USB-video PL；Vitis JTAG ELF 仍受 A53 halt timeout 阻擋
 
 - 新增 read-only `fpga/scan_pynq_zu_jtag.tcl` 和 static test。因 repository 路徑含中文，Vivado batch source 必須先複製到 external ASCII `%TEMP%` path；實測 Hardware Manager 成功枚舉 `xczu5_0`（XCZU5EG）、ARM DAP、正常 startup/config status，證實 JTAG chain 完整可用。先前 XSDB 空白輸出是 Tcl batch command 沒有 `puts`，不是 cable failure。

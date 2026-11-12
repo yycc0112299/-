@@ -1,5 +1,11 @@
 # 專題進度（重點版）
 
+## 2026-11-12：目前必須斷電重開板子
+
+- 正確的 PYNQ UART 是 COM5；可開啟但沒有收到開機訊息，SSH 網路也仍不能連。
+- JTAG USB 線仍被電腦辨識，因此問題是板子尚未回到 SD/Linux，而不是電腦失去線材。
+- 請斷電再開後維持 SD boot；重開後我會先確認 UART、SSH 和兩支相機。
+
 ## 2026-11-12：USB 硬體已成功由 Vivado 暫時下載到 FPGA
 
 - Vivado 現在確定可看到 FPGA，並已成功把 USB-video 的 bitstream 暫時下載到 PL；沒有寫 SD 或 flash。

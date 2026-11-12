@@ -1,5 +1,11 @@
 # 專題進度（重點版）
 
+## 2026-11-12：DPU 硬體檔已有可核對的身分紀錄
+
+- 新工具會記錄目前 DPU 的 IP 版本、硬體設定 fingerprint，以及 bitstream／XSA 等檔案雜湊。
+- 已實際核對目前 B512 DPU 是 4.0；這可避免之後拿錯硬體檔做 Linux 映像或模型。
+- 這是檔案身分核對，不是 DPU 已在板子上推論。
+
 ## 2026-11-12：兩板部署包已補齊 Wi‑Fi 與 DPU 程式
 
 - 部署 tarball 現會包含 Wi‑Fi 檢查工具與未來 DPU YOLOv8 adapter；已實際建立 archive 並確認檔案在內。

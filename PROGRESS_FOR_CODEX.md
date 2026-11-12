@@ -1,5 +1,11 @@
 # 專題狀態與交接記錄（供 Codex）
 
+## 2026-11-12：DPU artifact identity gate 已實作並驗證現有 B512 hardware
+
+- 新增 `vitis/pynq_zu_dpu/linux/verify_dpu_artifact_contract.py`。它唯讀讀取 DPU `component.xml`、generated `arch.json`、bitstream、XSA，解析 DPU IP version 和 hex fingerprint、產生四個 SHA-256，並且缺檔／無效 metadata 時 FAIL。此 gate 不將外部絕對路徑或 binary 放進 Git。
+- test-first：synthetic complete artifact contract test 先因 module 不存在 FAIL；實作後 1/1 PASS。實際使用 external native build 實跑 PASS：DPU IP=`4.0`、fingerprint=`0x101000016010400`、component SHA-256=`70e6c6c4923b872d907d9b007c0308393eda30bbc0a30e515843b630f329fb3d`、bitstream=`1e173c9a707d050defca9a4d7235e8f2e51e680fd40040d976256b24ee46e29e`、XSA=`8b0f59c19d239de34dbe5366eb61f826a299c9caae78a671738407addeb9cc57`。
+- 嚴格界線：hash/metadata identity 不驗證 bitstream 已燒入 PL、XSA Linux device tree、driver/VART、model compatibility 或 inference。未改 Vivado project/PL/SD/board。這是後續 2022.1 image/model deployment 防止選到錯 artifact 的證據記錄。
+
 ## 2026-11-12：兩板 PYNQ runtime bundle 已補齊 Wi-Fi／VART 元件並實際封裝驗證
 
 - `live_site/prepare_pynq_dual_bundle.py` 將 runtime file list 提取為 `runtime_sources()`，bundle 現額外包含 `person_tracking/pynq_wifi_peer_preflight.py` 和 `person_tracking/assets/yolov8_vart.py`。這使 deployed CPU two-board Wi-Fi readiness gate 與未來 opt-in DPU backend source 隨同同一套板端程式，不會在 target import 時缺檔。

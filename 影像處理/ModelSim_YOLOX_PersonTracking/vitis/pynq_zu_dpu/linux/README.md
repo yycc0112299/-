@@ -98,6 +98,25 @@ configuration change. The presence of this architecture file only unlocks the
 correct compiler input—it does not resolve the required matching build host or
 create a working Linux DPU runtime.
 
+## Artifact identity record
+
+Before attaching a PetaLinux image, `.xmodel`, or SD deployment bundle to a
+locally built DPU, record the exact hardware artifacts instead of referring to
+them by a directory name:
+
+```sh
+python3 verify_dpu_artifact_contract.py \
+  --component-xml /path/to/DPUCZDX8G_v4_0_0/component.xml \
+  --arch-json /path/to/generated/arch.json \
+  --bitstream /path/to/pynq_zu_dpu_wrapper.bit \
+  --xsa /path/to/pynq_zu_dpu_b512.xsa
+```
+
+It emits the DPU IP version, `arch.json` fingerprint, and SHA-256 values for
+all four inputs, followed by `PYNQ_ZU_DPU_ARTIFACT_CONTRACT_PASS`. It is a
+read-only identity record, not an XSA implementation check, Linux runtime
+test, or proof that an `.xmodel` matches the fingerprint.
+
 ## 2022.1 SDK VART link smoke
 
 The actual DPUCZDX8G 4.0 contract uses the 2022.1 target SDK and Vitis AI

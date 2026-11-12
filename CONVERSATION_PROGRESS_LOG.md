@@ -5,7 +5,7 @@
 - 需求／決策：使編譯後的 YOLOv8 DPU model 能沿用既有 `Detector` → tracker → peer packet dataflow，同時維持 CPU YOLOv8 為可用預設、避免未驗證 xmodel output 被自動解碼。
 - 實際完成：`PERSON_DETECTOR=yolov8_vart` 現要求 explicit `PYNQ_VART_XMODEL`，驗證 `.xmodel` 後用 `VartYoloV8.from_xmodel()`；只有 explicit `PYNQ_VART_STANDARD_OUTPUT=1` 才使用前輪 conditional standard decoder，否則 decoder 保持未註冊並安全拒絕 detection。test-first：新增 missing-xmodel contract 先因 backend unsupported 失敗，實作後 backend tests 3/3、完整 person_tracking 22/22 PASS。
 - 驗證範圍／未完成：未有 xmodel、VART target runtime 或 board DPU；DPU backend 未實際執行。仍需 matching 2022.1 image/driver/runtime、compile xmodel、檢查 tensor shape，才可設定 standard-output flag 或寫 custom decoder。
-- Git／同步：待本次程式、文件與完整測試完成後提交並推送 `origin/main`；提交後以後續同步紀錄補上實際 hash。
+- Git／同步：已提交為 `a6a609f`（`Add opt-in YOLOv8 VART detector backend`）並成功推送至 `origin/main`；本行同步結果由下一筆文件提交補上。
 
 ## 2026-11-12 — Added a conditional standard YOLOv8 VART decoder bridge
 

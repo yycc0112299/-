@@ -706,3 +706,9 @@
 - Docker Desktop 與固定 Vitis AI 3.5 容器已可用；啟用 container 的 `vitis-ai-pytorch` 環境後，`vai_c_xir` 編譯器已實測存在。
 - 正式 DPU 映像仍需 matching 2023.1 Vivado/PetaLinux/XSA。
 
+## 2026-11-13：Vivado 2022.1 安裝狀態更正
+
+- 安裝視窗停在 76% 的收尾步驟，並顯示安裝後處理失敗，所以不能說安裝器已完整完成。
+- 但 Vivado 2022.1 和 Vitis 2022.1 的主要命令都能實際啟動，Zynq UltraScale+ 裝置資料也已存在。
+- 接下來會用獨立的硬體重建測試確認這個安裝是否足夠；在驗證完成前，不把它說成完整安裝成功或已完成 DPU 硬體。
+

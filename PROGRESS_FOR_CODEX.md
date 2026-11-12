@@ -888,3 +888,9 @@
 - Docker Desktop 4.99.0 已以 `hello-world` 實測 pull/run；固定 image `xilinx/vitis-ai-pytorch-cpu:ubuntu2004-3.5.0.306` 已 pull。container 預設 PATH 沒有 compiler，需 source conda profile 並 activate `vitis-ai-pytorch`；其後實測 `vai_c_xir`、`vaic`、`xcompiler`、`xir` 都是 3.5.0。
 - 這解除 compiler-route blocker，不解除官方 Vitis AI 3.5 所需的 2023.1 Vivado/PetaLinux/XSA/rootfs/VART/image blocker。
 
+### 2026-11-13：Vivado 2022.1 核心工具可執行，但安裝器收尾失敗
+
+- 使用者畫面與即時 Java installer window 均顯示 2022.1 Vivado installer 在「Installing files, 76% completed」後停於 Final Processing，並出現 `Execution of Pre/Post Installation Tasks Failed`。因此不能把 GUI installer 視為完整成功結束。
+- 直接唯讀驗證已安裝樹：`C:\Xilinx\Vivado\2022.1\Vivado\2022.1\bin\vivado.bat -mode batch -nolog -nojournal -version` 回報 Vivado 2022.1 且 exit code=0；`Vitis\2022.1\bin\xsct.bat -help` 亦 exit code=0。Zynq UltraScale+ part data 已存在於 Vivado data tree。這證明 Vivado/Vitis 核心可啟動，不等於 installer post-install、所有附屬元件或 DPU build 已驗證。
+- 後續 2022.1 rebuild 必須使用獨立 external build directory，並在 first real project/IP run 中確認缺少元件與否；不要因為版本字串可回應而誤稱 2022.1 全安裝成功。沒有變更板子、SD、現有 project source 或 Git-tracked hardware artifacts。
+

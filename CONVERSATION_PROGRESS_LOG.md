@@ -753,3 +753,10 @@
 - 驗證界線／未完成：SSH credentials 尚未驗證，UART prompt 未取得；未上傳程式、未載入 overlay、未執行 Vitis ELF、未測 UVC/DMA/DPU/YOLOv8/Wi-Fi。唯一 2022.1 installer 視窗保留但尚未完成安裝。
 - Git／同步：已提交為 `4808af3`（`Record PYNQ reboot transport recovery`）並成功推送至 `origin/main`。本同步註記將由下一筆文件提交記錄。
 
+## 2026-11-13 — Verified usable Vivado 2022.1 core after installer final-processing failure
+
+- 需求／決策：使用者指出 Vivado installer 尚停在 76%，因此先區分「下載/安裝器完成」與「主工具是否可執行」，避免在未完成 GUI 安裝時做不實宣稱。
+- 實際完成：觀察到 installer 的 `Execution of Pre/Post Installation Tasks Failed` dialog；唯讀執行 Vivado 2022.1 version check 與 Vitis 2022.1 XSCT help，兩者 exit code=0，並確認 Zynq UltraScale+ device data 已落在安裝樹。
+- 驗證範圍／未完成：僅證明核心 tools 可啟動，未證明 post-install tasks、完整 device/IP coverage 或 2022.1 DPU/USB-video build 成功；未改板子、SD、USB 相機、Wi-Fi 或 tracked program source。下一步以隔離 build directory 做 real project/IP validation。
+- Git／同步：本紀錄與兩份進度文件將隨本次文件提交推送；installer tree 與 logs 為本機工具狀態，不納入 Git。
+

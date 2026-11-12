@@ -13,6 +13,10 @@ It is intentionally not a Jupyter/PYNQ control path.
    creates an A53 standalone platform and `pynq_zu_usb_video_app.elf`.
    `build_vitis_embedded.py` remains the separate Vitis Embedded 2024.2 flow
    for a 2024.2 XSA and must not be used for the 2022.1 handoff.
+   If the 2022.1 platform is already present after an interrupted IDE session,
+   run `finish_vitis_2022_app.tcl` with the same
+   `PYNQ_ZU_VITIS_WORKSPACE` to import the tracked C sources and build only
+   the application.
 3. Let Vitis generate `xparameters.h`; `main.c` uses those generated base
    addresses and deliberately fails compilation if the expected IP is absent.
 

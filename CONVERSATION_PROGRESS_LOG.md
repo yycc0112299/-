@@ -778,6 +778,6 @@
 
 - 需求／決策：以 Vivado 2022.1 已輸出的 exact XSA 產生 matching Vitis A53 control build，避免把 Vitis 2024.2 Python client 用於 2022.1 handoff。
 - 實際完成：新增 tracked `vitis/pynq_zu_usb_video/build_vitis_2022.tcl` 與 README version guard；external 2022.1 XSCT platform 產生 `standalone_domain` BSP。handoff verifier 對 XSA 與 generated `xparameters.h` PASS，DMA/frame GPIO/mailbox 分別為 `A0000000/A0010000/A0020000`。用 Vitis 2022.1 `aarch64-none-elf-gcc`、該 BSP 的 `libxil.a` 和 generated linker script 實際輸出 203,736-byte ELF64/AArch64 control ELF。
-- 驗證範圍／未完成：XSCT/Eclipse 的 automatic app-import request 在 empty app project 建好後停止回應；僅關閉這次 isolate workspace 的 processes，未改 installer、board、SD、USB/UART 或網路。因此 tracked Tcl 尚未在此主機端 full completion verified。manual ELF compilation 與 address contract 不代表 JTAG/Linux execution、PL programming、UVC dual capture、DPU/VART/YOLOv8 或 Wi-Fi peer。
+- 驗證範圍／未完成：第二次以新增 `finish_vitis_2022_app.tcl` 重新 import project 時，已實際寫入 tracked C/H sources，但 XSCT/Eclipse 在 build request 前報 `xsct server communication channel has closed unexpectedly`/`Connection reset`；僅關閉這次 isolate workspace 的 processes，未改 installer、board、SD、USB/UART 或網路。因此 tracked Tcl 尚未在此主機端 full completion verified。manual ELF compilation 與 address contract 不代表 JTAG/Linux execution、PL programming、UVC dual capture、DPU/VART/YOLOv8 或 Wi-Fi peer。
 - Git／同步：本次 source/README/三份 progress documents 將提交並推送到 `main`；external XSA/workspace/BSP/ELF/logs 不入 Git。
 

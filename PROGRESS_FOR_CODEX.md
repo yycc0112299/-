@@ -17,6 +17,12 @@
 - 已從 Docker Hub 拉取 official `xilinx/vitis-ai:2.5.0`；image digest=`sha256:eaa85efb06924995ebdb973546e7f69169b003b8cc525764bd9524ad554dddbe`，Docker inspect size=27,008,926,042 bytes。以 noninteractive container 啟動、activate `vitis-ai-pytorch` 後，`/opt/vitis_ai/conda/envs/vitis-ai-pytorch/bin/vai_c_xir` 可執行；`vaic`、`xcompiler`、`xir`、`vart`、`pytorch_nndct_cpu` 都列為 2.5.0。
 - 這解除 **host model-compiler** blocker（可在後續有 exact 4.0 `arch.json` 時編譯相容模型）；未做 quantization／compile，因為尚未獲得要部署的 deterministic YOLOv8 INT8 model contract，且 Vitis AI 2.5 對 YOLOv8 非現成官方 model-library claim。它也不解除 2022.1 Vivado/PetaLinux、Linux DPU driver/runtime、target image、或板端驗證。
 
+## 2026-11-12：DPU 4.0 的 2022.1 target SDK 與 runtime bundle 已取得、未誤部署
+
+- 從 Vitis-AI v2.5 source 的 official public URLs 下載 `sdk-2022.1.0.0.sh`（942,561,547 bytes，SHA-256=`e2becdb06564f7f26ac1c61e81201d1ada78e9d7f6bb2aacc0969a0d63ba84e4`）與 `vitis_ai_2022.1-r2.5.0.tar.gz`（7,247,361 bytes，SHA-256=`cc04a31abc147b9936fa2cc15ec3a8348a3dc27ab5a52dbc2239326e31567511`），放在外部 `C:\pynq_toolchain_sources\vitis_ai_2_5_assets`，不入 Git。Vitis-AI v2.5 tag `c26eae36f034d5a2f9b2a7bfe816b8c43311a4f8` 亦已 external clone。
+- runtime tar 在 Windows NTFS 展開時無法建立 Linux symlinks，故不把 Windows staging 當作 validation。已在 WSL Ubuntu 的 ext4 `/home/petalinux/vitis_ai_2_5_runtime_staging` 解壓確認 `libvart-runner.so -> libvart-runner.so.2`、`libvart-runner.so.2.5.0`、`libxir.so.2.5.0`、`xdputil` 與 13 個 `libvart*.so.2.5.0` 均存在。
+- 限制：SDK installer 尚未執行；runtime 也未複製到板子或目前 PYNQ 2024.1 rootfs。它們只對日後 matching 2022.1 system/sysroot 有效，不可將存在的 aarch64 libraries 宣稱為已在 PYNQ-ZU 執行。
+
 ## 2026-11-11：Linux CMA 可用，但 Vitis/Linux AXI DMA 仍需 kernel DMA-BUF ownership layer
 
 - 對 live PYNQ 做唯讀盤點，發現 `/dev/dma_heap/linux,cma`、`/dev/dma_heap/system`；`CmaTotal=524288 KiB`、`CmaFree=517188 KiB`。所以 Linux camera/packer 後有 contiguous-memory allocation source，這是正面硬體／kernel 證據。

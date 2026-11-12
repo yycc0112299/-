@@ -560,6 +560,13 @@
 - 驗證範圍／未完成：只驗證 compiler runtime，沒有 quantize/compile YOLOv8、沒有建立 Linux image、安裝 VART、寫 SD 或碰板子。YOLOv8 並非此 2.5 image 已驗證的現成 output/decode contract；必須等 exact 4.0 target image 與 model integration test 才可聲稱 DPU inference。
 - Git／同步：已提交為 `20ec629`（`Record Vitis AI 2.5 compiler verification`）並成功推送至 `origin/main`；27-GB Docker image、source archive、model/bitstream 與帳密均不進 Git。本行同步結果由下一筆文件提交補上。
 
+## 2026-11-12 — Acquired and verified Vitis AI 2.5 target SDK/runtime assets
+
+- 需求／決策：補齊 DPU 4.0/2022.1 正確 target runtime 與交叉編譯資產，但不把它誤裝到現有 2024.1 PYNQ SD image。
+- 實際完成：從 Vitis-AI v2.5 官方 source 連結下載 `sdk-2022.1.0.0.sh`（942,561,547 bytes、SHA-256 `e2becdb06564f7f26ac1c61e81201d1ada78e9d7f6bb2aacc0969a0d63ba84e4`）與 `vitis_ai_2022.1-r2.5.0.tar.gz`（7,247,361 bytes、SHA-256 `cc04a31abc147b9936fa2cc15ec3a8348a3dc27ab5a52dbc2239326e31567511`）。在 WSL ext4 解壓 bundle，驗證 `libvart-runner.so -> libvart-runner.so.2`、versioned VART/XIR libraries、`xdputil`，並計得 13 個 versioned VART libraries。
+- 驗證範圍／未完成：Windows NTFS staging 不能建立 Linux symlink，故不作 runtime 安裝證據；ext4 解壓才是 bundle completeness check。沒有執行 SDK installer、未建 2022.1 image、未複製 runtime 到板子、未改 SD/PL/UART/network；DPU inference 未完成。
+- Git／同步：本項環境紀錄與兩份進度文件將同一提交推送；SDK/runtime archives、external source clone、Docker images、models、bitstreams 和帳密均不進 Git。
+
 ## 2026-11-12 — Verified fixed Vitis AI 3.5 compiler container
 
 - 實際完成：Docker Desktop 4.99.0 已以 `hello-world` pull/run 驗證；固定 tag `xilinx/vitis-ai-pytorch-cpu:ubuntu2004-3.5.0.306` 已拉取。container activate `vitis-ai-pytorch` 後確認 `vai_c_xir`、`vaic`、`xcompiler`、`xir` 均為 3.5.0。

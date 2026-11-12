@@ -15,6 +15,11 @@
 - 已下載並實測對應的 Vitis AI 2.5 Docker 編譯環境；DPU 模型編譯所需工具都能啟動。
 - 還不能宣稱模型已跑在板上：仍缺 2022.1 的 Vivado/PetaLinux、Linux DPU 驅動與板端映像。
 
+## 2026-11-12：已備妥正確的 2022.1 runtime 資產
+
+- 已下載正確版本的 target SDK 與 Vitis AI 2.5 runtime，並在 Linux 環境確認 VART、XIR、xdputil 函式庫內容完整。
+- 這些檔案尚未寫入 SD 卡或板子；要等 2022.1 Linux 映像完成後才可使用。
+
 ## 2026-11-11：找到 Linux 的連續影像記憶體，但 DMA 還不能直接使用
 
 - 板子已具備可分配連續記憶體的 CMA；這是相機資料未來送往 FPGA 所需的條件之一。

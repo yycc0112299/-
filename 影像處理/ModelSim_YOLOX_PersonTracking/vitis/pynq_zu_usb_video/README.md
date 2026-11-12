@@ -101,3 +101,20 @@ mailbox status=`2`, and DMA status=`0x1002`; the AXI DMA status register also
 read `0x1002` (idle plus IOC completion). This proves the A53 → DDR → AXI DMA
 → PL AXI4-Stream path for a complete frame. It does not prove USB UVC capture,
 two-camera stability, real YOLOX results, or the IRQ handler.
+
+## SD/Linux overlay staging
+
+For a later SD-booted PYNQ Linux test, stage the exact implemented hardware
+without programming the board.  From the `ModelSim_YOLOX_PersonTracking`
+repository directory, run:
+
+```powershell
+.\fpga\prepare_pynq_zu_usb_video_overlay.ps1 `
+  -BuildDir C:\path\to\pynq_zu_usb_video_build `
+  -OutputDir $env:TEMP\pynq_zu_usb_video_overlay
+```
+
+The output is the matching pair `pynq_zu_usb_video.bit` and
+`pynq_zu_usb_video.hwh`, plus their SHA-256 values.  Copying/loading that
+pair remains a separate authenticated board action; staging neither writes an
+SD card nor makes UVC/DMA/DPU inference work by itself.

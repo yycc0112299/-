@@ -1,5 +1,11 @@
 # 專題進度（重點版）
 
+## 2026-11-12：USB 硬體檔已可安全準備給 Linux 板子使用
+
+- 已從 USB-camera Block Design 的實際 Vivado 結果封裝出成對的 `.bit`／`.hwh` overlay 檔案，名稱及雜湊均已核對。
+- 封裝步驟只在電腦上複製檔案，不會燒錄 SD、連線板子或偷偷變更開機。
+- 仍待有效板端登入後，才能實際載入 overlay 並驗證 USB 相機與 DMA。
+
 ## 2026-11-12：Vitis 控制程式已用正確 Embedded 安裝重新編出
 
 - 找到完整的 Embedded Vitis 2024.2 安裝，修正另一套 Vitis 因 Lopper 缺失而「表面 exit code 成功、實際平台建立失敗」的問題。

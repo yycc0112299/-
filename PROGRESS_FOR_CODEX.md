@@ -1,5 +1,11 @@
 # 專題狀態與交接記錄（供 Codex）
 
+## 2026-11-12：USB-video 的 PYNQ Linux overlay 已可從正確 Vivado implementation 安全封裝
+
+- 新增 `fpga/prepare_pynq_zu_usb_video_overlay.ps1` 和 static safety contract test。工具要求使用者提供 external Vivado build directory，只讀 `pynq_zu_usb_video_wrapper.bit` 與同一 BD 的 `pynq_zu_usb_video.hwh`，輸出同 stem 的 `pynq_zu_usb_video.bit/.hwh`，並輸出兩個 SHA-256。它不含 SSH/SCP/bootgen，絕不連線板子、寫 SD 或改 boot configuration。
+- test-first：script 未建立時 test 如預期 FAIL；實作後 1/1 PASS。實際從 `C:\pynq_zu_usb_video_rebuild_20261111` 封裝到 external `%TEMP%` staging directory；bit=7,797,821 bytes、HWH=333,915 bytes，SHA-256 分別為 `e92ee2cc3f7493ea141e7e363a80893b393225e744562c33093b1011e34cd6c2` 與 `ac5497244a55b17810c6bc318dd050fec159c3e84005afe3eb91ce31b375c6b5`。
+- 這提供未來 SD-boot Linux `Overlay()`／DMA driver bring-up 的正確 hardware pair，不證明它已被上傳、下載至 PL、UVC capture、DMA-BUF handoff、two-camera、DPU/YOLOv8 或 Wi-Fi 已運作。external staged binary 不入 Git。
+
 ## 2026-11-12：以完整 Embedded Vitis 2024.2 重新建立 USB-video A53 平台與 ELF
 
 - 先前使用 `C:\Xilinx\Vitis\2024.2` 建 platform 時雖回傳 process exit 0，實際卻因 `Invalid Lopper Installation Directory path 'null'` 失敗；不可把該 exit code 當成功。唯讀比對既有成功 workspace 的 BSP metadata 後，找到完整安裝為 `C:\Xilinx_Embedded_2024_2\Vitis\2024.2`：含 `data\embeddedsw` 及可執行的 Lopper 1.2.0。另一套的自動 lopper 安裝紀錄也證實缺少 requirements 檔。

@@ -1,5 +1,11 @@
 # 專題狀態與交接記錄（供 Codex）
 
+## 2026-11-12：overlay PYNQ/XRT device discovery blocked by `render` group access
+
+- Host 已以 SSH key auth 直接登入，overlay staging directory 為 `/home/xilinx/codex_usb_overlay`，內含 matching USB-video `.bit/.hwh` 與 `verify_pynq_zu_usb_video_overlay.py`。verifier 呼叫 `Overlay(..., download=True)` 前先失敗於 `Device.active_device`：`RuntimeError: No Devices Found`，沒有 DMA CONTROL write。
+- Read-only diagnosis：XRT=2.17.0、ZOCL module loaded、FPGA manager state=`operating`，dmesg 有 `base.bin` programming 和 ZOCL initialized；但 `xbutil examine` reports 0 devices。`/dev/dri/renderD128` 是 mode 660、group `render`；`xilinx` groups 僅 `xilinx,adm,sudo,video`，不含 `render`。這是 PYNQ `pyxrt.device(0)` 無法開啟的具體 host permissions cause。
+- 已嘗試 `sudo usermod -aG render xilinx`，但 non-interactive SSH 正確地被 sudo password prompt 阻擋，未變更 group。需要在使用者已登入的 SSH session 執行並輸入 sudo password，然後重新登入。不要聲稱 overlay/DMA/UVC/DPU 已成功。
+
 ## 2026-11-12：板端兩支 C270 實際 sequential capture PASS
 
 - SSH key auth 建立後，以 `xilinx@192.168.3.1` 直接執行唯讀板端診斷。`lsusb` 顯示兩支 `046d:0825 Logitech Webcam C270`；udev path 對應 USB port `1-1.3` 的 `/dev/video0,/dev/video1` 與 port `1-1.4` 的 `/dev/video2,/dev/video3`。

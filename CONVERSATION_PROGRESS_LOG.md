@@ -1,5 +1,12 @@
 # 對話與進度同步紀錄
 
+## 2026-11-12 — Diagnosed PYNQ overlay/XRT access failure after safe USB-video overlay staging
+
+- 需求／決策：利用已確認可用的板端 SSH key，在不啟動 DMA 的前提下嘗試 USB-video overlay control-plane verifier，並定位任何 runtime blocker。
+- 實際完成：upload matching `.bit/.hwh` + verifier 至 `/home/xilinx/codex_usb_overlay`。PYNQ verifier 安全停止於 `No Devices Found`。後續 read-only diagnosis 顯示 XRT/ZOCL/FPGA manager/base.bin 均存在，但 `xilinx` 不屬於 `render` group，不能存取 660 `root:render` 的 `/dev/dri/renderD128`；`xbutil` 因此見到 0 devices。
+- 驗證界線／未完成：沒有 DMA control、camera stream、overlay success、DPU、YOLOv8 或 Wi‑Fi 實測。以 noninteractive SSH 嘗試 `sudo usermod -aG render xilinx` 被 password prompt 正確擋下，未修改群組；需使用者在已有 SSH session 完成 sudo 後重新登入。
+- Git／同步：本次文件變更待提交並推送到 `origin/main`；SSH private key 和 staged binary overlay 都屬外部機器/板端狀態，不入 Git。
+
 ## 2026-11-12 — Verified direct SSH access and sequential capture from both USB cameras on PYNQ
 
 - 需求／決策：使用者完成 SSH key 授權後，直接在板端確認兩支實體相機是否可擷取；採 sequential one-frame capture，避免把 USB2 hub 同時帶寬問題誤判為相機失敗。

@@ -1,5 +1,11 @@
 # 專題進度（重點版）
 
+## 2026-11-12：板端 PYNQ overlay／XRT 診斷定位到 render 權限
+
+- USB-video overlay 的 `.bit`、matching `.hwh` 與安全 verifier 已傳到板端；verifier 在下載前因 XRT 顯示 0 devices 而安全停止，沒有啟動 DMA 或相機。
+- 板上 XRT 2.17、ZOCL 與 FPGA manager 都存在，開機記錄顯示 `base.bin` 已載入；但帳號 `xilinx` 不在 `render` 群組，無權存取 `root:render` 的 `/dev/dri/renderD128`，因此 PYNQ/XRT 無法開啟 device 0。
+- 尚待在已登入 SSH 終端以 sudo 將 `xilinx` 加入 `render` 群組後重新登入，再重新驗證 overlay。這不是 DPU、YOLOv8 或 DMA 已成功。
+
 ## 2026-11-12：兩支 USB 相機已在 PYNQ 板上逐支實際擷取成功
 
 - 板端 `lsusb` 實測兩支 Logitech Webcam C270（`046d:0825`）；第一支對應 `/dev/video0`/`video1`，第二支對應 `/dev/video2`/`video3`。

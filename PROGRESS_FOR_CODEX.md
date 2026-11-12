@@ -708,3 +708,8 @@
 - 驗證界線：PetaLinux installer 警告 host 未提供 TFTP server，這不阻止 SDK setup，但若採 network boot 需另行配置。尚未以 2024.1 重建 matching XSA、建立 PetaLinux project/rootfs、加入 DPU device tree/driver、VART/XIR、Docker/Vitis AI compiler 或 `.xmodel`；也尚未寫 SD、program PL、改板端 Linux 或驗證 DPU/Wi-Fi/second board。現有已實作 USB-video XSA/ELF 是 2024.2，不能直接聲稱與 DPUCZDX8G 4.0 + Vitis AI 3.5 的 2024.1 deployment contract 相容。
 - 在 WSL 中 source 2024.1 settings 後，以 exact generated `arch.json` 實跑 `preflight_dpu_build_host.py`：`petalinux-create=True`、`has_arch_json=True`、PetaLinux version=2024.1。gate 因此只剩兩個 blockers：尚無 Docker/`vai_c_xir` Vitis AI 3.5 compiler route，以及現有 DPU Vivado hardware 是 2024.2（不是 matching 2024.1）。這是 host preflight，非 target image/DPU runtime 驗證。
 - 已在外部 WSL path `/home/petalinux/work/pynq_zu_dpu_2024_1` 成功執行 `petalinux-create project --template zynqMP --name pynq_zu_dpu_2024_1`。這只是 target family 正確的專案骨架；刻意未對它執行 `petalinux-config --get-hw-description` 或匯入現有 2024.2 XSA，因為那會破壞 2024.1 matching contract。project 是 generated external build state，不納入 Git。
+### 2026-11-12：Docker Vitis AI 3.5 compiler route 已驗證
+
+- Docker Desktop 4.99.0 已以 `hello-world` 實測 pull/run；固定 image `xilinx/vitis-ai-pytorch-cpu:ubuntu2004-3.5.0.306` 已 pull。container 預設 PATH 沒有 compiler，需 source conda profile 並 activate `vitis-ai-pytorch`；其後實測 `vai_c_xir`、`vaic`、`xcompiler`、`xir` 都是 3.5.0。
+- 這解除 compiler-route blocker，不解除官方 Vitis AI 3.5 所需的 2023.1 Vivado/PetaLinux/XSA/rootfs/VART/image blocker。
+

@@ -538,3 +538,8 @@
 - DPU 建置檢查已確認 PetaLinux 與正確 DPU 架構檔可用；目前只剩 Docker/Vitis AI 編譯環境，以及重新以 2024.1 建硬體這兩項主機端缺口。
 - 已建立 ZynqMP 的 PetaLinux 專案骨架，但尚未放入不相容的 2024.2 硬體交接檔。
 - 仍未完成：2024.1 matching 硬體/XSA、PetaLinux 映像、DPU/VART/YOLOv8 模型部署、燒錄 SD、兩板 Wi-Fi 與實機人物辨識。現有 Vivado/Vitis USB-video 成果仍是 2024.2，不能直接當成 DPU runtime 完成。
+## 2026-11-12：Docker 與 Vitis AI 編譯器可用
+
+- Docker Desktop 與固定 Vitis AI 3.5 容器已可用；啟用 container 的 `vitis-ai-pytorch` 環境後，`vai_c_xir` 編譯器已實測存在。
+- 正式 DPU 映像仍需 matching 2023.1 Vivado/PetaLinux/XSA。
+

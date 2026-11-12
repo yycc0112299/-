@@ -539,3 +539,7 @@
 - 實際完成：官方 Vitis AI 3.5 release、embedded quick-start 與 recipes 均證實相容版本是 Vivado/Vitis/PetaLinux 2023.1。採 test-first 修正 tracked preflight 由 2024.1 改為 2023.1；preflight tests 3/3、person_tracking tests 19/19 PASS。
 - 驗證界線／未完成：已安裝 PetaLinux 2024.1、現有 Vivado 2024.2、external 2024.1 project skeleton 都不可當作 Vitis AI 3.5 deployable contract；仍待 matching 2023.1 toolchain/XSA/image/DPU runtime。Docker 已完成 engine verification，但尚未 pull Vitis AI container。
 - Git：已提交為 `a078ede`（`Correct Vitis AI 3.5 toolchain contract`）並成功推送至 `origin/main`。
+## 2026-11-12 — Verified fixed Vitis AI 3.5 compiler container
+
+- 實際完成：Docker Desktop 4.99.0 已以 `hello-world` pull/run 驗證；固定 tag `xilinx/vitis-ai-pytorch-cpu:ubuntu2004-3.5.0.306` 已拉取。container activate `vitis-ai-pytorch` 後確認 `vai_c_xir`、`vaic`、`xcompiler`、`xir` 均為 3.5.0。
+- 驗證界線／未完成：這提供 compiler route，但尚無 matching 2023.1 Vivado/PetaLinux/XSA、target rootfs/VART image 或 compiled xmodel，未碰板子/SD。

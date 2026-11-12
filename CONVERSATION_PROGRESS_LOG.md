@@ -1,5 +1,12 @@
 # 對話與進度同步紀錄
 
+## 2026-11-12 — Verified SSH login, Linux/PYNQ runtime, and V4L2 node enumeration on the board
+
+- 需求／決策：板子重開且 SSH 可達後，先以實際已登入終端確認目標端 Linux/PYNQ 與相機 device node；不寫入板子。
+- 實際完成：使用者提供 `xilinx@pynq` 終端證據：`whoami=xilinx`、Linux `6.6.10-xilinx-v2024.1` aarch64、`PYNQ_OK 3.1.1`、`/dev/video0` 至 `/dev/video3` 均存在。
+- 驗證界線／未完成：尚未讀取 V4L2 format/frames，不能把 node presence 當成一或兩支相機出圖、同時串流、DMA/DPU/YOLOv8/Wi‑Fi success。沒有對板子寫入。
+- Git／同步：本次文件變更待提交並推送到 `origin/main`。
+
 ## 2026-11-12 — Completed host-side person-tracking and deployment contract tests while toolchain installation runs
 
 - 需求／決策：安裝 Vivado/Vitis 2022.1 期間先完成不需工具鏈或板端線材的工作。

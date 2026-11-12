@@ -1,5 +1,11 @@
 # 專題進度（重點版）
 
+## 2026-11-12：PYNQ Linux、SSH 與 video device 枚舉已實測
+
+- SSH 已以帳號 `xilinx` 成功登入板子；畫面實測 `whoami` 回傳 `xilinx`，Linux 為 `6.6.10-xilinx-v2024.1`、`aarch64`。
+- `python3` 可匯入 PYNQ `3.1.1`；`/dev/video0` 到 `/dev/video3` 均存在。
+- 這只證明 Linux/PYNQ 與 V4L2 device node 枚舉，尚未驗證任一相機能出圖、兩支相機可同時串流、DMA/DPU/YOLOv8 或雙板 Wi‑Fi。
+
 ## 2026-11-12：工具鏈安裝等待期間完成主機端 Python／部署測試
 
 - 重跑人物追蹤、YOLOv8 adapter、VART gate、Wi‑Fi peer 協定與 USB overlay verifier：`24/24` 通過。

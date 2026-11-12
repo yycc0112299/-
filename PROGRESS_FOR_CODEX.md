@@ -1,5 +1,11 @@
 # 專題狀態與交接記錄（供 Codex）
 
+## 2026-11-12：板端 SSH／Linux／PYNQ 與 V4L2 device node 實測
+
+- 使用者提供已登入 `xilinx@pynq` 的終端畫面：`whoami=xilinx`；`uname -a` 為 Linux `6.6.10-xilinx-v2024.1`、aarch64。
+- 同一終端執行 `ls -l /dev/video*`，可見 `/dev/video0`、`/dev/video1`、`/dev/video2`、`/dev/video3`；Python import 實測 `PYNQ_OK 3.1.1`。
+- 證據範圍限 SSH session、kernel/PYNQ version 和 V4L2 node presence。沒有 `v4l2-ctl` format/frame capture，也沒有 overlay、DMA、DPU、YOLOv8、Wi‑Fi peer 或 second board 驗證。
+
 ## 2026-11-12：安裝等待期間完成 Python／部署合約測試
 
 - 工具鏈安裝期間以 Python `unittest` 執行 `person_tracking/tests`：24/24 PASS，涵蓋 YOLOv8 backend、VART xmodel gate、解碼/量化、peer protocol、Wi‑Fi preflight 與 USB overlay verifier。

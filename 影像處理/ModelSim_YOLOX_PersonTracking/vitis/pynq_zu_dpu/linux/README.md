@@ -93,3 +93,22 @@ derived from the local Vivado build; regenerate it after any DPU IP
 configuration change. The presence of this architecture file only unlocks the
 correct compiler input—it does not resolve the required matching build host or
 create a working Linux DPU runtime.
+
+## 2022.1 SDK VART link smoke
+
+The actual DPUCZDX8G 4.0 contract uses the 2022.1 target SDK and Vitis AI
+2.5 runtime. Once those assets have been installed into a Linux sysroot,
+source the matching SDK environment and run the small cross-link check:
+
+```sh
+source /home/petalinux/sdk_2022_1/environment-setup-cortexa72-cortexa53-xilinx-linux
+bash build_vart_link_smoke.sh /tmp/vart_link_smoke.elf
+readelf -d /tmp/vart_link_smoke.elf | grep NEEDED
+```
+
+The expected AArch64 ELF has `libvart-runner.so.2`, `libxir.so.2`, and
+`libunilog.so.2` in its dynamic dependencies. This verifies that the
+cross-compiler can consume the matching target headers and libraries; it does
+not execute VART. `vart_link_smoke.cpp` deliberately supplies a null subgraph
+and must never be run on a target. It is not a model test, DPU driver test,
+boot-image test, or board-side inference result.

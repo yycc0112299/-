@@ -1,5 +1,12 @@
 # 對話與進度同步紀錄
 
+## 2026-11-12 — Cross-linked VART 2.5 against the correct 2022.1 SDK
+
+- 需求／決策：在實際 DPUCZDX8G 4.0 的 2.5/2022.1 contract 下，先用最小 AArch64 link smoke 驗證 SDK sysroot 與 VART/XIR runtime 能共用，而不把 runtime 錯裝到現有 PYNQ 2024.1 SD image。
+- 實際完成：official 2022.1 SDK 已 external 安裝於 WSL `/home/petalinux/sdk_2022_1`；Vitis AI 2.5 runtime archive 只 overlay 到該 sysroot。新增 tracked `vart_link_smoke.cpp`、`build_vart_link_smoke.sh` 和 source-contract test。test-first：缺檔時 test 如預期失敗；實作後 test PASS。source matching environment 後實際輸出 ARM aarch64 PIE ELF，`readelf -d` 確認 NEEDED `libvart-runner.so.2`、`libxir.so.2`、`libunilog.so.2`。
+- 驗證範圍／未完成：這是 cross-link ABI smoke，程式的 null subgraph 使它不可執行；沒有 PetaLinux 2022.1 image、DPU driver/VART board runtime、xmodel、YOLOv8 compile 或板端 inference。SDK/runtime/ELF 均為外部資產不入 Git，未改 SD/PL/UART/network。
+- Git／同步：待本次程式、文件與完整測試完成後提交並推送 `origin/main`；提交後以後續同步紀錄補上實際 hash。
+
 ## 2026-11-06 — Vivado USB-camera Block Design 與 Vitis 控制起始實作
 
 - 需求／決策：依使用者要求改為 Vivado 建硬體、Vitis 寫控制；現有鏡頭為兩支 USB Logitech C270，故 USB0/USB1 必須保留在 PYNQ-ZU PS 的 MIO，而非虛構 PL 相機腳位。

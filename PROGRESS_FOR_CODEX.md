@@ -1,5 +1,11 @@
 # 專題狀態與交接記錄（供 Codex）
 
+## 2026-11-12：2022.1 SDK 的 VART 2.5 AArch64 連結驗證已通過
+
+- 已在 WSL ext4 安裝 external `/home/petalinux/sdk_2022_1`（official 2022.1 SDK），其 `environment-setup-cortexa72-cortexa53-xilinx-linux` 提供 GCC 11.2.0 與 AArch64 sysroot。將已驗證的 Vitis AI 2.5 runtime bundle **overlay 到此 2022.1 sysroot** 後，確認 sysroot 內有 `xdputil`、`libvart-runner.so.2.5.0`、`libxir.so.2.5.0`。
+- 新增 tracked `vitis/pynq_zu_dpu/linux/vart_link_smoke.cpp`、`build_vart_link_smoke.sh` 和 source-contract unit test。test-first 證據：實作前 test 因檔案不存在失敗；加入檔案後 test PASS。實際 source SDK environment 後交叉編譯 PASS，輸出為 ARM aarch64 PIE ELF；`readelf -d` 實測含 `libvart-runner.so.2`、`libxir.so.2` 與 `libunilog.so.2`。這驗證 host cross-link ABI，而非執行期。
+- 嚴格界線：smoke source 故意給 `Runner::create_runner()` null subgraph，**不得在目標端執行**。本次未建 PetaLinux 2022.1 image、未安裝或啟動 DPU driver/VART 到 PYNQ SD、未寫 SD/PL、未 compile YOLOv8 `.xmodel`，也沒有 DPU inference。SDK、runtime bundle 和 ELF 都在外部路徑，未入 Git。
+
 ## 2026-11-12：DPU IP 版本與工具鏈契約再次校正
 
 - 直接讀取目前外部 build 的 `DPUCZDX8G_v4_0_0/component.xml`，確認現有 B512 bitstream 的 **實際 DPU IP 是 4.0**，不是「v4.0 source branch」標籤。AMD official compatibility matrix 指定：DPU 4.0 → Vitis AI 2.5 → Vivado/Vitis/PetaLinux 2022.1；DPU 4.1 → Vitis AI 3.5 → 2023.1。故先前把現有 DPU 4.0 說成 Vitis AI 3.5/2023.1 的表述不正確，已以本段覆蓋。

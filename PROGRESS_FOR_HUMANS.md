@@ -1,5 +1,11 @@
 # 專題進度（重點版）
 
+## 2026-11-12：Linux 建置環境已能看見正確的 DPU 編譯器
+
+- 已讓 WSL 的建置環境使用既有 Docker Desktop 裡正確的 Vitis AI 2.5 compiler image，不用重新下載。
+- 檢查工具現在會直接讀 PetaLinux 安裝內容，確認目前只有 2024.1；因此會正確擋下 DPU 4.0 所需 2022.1 被假裝已完成的情況。
+- 還是不能建出正式映像：真正缺的是 Vivado/PetaLinux 2022.1，不是 Docker 或模型編譯器。
+
 ## 2026-11-12：正確版本的 DPU 函式庫已能交叉編譯連結
 
 - 已安裝 DPU 4.0 所需的 2022.1 SDK，並放入對應的 Vitis AI 2.5 函式庫；實際編出 ARM 版測試程式，確認它會連到 VART、XIR 和 unilog。

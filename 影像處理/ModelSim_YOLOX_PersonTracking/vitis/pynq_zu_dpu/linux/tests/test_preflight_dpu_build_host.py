@@ -2,19 +2,36 @@
 
 from pathlib import Path
 import sys
+import tempfile
 import unittest
 
 
 LINUX_DIR = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(LINUX_DIR))
 
-from preflight_dpu_build_host import evaluate_build_contract
+from preflight_dpu_build_host import (
+    evaluate_build_contract,
+    petalinux_version_from_root,
+    required_docker_image,
+)
 
 
 class DpuBuildHostPreflightTests(unittest.TestCase):
+    def test_dpu_40_requires_the_fixed_vitis_ai_25_image(self) -> None:
+        self.assertEqual(required_docker_image("4.0"), "xilinx/vitis-ai:2.5.0")
+        self.assertEqual(required_docker_image("4.1"), "xilinx/vitis-ai-pytorch-cpu:ubuntu2004-3.5.0.306")
+
+    def test_reads_petalinux_version_from_the_selected_root(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            root = Path(temporary_directory)
+            (root / "settings.sh").write_text(
+                "export PETALINUX_VER=2022.1\n", encoding="utf-8"
+            )
+            self.assertEqual(petalinux_version_from_root(root), "2022.1")
+
     def test_accepts_current_dpu_40_vitis_ai_25_2022_1_docker_route(self) -> None:
         report = evaluate_build_contract(
-            commands={"docker": True, "vai_c_xir": False, "petalinux-create": True},
+            commands={"docker": True, "matching_docker_image": True, "vai_c_xir": False, "petalinux-create": True},
             has_arch_json=True,
             dpu_ip_version="4.0",
             vitis_ai_version="2.5",
@@ -26,7 +43,7 @@ class DpuBuildHostPreflightTests(unittest.TestCase):
 
     def test_rejects_vitis_ai_35_for_the_current_dpu_40_hardware(self) -> None:
         report = evaluate_build_contract(
-            commands={"docker": True, "vai_c_xir": False, "petalinux-create": True},
+            commands={"docker": True, "matching_docker_image": False, "vai_c_xir": False, "petalinux-create": True},
             has_arch_json=True,
             dpu_ip_version="4.0",
             vitis_ai_version="3.5",
@@ -39,7 +56,7 @@ class DpuBuildHostPreflightTests(unittest.TestCase):
 
     def test_accepts_dpu_41_vitis_ai_35_2023_1_contract(self) -> None:
         report = evaluate_build_contract(
-            commands={"docker": True, "vai_c_xir": False, "petalinux-create": True},
+            commands={"docker": True, "matching_docker_image": True, "vai_c_xir": False, "petalinux-create": True},
             has_arch_json=True,
             dpu_ip_version="4.1",
             vitis_ai_version="3.5",
@@ -50,7 +67,7 @@ class DpuBuildHostPreflightTests(unittest.TestCase):
 
     def test_requires_a_compiler_route_and_generated_architecture(self) -> None:
         report = evaluate_build_contract(
-            commands={"docker": False, "vai_c_xir": False, "petalinux-create": False},
+            commands={"docker": False, "matching_docker_image": False, "vai_c_xir": False, "petalinux-create": False},
             has_arch_json=False,
             dpu_ip_version="4.0",
             vitis_ai_version=None,
@@ -58,7 +75,7 @@ class DpuBuildHostPreflightTests(unittest.TestCase):
             petalinux_version=None,
         )
         self.assertEqual(report["status"], "FAIL")
-        self.assertIn("No Vitis AI compiler route: install Docker for the Vitis AI 2.5 container or expose vai_c_xir.",
+        self.assertIn("No verified Vitis AI compiler route: pull 'xilinx/vitis-ai:2.5.0' or expose vai_c_xir for Vitis AI 2.5.",
                       report["blocking_reasons"])
         self.assertIn("No DPU-generated arch.json was supplied; do not compile YOLOv8 for a guessed fingerprint.",
                       report["blocking_reasons"])

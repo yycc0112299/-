@@ -1,5 +1,11 @@
 # 專題狀態與交接記錄（供 Codex）
 
+## 2026-11-12：WSL compiler route 已接通，preflight 改採 PetaLinux 實際版本
+
+- Docker Desktop 既有 official `xilinx/vitis-ai:2.5.0` image 在 Windows 端可正常使用，但 WSL 原先沒有 `docker` command。已在 external `/home/petalinux/.local/bin/docker` 建立指向 Docker Desktop CLI 的 user-only symbolic link；WSL 實測 image digest 為 `sha256:eaa85efb06924995ebdb973546e7f69169b003b8cc525764bd9524ad554dddbe`。未拉取新 image、未改 Docker image/board/SD。
+- `preflight_dpu_build_host.py` 不再把「Docker command 存在」當作 compiler ready：DPU 4.0 現會 inspect fixed `xilinx/vitis-ai:2.5.0`，DPU 4.1 會 inspect fixed 3.5 image。另加 `--petalinux-root`，從 `settings.sh` 讀 `PETALINUX_VER`、確認 `scripts/petalinux-create`，不能以 CLI argument 偽稱另一個版本。新增 test-first tests，現在 6/6 PASS。
+- 實跑 WSL preflight：exact 4.0 `arch.json`、Docker image、PetaLinux executable 都存在；但 selected root 是 **2024.1**，gate 正確 FAIL，原因為 4.0/2.5 要求 2022.1，且 root 明確宣告 2024.1。這是更強的 blocker evidence，不是可部署 image；仍未取得／安裝 2022.1 Vivado/PetaLinux、未建 image／xmodel 或上板。
+
 ## 2026-11-12：2022.1 SDK 的 VART 2.5 AArch64 連結驗證已通過
 
 - 已在 WSL ext4 安裝 external `/home/petalinux/sdk_2022_1`（official 2022.1 SDK），其 `environment-setup-cortexa72-cortexa53-xilinx-linux` 提供 GCC 11.2.0 與 AArch64 sysroot。將已驗證的 Vitis AI 2.5 runtime bundle **overlay 到此 2022.1 sysroot** 後，確認 sysroot 內有 `xdputil`、`libvart-runner.so.2.5.0`、`libxir.so.2.5.0`。

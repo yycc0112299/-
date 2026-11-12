@@ -58,7 +58,8 @@ python3 preflight_dpu_build_host.py \
   --dpu-ip-version 4.0 \
   --vitis-ai-version 2.5 \
   --vivado-version 2022.1 \
-  --petalinux-version 2022.1
+  --petalinux-version 2022.1 \
+  --petalinux-root /path/to/petalinux/2022.1
 ```
 
 The generated hardware's `component.xml` identifies it as DPUCZDX8G **4.0**.
@@ -71,9 +72,12 @@ runtime compatibility from a successful Vivado implementation. Either rebuild
 this IP using the 2.5/2022.1 contract, or first replace it with DPU 4.1 and
 then use the 3.5/2023.1 contract.
 
-The preflight requires a compiler route (Docker with Vitis AI or `vai_c_xir`),
-PetaLinux and the exact DPU-generated `arch.json`. It intentionally refuses to
-guess a fingerprint or compile an `.xmodel` from a board-family JSON. It prints
+The preflight requires the exact local Docker compiler image for the selected
+DPU contract (DPU 4.0: `xilinx/vitis-ai:2.5.0`) or `vai_c_xir`, a PetaLinux
+installation and the exact DPU-generated `arch.json`. When `--petalinux-root`
+is supplied, it reads `PETALINUX_VER` from that installation's `settings.sh`
+instead of trusting a claimed version. It intentionally refuses to guess a
+fingerprint or compile an `.xmodel` from a board-family JSON. It prints
 `PYNQ_ZU_DPU_BUILD_HOST_PASS` only for the compatible build contract; it does
 not download software, alter the workstation, build an image or touch the
 board.

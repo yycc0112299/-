@@ -1,5 +1,12 @@
 # 對話與進度同步紀錄
 
+## 2026-11-12 — Connected WSL to the verified Vitis AI 2.5 compiler and hardened the version gate
+
+- 需求／決策：讓實際 PetaLinux/WSL host 能使用已下載的 Vitis AI 2.5 compiler image，並避免只因 Docker CLI 或使用者輸入版本字串存在就把不相容 host 誤判為 ready。
+- 實際完成：external WSL user-local `/home/petalinux/.local/bin/docker` symbolic link 指向既有 Docker Desktop CLI；WSL 實測能 inspect `xilinx/vitis-ai:2.5.0`，digest=`sha256:eaa85efb06924995ebdb973546e7f69169b003b8cc525764bd9524ad554dddbe`。preflight 現會檢查 exact fixed Docker image，並新增 `--petalinux-root` 從 `settings.sh` 讀 `PETALINUX_VER`、確認 `scripts/petalinux-create`。test-first：新增 import 的 test 先失敗，再實作；preflight tests 6/6 PASS。
+- 驗證範圍／未完成：WSL 實跑確認 current root 確實為 2024.1，Docker/image/arch JSON 與 PetaLinux executable 都可見，但 gate 正確 FAIL：DPU 4.0/AI 2.5 需要 2022.1。未取得/安裝 2022.1 Vivado/PetaLinux、未建 image/xmodel、未寫 SD/PL 或碰板子。
+- Git／同步：待本次程式、文件與完整測試完成後提交並推送 `origin/main`；提交後以後續同步紀錄補上實際 hash。
+
 ## 2026-11-12 — Cross-linked VART 2.5 against the correct 2022.1 SDK
 
 - 需求／決策：在實際 DPUCZDX8G 4.0 的 2.5/2022.1 contract 下，先用最小 AArch64 link smoke 驗證 SDK sysroot 與 VART/XIR runtime 能共用，而不把 runtime 錯裝到現有 PYNQ 2024.1 SD image。

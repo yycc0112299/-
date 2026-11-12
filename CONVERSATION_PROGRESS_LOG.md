@@ -1,5 +1,12 @@
 # 對話與進度同步紀錄
 
+## 2026-11-12 — Reopened and verified the USB-camera Block Design in Vivado
+
+- 需求／決策：以 Vivado 本身而非僅 XML/XSA parser 重新確認可重跑 USB-camera Block Design 與 Vitis control address interface；不改動既有 implementation 或 hardware。
+- 實際完成：新增 read-only `verify_pynq_zu_usb_video_bd.tcl` 和 test-first static contract test（缺 script 時 FAIL，實作後 1/1 PASS）。Vivado 2024.2 batch 實際 open external completed project，載入 local packaged IP repo，成功讀取 `pynq_zu_usb_video` BD。`validate_bd_design` status valid；實測 `axi_dma_0=0xA0000000`、`frame_id_gpio_0=0xA0010000`、`yolox_video_rtl_0=0xA0020000`，marker PASS、exit=0。
+- 驗證範圍／未完成：未 synthesis/implementation/export、未 JTAG program／改 SD，也未開啟 UVC/DPU/Wi-Fi。Vivado session log 留在 `%TEMP%` 不入 Git；這是 BD control-plane verification，不是 camera/DPU runtime proof。
+- Git／同步：待本次程式、文件與完整測試完成後提交並推送 `origin/main`；提交後以後續同步紀錄補上實際 hash。
+
 ## 2026-11-12 — Confirmed PYNQ SSH transport without assuming board access
 
 - 需求／決策：重新取得 board-side runtime evidence，但只作唯讀登入；不因為 TCP 22 開放就假設可執行板端檢查。

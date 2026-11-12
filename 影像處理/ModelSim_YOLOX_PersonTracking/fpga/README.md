@@ -198,6 +198,13 @@ pixel pins：PYNQ-ZU board preset 中 USB0 是 **MIO 52–63**、USB1 是
 2. `create_pynq_zu_usb_video_bd.tcl`
 3. `export_pynq_zu_usb_video_xsa.tcl`
 
+For a non-destructive Vivado-native check of an already-built project, set
+`PYNQ_ZU_BUILD_DIR` and run `verify_pynq_zu_usb_video_bd.tcl` in Vivado batch
+mode. It reopens the BD, invokes `validate_bd_design`, and checks the PS
+address segments for DMA (`0xA0000000`), frame GPIO (`0xA0010000`) and mailbox
+(`0xA0020000`). It does not run implementation, export an XSA or program the
+board.
+
 BD IP Catalog 對應為 `zynq_ultra_ps_e`（PS USB/DDR）、`axi_dma`（MM2S）、
 兩個 `smartconnect`、`axi_gpio`（frame ID）、`proc_sys_reset`，以及
 `dual_camera_yolox_axis_top`。Vitis 從 USB/UVC driver 取得兩張影像、轉為既有的

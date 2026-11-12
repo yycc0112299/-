@@ -1,5 +1,11 @@
 # 專題狀態與交接記錄（供 Codex）
 
+## 2026-11-12：Vivado-native USB Block Design reopen／address verification 已實際通過
+
+- 新增 `fpga/verify_pynq_zu_usb_video_bd.tcl`，需要 external `PYNQ_ZU_BUILD_DIR`。它只開啟既有 `.xpr`／`.bd`、呼叫 Vivado `validate_bd_design`、從 `zynq_ultra_ps_e_0/Data` address space 檢查 `axi_dma_0=0xA0000000`、`frame_id_gpio_0=0xA0010000`、`yolox_video_rtl_0=0xA0020000`，輸出 `PYNQ_ZU_USB_VIDEO_BD_VERIFY_PASS`。不 export／implementation／program hardware。
+- test-first：Tcl source contract test 先因檔案缺失 FAIL；實作後 1/1 PASS。實際以 Vivado 2024.2 batch 開啟 external `C:\pynq_zu_usb_video_rebuild_20261111` project，IP repo（含 packaged `dual_camera_yolox_axis`）成功載入，BD 成功讀入。`validate_bd_design` 表示設計已有 validated status；三個實際 address check 都 PASS，Vivado exit code=0。
+- 外部 session log 為 `%TEMP%\vivado_usb_bd_verify_20261112.log`，不入 Git。此證據證實本機的 Vivado project/BD 可重新開啟且控制連線 address 正確；不是 Linux UVC capture、DMA-BUF/AXI ownership、PL programming、two-camera simultaneous 或 DPU inference 驗證。
+
 ## 2026-11-12：PYNQ SD Linux 的 SSH transport 可達，但目前無有效唯讀登入憑證
 
 - Windows 對 `192.168.3.1:22` 的 TCP check PASS，表示目前 Composite/SSH transport 有回應。為避免 interactive terminal 阻塞，host 安裝 user-local Python `paramiko` 5.1.0，並以使用者先前提供的 `xilinx` 預設登入資料嘗試**一次** password authentication。

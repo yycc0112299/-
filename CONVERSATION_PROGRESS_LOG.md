@@ -1,5 +1,12 @@
 # 對話與進度同步紀錄
 
+## 2026-11-12 — Checked simultaneous UART, SSH, and JTAG transport state without programming hardware
+
+- 需求／決策：使用者已同時插接兩條板端連線，需以實際 enumeration 區分 UART/SSH/JTAG 是否各自可用，而非以插頭存在推斷；只允許 read-only inspection。
+- 實際完成：Windows 確認 UART 為 COM4，並列出 FTDI USB serial-converter A/B；對 `192.168.3.1:22` TCP check PASS。用 Embedded Vitis 2024.2 XSDB/hw_server 執行 `connect; targets -target-properties; disconnect`，結果沒有 FPGA target 列出。沒有 program/reset/write board，temporary hw_server 沒有保留。
+- 驗證範圍／未完成：這證實 UART 與 SSH transport 可同時存在；僅能證明 JTAG USB enumeration，不證明 JTAG chain/FPGA access。須在 XSDB 顯示 `xczu5_0` 後才可 JTAG download；SSH authentication 仍未成功，故未執行 overlay/UVC/DMA board tests。
+- Git／同步：本硬體狀態與三份進度文件將於本次提交推送；實際提交雜湊與推送結果由下一筆文件同步紀錄補上。
+
 ## 2026-11-12 — Added a dedicated deployable PYNQ check for the USB-video overlay
 
 - 需求／決策：讓已封裝的 USB-camera Block Design 有可由 SD/Linux deployment bundle 執行的實機 control-plane check，且不得將它與舊 `pynq_zu_yolox` bring-up overlay 混用或意外啟動 DMA/UVC。

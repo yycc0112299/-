@@ -1,5 +1,11 @@
 # 專題狀態與交接記錄（供 Codex）
 
+## 2026-11-12：同時插接的 UART／網路可用；JTAG target 尚未由 XSDB 枚舉
+
+- 使用者確認板上兩條連線都已插接。Windows 裝置盤點顯示 USB UART 為 `COM4`，另有 FTDI USB serial-converter A/B 介面；`Test-NetConnection 192.168.3.1 -Port 22` 實測 PASS。因此 SD/Linux 的 UART 與 SSH network transport 可以同時存在，兩者不互斥。
+- 使用 Embedded Vitis 2024.2 的 XSDB／hw_server 作純讀取 `connect; targets -target-properties; disconnect` 掃描，沒有列出 FPGA target。未 program bitstream、未 reset、未寫 PL／SD；temporary hw_server 亦未持續留在背景。USB 裝置「被 Windows 看見」不等於 JTAG chain 已可下載。
+- 後續若要走 JTAG Vitis test，需讓 XSDB 能列出 `xczu5_0`（再檢查 board power、JTAG cable/driver/port）；但這不阻礙目前 SD boot + SSH 的 Linux overlay deployment path。尚無 authenticated SSH login，故也尚未上傳或執行 USB-video overlay verifier。
+
 ## 2026-11-12：USB-video overlay 的板端下載／control-MMIO 檢查已接進 deployment bundle
 
 - 新增 `person_tracking/verify_pynq_zu_usb_video_overlay.py`。它要求同目錄有 exact `pynq_zu_usb_video.bit/.hwh`、呼叫 PYNQ `Overlay(download=True)`，只對 frame-ID GPIO `0xA0010000` 與 mailbox frame-ID offset `0xA0020004` 作寫入／讀回，最後清回零；絕不寫 mailbox CONTROL，故不送 DMA command、不開始 UVC capture。host fake-MMIO tests 驗證正常流程與缺少 HWH 的 fail-fast 行為，2/2 PASS。

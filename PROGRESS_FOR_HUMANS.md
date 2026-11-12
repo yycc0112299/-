@@ -1,5 +1,11 @@
 # 專題進度（重點版）
 
+## 2026-11-12：兩支 USB 相機已在 PYNQ 板上逐支實際擷取成功
+
+- 板端 `lsusb` 實測兩支 Logitech Webcam C270（`046d:0825`）；第一支對應 `/dev/video0`/`video1`，第二支對應 `/dev/video2`/`video3`。
+- 以板端 OpenCV 依序開啟 `/dev/video0`、`/dev/video2`，各讀取一張影像成功，兩者皆為 `640×480×3`。
+- 此結果是逐支 sequential capture；尚未驗證兩支相機同時串流（先前 USB2 hub 帶寬可能不足）。`wlan0` 目前 DOWN；未見 `/dev/dpu*` 或完整 VART/XIR runtime，因此尚未完成 Wi‑Fi、DPU 或 YOLOv8 板端推論。
+
 ## 2026-11-12：PYNQ Linux、SSH 與 video device 枚舉已實測
 
 - SSH 已以帳號 `xilinx` 成功登入板子；畫面實測 `whoami` 回傳 `xilinx`，Linux 為 `6.6.10-xilinx-v2024.1`、`aarch64`。

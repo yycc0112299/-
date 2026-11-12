@@ -1,5 +1,12 @@
 # 對話與進度同步紀錄
 
+## 2026-11-12 — Verified direct SSH access and sequential capture from both USB cameras on PYNQ
+
+- 需求／決策：使用者完成 SSH key 授權後，直接在板端確認兩支實體相機是否可擷取；採 sequential one-frame capture，避免把 USB2 hub 同時帶寬問題誤判為相機失敗。
+- 實際完成：key auth PASS（`AUTH_OK xilinx / pynq`）。`lsusb` 顯示兩支 Logitech C270（`046d:0825`）；OpenCV/V4L2 逐一讀取 `/dev/video0`、`/dev/video2` 均 PASS，frame shapes 為 `(480, 640, 3)`。
+- 驗證界線／未完成：沒有同時開兩支、沒有寫檔、DMA、overlay、DPU、YOLOv8 或 Wi‑Fi peer 實測。`wlan0` 仍 DOWN；無 `/dev/dpu*`，`v4l2-ctl` 未安裝。SSH private key 是主機外部憑證，未加入 Git。
+- Git／同步：本次文件變更待提交並推送到 `origin/main`。
+
 ## 2026-11-12 — Verified SSH login, Linux/PYNQ runtime, and V4L2 node enumeration on the board
 
 - 需求／決策：板子重開且 SSH 可達後，先以實際已登入終端確認目標端 Linux/PYNQ 與相機 device node；不寫入板子。

@@ -1,5 +1,12 @@
 # 專題狀態與交接記錄（供 Codex）
 
+## 2026-11-12：板端兩支 C270 實際 sequential capture PASS
+
+- SSH key auth 建立後，以 `xilinx@192.168.3.1` 直接執行唯讀板端診斷。`lsusb` 顯示兩支 `046d:0825 Logitech Webcam C270`；udev path 對應 USB port `1-1.3` 的 `/dev/video0,/dev/video1` 與 port `1-1.4` 的 `/dev/video2,/dev/video3`。
+- 板端 OpenCV `VideoCapture(..., CAP_V4L2)` 依序對 `/dev/video0` 及 `/dev/video2` 各讀取一張，皆輸出 `CAMERA_OK`、shape `(480, 640, 3)`；沒有寫影像檔、沒有 PL/overlay/DMA 操作。
+- 同一診斷：`wlan0` 存在但 DOWN；`usb0=192.168.3.1/24`；未找到 `/dev/dpu*`，僅見 XRT VART plugin，不能視為可用 DPU/VART/XIR runtime。`v4l2-ctl` 未安裝，故尚未列舉 driver formats/capabilities。
+- 驗證界線：sequential one-frame UVC capture PASS，不證明 simultaneous two-camera bandwidth、長時間 capture、DMA/hardware overlay、DPU/YOLOv8 或 two-board Wi‑Fi。
+
 ## 2026-11-12：板端 SSH／Linux／PYNQ 與 V4L2 device node 實測
 
 - 使用者提供已登入 `xilinx@pynq` 的終端畫面：`whoami=xilinx`；`uname -a` 為 Linux `6.6.10-xilinx-v2024.1`、aarch64。

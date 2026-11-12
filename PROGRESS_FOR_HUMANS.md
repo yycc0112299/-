@@ -1,5 +1,11 @@
 # 專題進度（重點版）
 
+## 2026-11-12：USB-video 硬體檔已由 PYNQ Linux 成功下載至 FPGA
+
+- 完成 `render` 群組設定後，XRT 已能辨識 Pynq-ZU device；使用 sudo 執行 overlay verifier 時，kernel 記錄 `writing pynq_zu_usb_video.bin to Xilinx ZynqMP FPGA Manager`，並有 XRT xclbin 成功讀取紀錄。
+- 這證明 USB-video 的 PL hardware file 已由板端成功下載；仍未啟動 DMA、相機串流或人物辨識。
+- 最後的 frame-ID MMIO 寫回讀仍待 root 工作階段執行；PYNQ 3.1 對這個 `/dev/mem` MMIO 操作要求 root，即使使用者已有 `render` 權限。
+
 ## 2026-11-12：板端 PYNQ overlay／XRT 診斷定位到 render 權限
 
 - USB-video overlay 的 `.bit`、matching `.hwh` 與安全 verifier 已傳到板端；verifier 在下載前因 XRT 顯示 0 devices 而安全停止，沒有啟動 DMA 或相機。

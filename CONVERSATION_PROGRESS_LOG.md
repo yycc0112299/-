@@ -1,5 +1,12 @@
 # 對話與進度同步紀錄
 
+## 2026-11-12 — Programmed the USB-video overlay from PYNQ Linux and isolated root-only MMIO follow-up
+
+- 需求／決策：修復 XRT device access 後，使用既有安全 overlay verifier 下載 USB-video bitstream；以 kernel/XRT 事實區分 PL programming 與控制面驗證。
+- 實際完成：`xilinx` 加入 `render` group 後 XRT 報告 Pynq-ZU ready device。使用者在 interactive sudo session 執行 verifier；kernel 顯示 `writing pynq_zu_usb_video.bin`，ZOCL xclbin read `ret: 0`，故 PL programming PASS。
+- 驗證界線／未完成：一般使用者 PYNQ MMIO 被 `/dev/mem` root requirement 擋下；noninteractive `sudo -n` 無 credential cache。尚未有 root frame-ID write/read/clear、DMA、camera-on-overlay、DPU/YOLOv8 或 Wi‑Fi peer 成功聲稱。
+- Git／同步：本次文件變更待提交並推送到 `origin/main`；staged overlay binary/SSH private key 不入 Git。
+
 ## 2026-11-12 — Diagnosed PYNQ overlay/XRT access failure after safe USB-video overlay staging
 
 - 需求／決策：利用已確認可用的板端 SSH key，在不啟動 DMA 的前提下嘗試 USB-video overlay control-plane verifier，並定位任何 runtime blocker。

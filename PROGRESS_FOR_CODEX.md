@@ -1,5 +1,11 @@
 # 專題狀態與交接記錄（供 Codex）
 
+## 2026-11-12：PYNQ USB-video overlay programming PASS；user MMIO readback still requires root
+
+- 使用者執行 `sudo usermod -aG render xilinx` 並重新登入後，新 SSH session 具 `render` group。`xbutil examine` 現在列出 ready Pynq-ZU device `[0000:00:00.0]`。
+- 使用者在互動 SSH session 以 sudo 執行 staged verifier 後，direct kernel evidence：`fpga_manager fpga0: writing pynq_zu_usb_video.bin to Xilinx ZynqMP FPGA Manager` 及 `zocl_xclbin_read_axlf ... ret: 0`。因此可確認 matching USB-video hardware bitstream 已下載至 PL。
+- 後續 non-root `MMIO(0xA0010000/0xA0020000)` 仍被 PYNQ embedded device 拒絕 `Root permissions required`；`sudo -n` 也無跨 SSH session credential cache。尚待在 interactive root session 完成 verifier 的 inert frame-ID write/read/clear。不得宣稱 DMA/control path、camera stream、DPU/YOLO/Wi‑Fi 已驗證。
+
 ## 2026-11-12：overlay PYNQ/XRT device discovery blocked by `render` group access
 
 - Host 已以 SSH key auth 直接登入，overlay staging directory 為 `/home/xilinx/codex_usb_overlay`，內含 matching USB-video `.bit/.hwh` 與 `verify_pynq_zu_usb_video_overlay.py`。verifier 呼叫 `Overlay(..., download=True)` 前先失敗於 `Device.active_device`：`RuntimeError: No Devices Found`，沒有 DMA CONTROL write。

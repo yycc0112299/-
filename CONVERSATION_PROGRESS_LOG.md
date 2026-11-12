@@ -1,5 +1,12 @@
 # 對話與進度同步紀錄
 
+## 2026-11-12 — Added a dedicated deployable PYNQ check for the USB-video overlay
+
+- 需求／決策：讓已封裝的 USB-camera Block Design 有可由 SD/Linux deployment bundle 執行的實機 control-plane check，且不得將它與舊 `pynq_zu_yolox` bring-up overlay 混用或意外啟動 DMA/UVC。
+- 實際完成：新增 USB verifier，要求 matching `pynq_zu_usb_video.bit/.hwh`，下載 overlay 後只測 GPIO `0xA0010000` 和 mailbox frame-ID `0xA0020004` 的非破壞 readback，finally 清零，從不寫 CONTROL。fake-overlay/MMIO tests 2/2 PASS。bundle 新增 verifier 和 `--usb-video-overlay-dir`，把 artifacts 分置 `overlay_usb_video/`；deploy helper 新增 opt-in USB overlay argument/check。bundle/runtime tests 共 4/4 PASS、PowerShell parse PASS；external tar 實測含 verifier、bit、HWH。
+- 驗證範圍／未完成：尚無有效 authenticated board login，故沒有 SCP、PYNQ `Overlay()`、MMIO、UVC/DMA 或 board writes。external tar/bit/HWH 不入 Git；host tests 不能取代 on-board hardware evidence。
+- Git／同步：本項 verifier、bundle/deploy wiring、文件將於本次提交推送；實際提交雜湊與推送結果由下一筆文件同步紀錄補上。
+
 ## 2026-11-12 — Staged the exact USB-video Vivado implementation as a PYNQ Linux overlay
 
 - 需求／決策：在板端 SSH 尚未可驗證時，先完成不需插線的 Linux-overlay handoff；只接受 USB-video Block Design 實作產物，不混用舊 bring-up overlay，且不得寫板子／SD。

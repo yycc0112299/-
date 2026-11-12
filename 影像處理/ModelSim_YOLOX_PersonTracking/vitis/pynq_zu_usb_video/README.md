@@ -118,3 +118,10 @@ The output is the matching pair `pynq_zu_usb_video.bit` and
 `pynq_zu_usb_video.hwh`, plus their SHA-256 values.  Copying/loading that
 pair remains a separate authenticated board action; staging neither writes an
 SD card nor makes UVC/DMA/DPU inference work by itself.
+
+To use the existing authenticated deployment helper after staging, pass that
+directory via `-UsbVideoOverlayDir` and add `-RunUsbVideoOverlayCheck`.  The
+bundle keeps this pair under `overlay_usb_video/`, copies it next to the
+dedicated verifier, downloads it with `Overlay()`, and only round-trips the
+frame-ID registers at GPIO `0xA0010000` and mailbox `0xA0020000`.  It never
+writes the mailbox CONTROL register, so it does not command DMA or capture.

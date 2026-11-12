@@ -1,5 +1,11 @@
 # 專題狀態與交接記錄（供 Codex）
 
+## 2026-11-12：USB-video overlay 的板端下載／control-MMIO 檢查已接進 deployment bundle
+
+- 新增 `person_tracking/verify_pynq_zu_usb_video_overlay.py`。它要求同目錄有 exact `pynq_zu_usb_video.bit/.hwh`、呼叫 PYNQ `Overlay(download=True)`，只對 frame-ID GPIO `0xA0010000` 與 mailbox frame-ID offset `0xA0020004` 作寫入／讀回，最後清回零；絕不寫 mailbox CONTROL，故不送 DMA command、不開始 UVC capture。host fake-MMIO tests 驗證正常流程與缺少 HWH 的 fail-fast 行為，2/2 PASS。
+- `prepare_pynq_dual_bundle.py` 現包含這個 verifier，並新增 `--usb-video-overlay-dir`，把 matching pair 放入 archive 的 `overlay_usb_video/`。`deploy_pynq_zu.ps1` 新增 `-UsbVideoOverlayDir` 及 opt-in `-RunUsbVideoOverlayCheck`，在 authenticated transfer/unpack 後才將 USB pair 複製到 verifier 旁執行。PowerShell parse PASS；實際建立 external tar 並確認 verifier、bit、HWH 三項都在 archive。這條新流程與舊 `pynq_zu_yolox` bring-up overlay 明確分開。
+- 未有可用 board authentication 時沒有 upload、Overlay download 或 MMIO 實機執行；這不是 UVC、DMA-BUF、雙鏡頭、DPU/YOLO 或 Wi-Fi 成功證據。tar 與 binary 都只留 external `%TEMP%`，不入 Git。
+
 ## 2026-11-12：USB-video 的 PYNQ Linux overlay 已可從正確 Vivado implementation 安全封裝
 
 - 新增 `fpga/prepare_pynq_zu_usb_video_overlay.ps1` 和 static safety contract test。工具要求使用者提供 external Vivado build directory，只讀 `pynq_zu_usb_video_wrapper.bit` 與同一 BD 的 `pynq_zu_usb_video.hwh`，輸出同 stem 的 `pynq_zu_usb_video.bit/.hwh`，並輸出兩個 SHA-256。它不含 SSH/SCP/bootgen，絕不連線板子、寫 SD 或改 boot configuration。

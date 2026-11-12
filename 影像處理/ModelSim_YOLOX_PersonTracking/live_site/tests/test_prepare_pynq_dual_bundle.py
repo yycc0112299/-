@@ -17,6 +17,10 @@ class PynqDualBundleTests(unittest.TestCase):
         self.assertIn(bundle.TRACKING / "pynq_wifi_peer_preflight.py", sources)
         self.assertIn(bundle.TRACKING / "assets" / "yolov8_vart.py", sources)
 
+    def test_runtime_sources_include_usb_video_overlay_verifier(self) -> None:
+        self.assertIn(bundle.TRACKING / "verify_pynq_zu_usb_video_overlay.py",
+                      bundle.runtime_sources())
+
 
 if __name__ == "__main__":
     unittest.main()

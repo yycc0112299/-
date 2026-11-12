@@ -29,6 +29,7 @@ def runtime_sources() -> list[Path]:
         TRACKING / "pynq_wifi_peer_preflight.py",
         TRACKING / "assets" / "yolov8.py", TRACKING / "assets" / "yolov8_vart.py", MODEL,
         TRACKING / "verify_pynq_zu_bringup.py",
+        TRACKING / "verify_pynq_zu_usb_video_overlay.py",
     ]
 
 def ensure_model() -> None:
@@ -47,6 +48,8 @@ def main() -> None:
     parser.add_argument("--output", type=Path, default=Path("pynq_dual_dashboard.tar.gz"))
     parser.add_argument("--overlay-dir", type=Path,
                         help="optional directory containing pynq_zu_yolox.bit/.hwh")
+    parser.add_argument("--usb-video-overlay-dir", type=Path,
+                        help="optional directory containing pynq_zu_usb_video.bit/.hwh")
     args = parser.parse_args()
     ensure_model()
     sources = runtime_sources()
@@ -65,6 +68,13 @@ def main() -> None:
                 if not source.is_file():
                     raise FileNotFoundError(f"Missing overlay artifact: {source}")
                 archive.add(source, arcname=Path("overlay") / name)
+        if args.usb_video_overlay_dir is not None:
+            overlay_dir = args.usb_video_overlay_dir.resolve()
+            for name in ("pynq_zu_usb_video.bit", "pynq_zu_usb_video.hwh"):
+                source = overlay_dir / name
+                if not source.is_file():
+                    raise FileNotFoundError(f"Missing USB-video overlay artifact: {source}")
+                archive.add(source, arcname=Path("overlay_usb_video") / name)
     print(f"PYNQ_DUAL_BUNDLE={output}")
 
 

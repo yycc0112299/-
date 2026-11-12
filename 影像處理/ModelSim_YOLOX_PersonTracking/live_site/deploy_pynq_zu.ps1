@@ -11,9 +11,11 @@ param(
     [int]$CameraA = 0,
     [int]$CameraB = 1,
     [string]$OverlayDir,
+    [string]$UsbVideoOverlayDir,
     [switch]$RunSystemPreflight,
     [switch]$RunCameraPreflight,
-    [switch]$RunBringupCheck
+    [switch]$RunBringupCheck,
+    [switch]$RunUsbVideoOverlayCheck
 )
 
 <#
@@ -46,12 +48,18 @@ if ($RemoteDir -notmatch '^[A-Za-z0-9._-]+$') {
 if ($RunBringupCheck -and [string]::IsNullOrWhiteSpace($OverlayDir)) {
     throw "-RunBringupCheck requires -OverlayDir containing pynq_zu_yolox.bit and .hwh."
 }
+if ($RunUsbVideoOverlayCheck -and [string]::IsNullOrWhiteSpace($UsbVideoOverlayDir)) {
+    throw "-RunUsbVideoOverlayCheck requires -UsbVideoOverlayDir containing pynq_zu_usb_video.bit and .hwh."
+}
 
 $scriptDir = Split-Path -Parent $PSCommandPath
 $bundle = Join-Path $env:TEMP "pynq_dual_dashboard.tar.gz"
 $bundleArgs = @((Join-Path $scriptDir "prepare_pynq_dual_bundle.py"), "--output", $bundle)
 if (-not [string]::IsNullOrWhiteSpace($OverlayDir)) {
     $bundleArgs += @("--overlay-dir", $OverlayDir)
+}
+if (-not [string]::IsNullOrWhiteSpace($UsbVideoOverlayDir)) {
+    $bundleArgs += @("--usb-video-overlay-dir", $UsbVideoOverlayDir)
 }
 
 Write-Host "Building deployment bundle..."
@@ -88,6 +96,11 @@ if ($RunBringupCheck) {
     Write-Host "Downloading overlay and checking AXI-Lite mailbox..."
     & ssh $target "cd '$RemoteDir'; cp overlay/pynq_zu_yolox.bit overlay/pynq_zu_yolox.hwh person_tracking/; $PythonCommand person_tracking/verify_pynq_zu_bringup.py"
     if ($LASTEXITCODE -ne 0) { throw "Overlay/MMIO check failed; deployment remains on the board for diagnosis." }
+}
+if ($RunUsbVideoOverlayCheck) {
+    Write-Host "Downloading USB-video overlay and checking frame-ID MMIO..."
+    & ssh $target "cd '$RemoteDir'; cp overlay_usb_video/pynq_zu_usb_video.bit overlay_usb_video/pynq_zu_usb_video.hwh person_tracking/; $PythonCommand person_tracking/verify_pynq_zu_usb_video_overlay.py"
+    if ($LASTEXITCODE -ne 0) { throw "USB-video overlay/MMIO check failed; deployment remains on the board for diagnosis." }
 }
 
 Write-Host "PYNQ_DEPLOY_PASS host=$BoardHost remote_dir=~/$RemoteDir"

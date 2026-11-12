@@ -5,6 +5,11 @@
 - 讀到現有 DPU 硬體的實際 IP 為 **4.0**。它的官方搭配是 Vitis AI 2.5＋Vivado/Vitis/PetaLinux 2022.1；若要用 Vitis AI 3.5／YOLOv8 路線，必須先換成 DPU IP 4.1，再用 2023.1 重建。
 - 因此現有的 Vivado 2024.2、PetaLinux 2024.1、DPU 4.0 bitstream 與 Vitis AI 3.5 Docker image 不能直接組成可部署系統。已新增檢查，會明確擋下這種混版。
 
+## 2026-11-12：已找到並驗證官方 DPU 原始碼
+
+- 已自行下載 AMD 官方 DPU 原始碼並核對：它和目前做出的 B512 DPU 硬體檔完全相同，確認是 DPU 4.0、2022.1／Vitis AI 2.5 路線。
+- 原始碼保留在電腦的外部工具資料夾，不上傳 Git；這證實硬體來源，但還沒有 Linux 映像、模型或板端 DPU 測試。
+
 ## 2026-11-11：找到 Linux 的連續影像記憶體，但 DMA 還不能直接使用
 
 - 板子已具備可分配連續記憶體的 CMA；這是相機資料未來送往 FPGA 所需的條件之一。

@@ -6,6 +6,12 @@
 - `preflight_dpu_build_host.py` 現需 `--dpu-ip-version`，將 4.0/2.5/2022.1 與 4.1/3.5/2023.1 明確分流，拒絕不明 IP 或將目前 4.0 bitstream 混接 3.5。test-first：先新增參數的 tests 失敗（舊函式無此參數），再完成 mapping；4/4 unit tests PASS。
 - 決策仍待實作：若保留已完成的 4.0 B512 hardware，要取得 2022.1 Vivado/Vitis/PetaLinux 與 Vitis AI 2.5；若以 YOLOv8/Vitis AI 3.5 為優先，需取得 DPU 4.1 source 並以 2023.1 重建，不能重用當前 bitstream/`arch.json`。已安裝 PetaLinux 2024.1、現有 Vivado 2024.2，以及目前 Vitis AI 3.5 Docker image 都不構成任一路線的完整 deployment contract。
 
+## 2026-11-12：官方 DPU TRD source 已取得並與既有硬體溯源比對
+
+- 從 Vitis-AI v3.5 的 Zynq example 所指向、不需 AMD account 的 official URL `https://download.amd.com/opendownload/xlnx/DPUCZDX8G.tar.gz` 下載 61,086,986-byte archive，SHA-256=`2888c035f73c907e29de1ae524e2caf4474b05a59ba30aeac3ebe2c818557603`，解壓於外部 `C:\pynq_toolchain_sources\DPUCZDX8G_official`（不入 Git）。archive 的 `component.xml` 是 DPUCZDX8G 4.0，且 README/changelog 都指向 Vitis AI 2.5、Vivado/PetaLinux 2022.1。
+- 實際比對新下載 source 與 `C:\pynq_zu_dpu_native_build\native_dpu_ip` 的 `DPUCZDX8G_v4_0_0/component.xml` SHA-256，兩者都是 `70e6c6c4923b872d907d9b007c0308393eda30bbc0a30e515843b630f329fb3d`（byte-identical）。所以現有 B512 bitstream 確實由官方 2022.1/2.5 DPU 4.0 source 派生，不能改以 source branch 名稱或 Vitis AI 3.5 說成相容。
+- Vitis-AI v3.5 source tag（`7a0d5a695027b0dc1494c7299918959608c3fab2`）也已 clone 到同一外部資料夾供離線核查。其 compatibility matrix 提及 4.1/3.5/2023.1，但所引用的 public DPU TRD bundle 仍是上述 4.0/2022.1 bundle；現階段沒有取得可驗證的 4.1 source，不猜測或偽造 IP。
+
 ## 2026-11-11：Linux CMA 可用，但 Vitis/Linux AXI DMA 仍需 kernel DMA-BUF ownership layer
 
 - 對 live PYNQ 做唯讀盤點，發現 `/dev/dma_heap/linux,cma`、`/dev/dma_heap/system`；`CmaTotal=524288 KiB`、`CmaFree=517188 KiB`。所以 Linux camera/packer 後有 contiguous-memory allocation source，這是正面硬體／kernel 證據。

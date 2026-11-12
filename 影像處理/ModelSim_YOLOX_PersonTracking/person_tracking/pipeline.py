@@ -86,6 +86,22 @@ class Detector:
         except KeyError:raise ValueError(f'Unsupported detector backend: {backend}')
     def __init__(self,backend=None):
         self.backend=(backend or self.default_backend()).lower()
+        if self.backend=='yolov8_vart':
+            xmodel=os.environ.get('PYNQ_VART_XMODEL','').strip()
+            if not xmodel:
+                raise RuntimeError('PYNQ_VART_XMODEL must name the compiled DPU .xmodel for yolov8_vart')
+            model=Path(xmodel)
+            if not model.is_file() or model.suffix!='.xmodel':
+                raise FileNotFoundError(f'Compiled DPU .xmodel is required: {model}')
+            self.model_sha256=hashlib.sha256(model.read_bytes()).hexdigest()
+            from yolov8_vart import VartYoloV8, standard_yolov8_decoder
+            decoder=None
+            if os.environ.get('PYNQ_VART_STANDARD_OUTPUT','').strip()=='1':
+                decoder=standard_yolov8_decoder(confidence_threshold=.3,nms_threshold=.45)
+            self.model=VartYoloV8.from_xmodel(model,confidence_threshold=.3,
+                                               nms_threshold=.45,decoder=decoder)
+            cv2.setNumThreads(4)
+            return
         model=self.model_path_for_backend(self.backend)
         if not model.is_file():
             raise FileNotFoundError(f'Missing {self.backend} model: {model}')

@@ -1,5 +1,11 @@
 # 專題狀態與交接記錄（供 Codex）
 
+## 2026-11-12：既有 Detector 已加入 opt-in `yolov8_vart` DPU backend
+
+- `person_tracking/pipeline.py` 的 `Detector` 現支援 `PERSON_DETECTOR=yolov8_vart`。必須明確提供 `PYNQ_VART_XMODEL=/path/to/model.xmodel`；不存在或非 `.xmodel` 時明確失敗。它會 hash artifact、經 `VartYoloV8.from_xmodel()` 建立 VART runner，並把偵測結果送進既有 histogram/tracker/Wi-Fi packet flow。既有 default 仍為 CPU `yolov8`，`yolox` 仍是 explicit legacy backend。
+- 為避免假設 compiled output，預設 `yolov8_vart` 只可取 tensor 而 `detect()` 會因未註冊 decoder 停止；只有使用者明確設 `PYNQ_VART_STANDARD_OUTPUT=1` **且實際 `.xmodel` 已驗證為單 raw standard output**，才綁定 `standard_yolov8_decoder()`。這避免把 feature-map/multi-head DPU graph 誤解碼為人物框。
+- test-first：新 backend-without-xmodel test 先收到 unsupported backend，再實作 opt-in route；backend tests 3/3、完整 person_tracking 22/22 PASS。未載入 xmodel、未 import target VART、未改板子。真實 DPU route 仍等待 2022.1 Linux image、driver/runtime、compiled `.xmodel` 和 on-board validation。
+
 ## 2026-11-12：標準單頭 YOLOv8 的 VART→tracker 解碼接點已完成離線驗證
 
 - `person_tracking/assets/yolov8_vart.py` 新增 `standard_yolov8_decoder()`：只接受已確認為 raw Ultralytics YOLOv8 layout 的單一輸出 tensor（`(1,84,N)` 或 `(1,N,84)`），復用 CPU adapter 的 de-letterbox、COCO person-class filtering 與 NMS，輸出既有 tracker/peer schema 所需的 `class_id`/`confidence`/`box`。

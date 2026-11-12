@@ -1,8 +1,10 @@
 """Backend-selection contract for the project detector facade."""
 
 from pathlib import Path
+import os
 import sys
 import unittest
+from unittest.mock import patch
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -22,6 +24,11 @@ class DetectorBackendTests(unittest.TestCase):
                          "yolox.onnx")
         with self.assertRaises(ValueError):
             pipeline.Detector.model_path_for_backend("unsupported")
+
+    def test_vart_backend_requires_an_explicit_compiled_xmodel(self) -> None:
+        with patch.dict(os.environ, {"PYNQ_VART_XMODEL": ""}, clear=False):
+            with self.assertRaisesRegex(RuntimeError, "PYNQ_VART_XMODEL"):
+                pipeline.Detector(backend="yolov8_vart")
 
 
 if __name__ == "__main__":

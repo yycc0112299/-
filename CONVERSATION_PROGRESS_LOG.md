@@ -5,7 +5,7 @@
 - 需求／決策：在 SSH 未回來時以 UART 判斷板子是否有正常回到 SD/Linux，不向板子寫入命令；區分目前 cable 的 UART 與已消失的其他 serial device。
 - 實際完成：host user-site 安裝 external `pyserial 3.5`。現存 Xilinx TUL FTDI 介面為 A/B + COM5；COM4（VID_03FD）已不再 present。以 115200 只讀 COM5 12 秒得到 0 bytes；同時 `192.168.3.1:22` TCP/ping FAIL。沒有 transmit serial data 或變更 board config。
 - 驗證範圍／未完成：這表示 JTAG cable 枚舉存在但 board 尚未輸出 SD boot/Linux networking；需 physical power-cycle 才能恢復並做 SSH/overlay/camera checks。不能據此判定 UVC/DMA/DPU/YOLO/Wi-Fi success or failure。pyserial 是 host 外部 dependency，不入 Git。
-- Git／同步：本環境/硬體診斷與三份進度文件將於本次提交推送；實際提交雜湊與推送結果由下一筆文件同步紀錄補上。
+- Git／同步：已提交為 `942c78a`（`Record UART recovery diagnostics`）並成功推送至 `origin/main`；本行同步結果由下一筆文件提交補上。
 
 ## 2026-11-12 — Verified JTAG hardware discovery and programmed the USB-video PL, while stopping safely at A53 debug timeout
 

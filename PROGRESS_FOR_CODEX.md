@@ -12,6 +12,11 @@
 - 實際比對新下載 source 與 `C:\pynq_zu_dpu_native_build\native_dpu_ip` 的 `DPUCZDX8G_v4_0_0/component.xml` SHA-256，兩者都是 `70e6c6c4923b872d907d9b007c0308393eda30bbc0a30e515843b630f329fb3d`（byte-identical）。所以現有 B512 bitstream 確實由官方 2022.1/2.5 DPU 4.0 source 派生，不能改以 source branch 名稱或 Vitis AI 3.5 說成相容。
 - Vitis-AI v3.5 source tag（`7a0d5a695027b0dc1494c7299918959608c3fab2`）也已 clone 到同一外部資料夾供離線核查。其 compatibility matrix 提及 4.1/3.5/2023.1，但所引用的 public DPU TRD bundle 仍是上述 4.0/2022.1 bundle；現階段沒有取得可驗證的 4.1 source，不猜測或偽造 IP。
 
+## 2026-11-12：現有 DPU 4.0 的 Vitis AI 2.5 編譯器已實際可用
+
+- 已從 Docker Hub 拉取 official `xilinx/vitis-ai:2.5.0`；image digest=`sha256:eaa85efb06924995ebdb973546e7f69169b003b8cc525764bd9524ad554dddbe`，Docker inspect size=27,008,926,042 bytes。以 noninteractive container 啟動、activate `vitis-ai-pytorch` 後，`/opt/vitis_ai/conda/envs/vitis-ai-pytorch/bin/vai_c_xir` 可執行；`vaic`、`xcompiler`、`xir`、`vart`、`pytorch_nndct_cpu` 都列為 2.5.0。
+- 這解除 **host model-compiler** blocker（可在後續有 exact 4.0 `arch.json` 時編譯相容模型）；未做 quantization／compile，因為尚未獲得要部署的 deterministic YOLOv8 INT8 model contract，且 Vitis AI 2.5 對 YOLOv8 非現成官方 model-library claim。它也不解除 2022.1 Vivado/PetaLinux、Linux DPU driver/runtime、target image、或板端驗證。
+
 ## 2026-11-11：Linux CMA 可用，但 Vitis/Linux AXI DMA 仍需 kernel DMA-BUF ownership layer
 
 - 對 live PYNQ 做唯讀盤點，發現 `/dev/dma_heap/linux,cma`、`/dev/dma_heap/system`；`CmaTotal=524288 KiB`、`CmaFree=517188 KiB`。所以 Linux camera/packer 後有 contiguous-memory allocation source，這是正面硬體／kernel 證據。

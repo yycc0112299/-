@@ -553,6 +553,13 @@
 - 驗證範圍／未完成：source acquisition／hash verification 不是 2022.1 安裝、hardware rebuild、PetaLinux image、VART、xmodel 或 board inference。public 4.0 bundle 沒有可驗證的 DPU 4.1 source；仍不得混用 3.5 container 或 2024.x 工具鏈。
 - Git／同步：已提交為 `cde24b6`（`Record official DPU source verification`）並成功推送至 `origin/main`；下載 archive、clone、bitstream、模型及任何帳密均不進 Git。本行同步結果由下一筆文件提交補上。
 
+## 2026-11-12 — Verified Vitis AI 2.5 compiler for the actual DPU 4.0
+
+- 需求／決策：取得並驗證與現有 DPUCZDX8G 4.0／2022.1 contract 同版的模型編譯器，而非繼續以 3.5 compiler 混編。
+- 實際完成：下載 official Docker Hub image `xilinx/vitis-ai:2.5.0`，digest `sha256:eaa85efb06924995ebdb973546e7f69169b003b8cc525764bd9524ad554dddbe`。container activate `vitis-ai-pytorch` 後實測 command path `/opt/vitis_ai/conda/envs/vitis-ai-pytorch/bin/vai_c_xir`；conda packages `vaic`、`xcompiler`、`xir`、`vart`、`pytorch_nndct_cpu` 均為 2.5.0。
+- 驗證範圍／未完成：只驗證 compiler runtime，沒有 quantize/compile YOLOv8、沒有建立 Linux image、安裝 VART、寫 SD 或碰板子。YOLOv8 並非此 2.5 image 已驗證的現成 output/decode contract；必須等 exact 4.0 target image 與 model integration test 才可聲稱 DPU inference。
+- Git／同步：本項環境紀錄與兩份進度文件將同一提交推送；27-GB Docker image、source archive、model/bitstream 與帳密均不進 Git。
+
 ## 2026-11-12 — Verified fixed Vitis AI 3.5 compiler container
 
 - 實際完成：Docker Desktop 4.99.0 已以 `hello-world` pull/run 驗證；固定 tag `xilinx/vitis-ai-pytorch-cpu:ubuntu2004-3.5.0.306` 已拉取。container activate `vitis-ai-pytorch` 後確認 `vai_c_xir`、`vaic`、`xcompiler`、`xir` 均為 3.5.0。

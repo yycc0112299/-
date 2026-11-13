@@ -863,3 +863,10 @@
 - 驗證範圍／未完成：proves this tested shared USB topology is unsuitable for live two-camera capture, not that all possible hardware wiring fails. No PL/DPU/SD/Wi-Fi settings were changed; use one camera per board or an independent USB controller and re-run the gate.
 - Git／同步：source/tests/docs are pending full regression then push; no images, board secrets or external build artifacts are added.
 
+## 2026-11-13 — Initialized and verified PYNQ-ZU Wi-Fi radio capability
+
+- 需求／決策：為兩板一鏡頭的 Linux peer path 驗證實際 Wi-Fi hardware/driver state，不任意加入未知網路。
+- 實際完成：initial `wlan0` was DOWN/all-zero MAC with no NetworkManager or saved profiles. Authorized `ip link set wlan0 up` initialized WILC SDIO to UP/LOWER_UP with a valid MAC and IPv6 link-local address. One `iw dev wlan0 scan` succeeded and returned 11 BSS records; SSID/BSSID data was intentionally not retained. No SSID association, DHCP request, credential write, source change, SD change or second-board connection was performed.
+- 驗證範圍／未完成：this proves Wi-Fi radio scan capability only. Two-board exchange still requires an authorized chosen SSID/passphrase, a second board, IPv4 association on both sides and the existing TCP peer preflight.
+- Git／同步：three progress records are being committed/pushed; no credentials, SSIDs, MAC addresses or private network data enter Git.
+

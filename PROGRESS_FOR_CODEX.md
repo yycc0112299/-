@@ -967,3 +967,9 @@
 - 新增 `live_site/pynq_usb_camera_preflight.py --simultaneous --frames N`，two independent V4L2 reader threads must each deliver all N frames or it emits `PYNQ_SIMULTANEOUS_CAMERA_FAIL`. Added fake-device regression for full dual success and one-side failure. Actual board executed the new gate with `video0/video2/20` and correctly failed (`video0=20`, `video2=0`); temporary `/tmp` script was removed afterward.
 - 結論／限制：current shared USB topology cannot be claimed as one-board/two-live-camera. Keep sequential tests only for packing/device checks. The deployable topology is one C270 per PYNQ-ZU plus Wi-Fi metadata exchange, unless hardware moves one camera to an independent root controller and this gate passes. This test neither changes PL/DPU nor proves Wi-Fi/DPU inference.
 
+### 2026-11-13：PYNQ-ZU Wi-Fi hardware/driver 初始化與 scan PASS
+
+- SSH read-only inspection initially found `wlan0` DOWN with all-zero MAC and no NetworkManager (`nmcli` absent) or saved connection profiles. Authorized `sudo ip link set wlan0 up` then initialized the WILC SDIO device: interface reports `UP,LOWER_UP`, a nonzero hardware MAC and link-local IPv6; `iw dev` reports managed mode and tx power. The command is a live board state change but does not join an SSID or write any network configuration.
+- A one-time authorized `iw dev wlan0 scan` returned success with 11 BSS records. SSID/BSSID data is deliberately not recorded in Git/progress logs. This proves the current image's physical Wi-Fi radio/driver can scan despite the historical boot-time regulatory database warning; it does not prove association or two-board TCP.
+- Remaining blocker is external configuration, not code: no saved Wi-Fi profile, no chosen authorized SSID/passphrase, and no second board. Existing `pynq_wifi_peer_preflight.py` remains the required post-association gate; it must show IPv4 and peer TCP reachability on both boards before claiming Wi-Fi exchange.
+

@@ -25,6 +25,10 @@ ROOTFS_PACKAGES = (
 )
 RUNTIME_PACKAGE_NAMES = tuple(package.removeprefix("CONFIG_") for package in ROOTFS_PACKAGES)
 PROJECT_PYTHON_RUNTIME_PACKAGES = (
+    # NumPy/OpenCV and the deployed tracking launcher import standard-library
+    # modules (for example json, pathlib and argparse) split out of Python by
+    # the PetaLinux 2022.1 package feed.
+    "python3-modules",
     "python3-numpy",
     "python3-opencv",
 )

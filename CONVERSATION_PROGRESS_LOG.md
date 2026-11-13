@@ -983,6 +983,13 @@
 - 驗證範圍／未完成：no SD content was changed, no formatting or initialization occurred, and no board SD boot/runtime result is claimed. A successful Windows UAC elevation remains necessary before destructive writing can proceed.
 - Git／同步：writer/test/readme/progress changes will be committed and pushed to `origin/main`; generated image/model assets and `petalinux_installation_log` stay outside Git.
 
+## 2026-11-13 — Booted the SD image and rebuilt it with the missing Python standard library
+
+- 需求／決策：continue board-side DPU validation after the user wrote the first tracker WIC and switched the board to SD boot; repair only evidence-backed runtime defects.
+- 實際完成：COM5 UART produced `pynqzudpu20221 login:`, proving the new image booted from SD. The first-login account was `petalinux`; target inspection found `/dev/dpu`, `xdputil`, the B512 xmodel and tracker launcher. Python import exposed a missing `json` standard-library module, which prevented NumPy/OpenCV import. Test-first staging now adds `python3-modules`; focused tests pass 7/7 and the full Linux suite passes 22/22. External PetaLinux rebuild completed 6,385 tasks with all succeeded; archive inspection confirms `json`/`argparse`; regenerated WIC was copied to Windows and its SHA-256 is `1c1604a7d60febe5e028e4ee64513be971a80f1f061a82caa1c25f480b6255ec`.
+- 驗證範圍／未完成：the already-booted SD still carries the previous rootfs, so target Python/GraphRunner and camera inference are not yet valid. The corrected WIC must be written and booted, then DPU import and UVC/YOLOv8 tracker verification can run. No password, personal data, generated image or build log is added to Git; `petalinux_installation_log` remains untracked.
+- Git／同步：source/test/progress changes are committed and pushed to `main` in this change.
+
 ## 2026-11-13 — Replaced unsupported removable-disk offlining with safe volume locking
 
 - 需求／決策：address the actual elevated SD-writer errors without widening the destructive target scope.

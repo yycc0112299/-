@@ -99,7 +99,7 @@ class PrepareDpu40PetaLinuxProjectTests(unittest.TestCase):
             self.assertTrue(image_append.is_file())
             self.assertEqual(
                 image_append.read_text(encoding="utf-8"),
-                'IMAGE_INSTALL:append = " vart xir unilog target-factory vitis-ai-library python3-numpy python3-opencv"\n',
+                'IMAGE_INSTALL:append = " vart xir unilog target-factory vitis-ai-library python3-modules python3-numpy python3-opencv"\n',
             )
             self.assertEqual(manifest["dpu_ip_version"], "4.0")
 

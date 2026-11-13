@@ -903,3 +903,9 @@
 - 工具已改成只鎖定並卸載已確認屬於 Disk 2 的 `D:` PYNQ 開機分割區，之後才寫映像。若檔案總管或 Windows 修復提示佔用卡片，工具會在寫入前停止。
 - SD 目前仍未成功寫入；重跑前要關閉 `PYNQ (D:)` 檔案總管並選「不掃描並繼續」。
 
+## 2026-11-13：SD 已成功開機，但發現並修正 Python 缺件
+
+- 新 SD 卡已成功讓板子開到 PetaLinux 登入畫面；UART、DPU 裝置、模型檔和追蹤程式都看得到。
+- 進一步測試發現舊映像少了 Python 的 `json` 等標準庫，所以 NumPy/OpenCV 暫時不能啟動；這不是相機或 FPGA 壞掉。
+- 已修正並重建新版映像：`pynq_zu_dpu_single_camera_tracker_python_modules_2022_1.wic`。它已完成檔案與雜湊核對，但還需要重新寫入 SD 後，才可做真正的 YOLOv8 相機測試。
+

@@ -962,3 +962,10 @@
 - 驗證範圍／未完成：no WIC write or target boot has occurred, so this remains target-code/host-test evidence, not DPU inference, person tracking or camera hardware proof. The external WIC and model remain untracked.
 - Git／同步：program, test, README and all progress records are to be committed and pushed to `origin/main` together.
 
+## 2026-11-13 — Built a self-contained single-camera DPU tracker SD image
+
+- 需求／決策：after SD boot, first-stage DPU tracking must not depend on copying project sources over SSH.
+- 實際完成：added a validated rootfs package containing the minimal GraphRunner/tracker Python files and rebuilt PetaLinux successfully (6,385/6,385 tasks). Rootfs archive confirms runtime source files plus the exact B512 xmodel. Repackaged and exported the new WIC as `pynq_zu_dpu_single_camera_tracker_2022_1.wic`, SHA-256 `013f29c2f3feb8c0cf26b2f7f3987557905899d44b2157713cb0c9ae8e5791d6`. A first attempt exposed a missing license metadata QA error; fixed it with `CLOSED` rather than mislabelling project source licensing.
+- 驗證範圍／未完成：all proof is build/rootfs content only. No SD write, target boot, DPU/GraphRunner import, camera frame, person detection or tracker result occurred. Earlier WIC exports are deliberately superseded for the current first-stage goal.
+- Git／同步：helper/test/README and progress records are to be committed and pushed to `origin/main`; external image/model/logs and `petalinux_installation_log` remain untracked.
+

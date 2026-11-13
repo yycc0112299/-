@@ -94,7 +94,8 @@ python3 prepare_dpu_4_0_petalinux_project.py \
   --project /work/pynq_zu_dpu_2022_1 \
   --petalinux-root /opt/petalinux/2022.1 \
   --official-meta-user /external/DPUCZDX8G/prj/Vivado/xilinx_zcu102_bsp/project-spec/meta-user \
-  --xmodel /external/yolov8n_b512.xmodel
+  --xmodel /external/yolov8n_b512.xmodel \
+  --runtime-source /path/to/ModelSim_YOLOX_PersonTracking
 ```
 
 The helper validates the official `xlnx_dpu` 4.0-compatible patch and
@@ -121,6 +122,21 @@ count go into the external stage manifest. The model binary itself is not
 tracked by this repository. This makes the image self-contained for the
 GraphRunner route; it is still not evidence that target-side inference works
 until the camera gate below succeeds.
+
+When `--runtime-source` is supplied, the helper packages the smallest tracked
+first-stage program set into `/opt/pynq-yolov8`: `pipeline.py`, the YOLOv8
+decoder/GraphRunner adapter and `pynq_yolov8_dpu_inference.py`. After booting
+the matching image, first-stage one-camera tracking can run without an SSH
+source copy:
+
+```sh
+python3 /opt/pynq-yolov8/person_tracking/pynq_yolov8_dpu_inference.py \
+  --camera 0 --frames 3
+```
+
+It prints `PYNQ_YOLOV8_DPU_CAMERA_PASS` only after each captured frame has run
+through GraphRunner and the existing tracker. It is a runtime gate, not proof
+that a person was present when the scene has zero detections.
 
 From the repository's `ModelSim_YOLOX_PersonTracking` root, the tracked helper
 below extracts that file from a completed Vivado project:

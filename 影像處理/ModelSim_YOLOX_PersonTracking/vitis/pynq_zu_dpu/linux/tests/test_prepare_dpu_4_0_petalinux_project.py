@@ -163,6 +163,47 @@ class PrepareDpu40PetaLinuxProjectTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "nonempty .xmodel"):
                 module.stage_reference(project, official, xmodel=empty_model)
 
+    def test_stages_the_minimal_graph_runner_and_tracker_sources_for_the_rootfs(self) -> None:
+        """A booted SD image must not require an SSH copy before first DPU tracking."""
+        module = load_module()
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            official = self.create_official_reference(root / "official")
+            project = root / "project"
+            (project / "project-spec" / "meta-user" / "conf").mkdir(parents=True)
+            runtime = root / "runtime"
+            for relative in module.PROJECT_RUNTIME_SOURCE_FILES:
+                source = runtime / relative
+                source.parent.mkdir(parents=True, exist_ok=True)
+                source.write_text(f"# {relative.as_posix()}\n", encoding="utf-8")
+
+            manifest = module.stage_reference(project, official, runtime_source=runtime)
+
+            package_dir = (project / "project-spec" / "meta-user" / "recipes-apps" /
+                           "pynq-yolov8-runtime")
+            for relative in module.PROJECT_RUNTIME_SOURCE_FILES:
+                self.assertEqual((package_dir / "files" / relative).read_text(encoding="utf-8"),
+                                 f"# {relative.as_posix()}\n")
+            recipe = (package_dir / "pynq-yolov8-runtime.bb").read_text(encoding="utf-8")
+            self.assertIn('LICENSE = "CLOSED"', recipe)
+            self.assertIn("/opt/pynq-yolov8/person_tracking/pynq_yolov8_dpu_inference.py", recipe)
+            image_append = (project / "project-spec" / "meta-user" / "recipes-core" /
+                            "images" / "petalinux-image-minimal.bbappend")
+            self.assertIn("pynq-yolov8-runtime", image_append.read_text(encoding="utf-8"))
+            self.assertEqual(manifest["runtime"]["target_root"], "/opt/pynq-yolov8")
+
+    def test_rejects_an_incomplete_runtime_source_tree(self) -> None:
+        module = load_module()
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            official = self.create_official_reference(root / "official")
+            project = root / "project"
+            (project / "project-spec" / "meta-user" / "conf").mkdir(parents=True)
+            runtime = root / "runtime"
+            runtime.mkdir()
+            with self.assertRaisesRegex(ValueError, "runtime source is missing"):
+                module.stage_reference(project, official, runtime_source=runtime)
+
 
 if __name__ == "__main__":
     unittest.main()

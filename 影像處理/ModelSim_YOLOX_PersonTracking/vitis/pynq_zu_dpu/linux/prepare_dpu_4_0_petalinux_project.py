@@ -30,6 +30,14 @@ PROJECT_PYTHON_RUNTIME_PACKAGES = (
 )
 PROJECT_XMODEL_PACKAGE = "pynq-yolov8-model"
 TARGET_XMODEL_NAME = "yolov8n_b512.xmodel"
+PROJECT_RUNTIME_PACKAGE = "pynq-yolov8-runtime"
+PROJECT_RUNTIME_TARGET_ROOT = "/opt/pynq-yolov8"
+PROJECT_RUNTIME_SOURCE_FILES = (
+    Path("person_tracking") / "pipeline.py",
+    Path("person_tracking") / "pynq_yolov8_dpu_inference.py",
+    Path("person_tracking") / "assets" / "yolov8.py",
+    Path("person_tracking") / "assets" / "yolov8_vart.py",
+)
 USB_CAMERA_KERNEL_CONFIG = (
     "CONFIG_USB_SUPPORT=y",
     "CONFIG_USB=y",
@@ -99,13 +107,16 @@ def _append_rootfs_packages(rootfs_config: Path) -> None:
     rootfs_config.write_text("\n".join(lines).rstrip() + "\n", encoding="utf-8")
 
 
-def _install_runtime_packages(meta_user: Path, *, include_xmodel: bool = False) -> None:
+def _install_runtime_packages(meta_user: Path, *, include_xmodel: bool = False,
+                              include_project_runtime: bool = False) -> None:
     """Make silent PetaLinux image builds include DPU and project Python runtime."""
     image_dir = meta_user / "recipes-core" / "images"
     image_dir.mkdir(parents=True, exist_ok=True)
     package_names = RUNTIME_PACKAGE_NAMES + PROJECT_PYTHON_RUNTIME_PACKAGES
     if include_xmodel:
         package_names += (PROJECT_XMODEL_PACKAGE,)
+    if include_project_runtime:
+        package_names += (PROJECT_RUNTIME_PACKAGE,)
     packages = " ".join(package_names)
     (image_dir / "petalinux-image-minimal.bbappend").write_text(
         f'IMAGE_INSTALL:append = " {packages}"\n', encoding="utf-8"
@@ -150,6 +161,46 @@ def _stage_xmodel(meta_user: Path, xmodel: Path) -> dict[str, object]:
     }
 
 
+def _stage_project_runtime(meta_user: Path, runtime_source: Path) -> dict[str, object]:
+    """Install only the Python files needed for first-stage DPU person tracking."""
+    runtime_source = runtime_source.resolve()
+    if not runtime_source.is_dir():
+        raise ValueError(f"PYNQ YOLOv8 runtime source is missing: {runtime_source}")
+    package_dir = meta_user / "recipes-apps" / PROJECT_RUNTIME_PACKAGE
+    files_dir = package_dir / "files"
+    source_uris: list[str] = []
+    install_lines: list[str] = []
+    file_hashes: dict[str, str] = {}
+    for relative in PROJECT_RUNTIME_SOURCE_FILES:
+        source = runtime_source / relative
+        if not source.is_file():
+            raise ValueError(f"PYNQ YOLOv8 runtime source is missing: {source}")
+        destination = files_dir / relative
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(source, destination)
+        posix = relative.as_posix()
+        source_uris.append(f"file://{posix}")
+        target = f"{PROJECT_RUNTIME_TARGET_ROOT}/{posix}"
+        install_lines.extend([
+            f"    install -d ${{D}}/{Path(target).parent.as_posix().lstrip('/')}",
+            f"    install -m 0644 ${{WORKDIR}}/{posix} ${{D}}{target}",
+        ])
+        file_hashes[posix] = hash_file(source)
+    recipe = (
+        "SUMMARY = \"PYNQ-ZU original YOLOv8 GraphRunner single-camera tracker\"\n"
+        "LICENSE = \"CLOSED\"\n"
+        "SRC_URI = \" " + " ".join(source_uris) + "\"\n"
+        "S = \"${WORKDIR}\"\n\n"
+        "do_install() {\n" + "\n".join(install_lines) + "\n}\n\n"
+        f'FILES:${{PN}} += "{PROJECT_RUNTIME_TARGET_ROOT}"\n'
+    )
+    (package_dir / f"{PROJECT_RUNTIME_PACKAGE}.bb").write_text(recipe, encoding="utf-8")
+    return {
+        "target_root": PROJECT_RUNTIME_TARGET_ROOT,
+        "files": file_hashes,
+    }
+
+
 def _enable_vitis_ai_library_python(meta_user: Path) -> None:
     """Enable Python bindings required by the target GraphRunner integration."""
     recipe = meta_user / "recipes-vitis-ai" / "vitis-ai-library"
@@ -171,7 +222,8 @@ def _enable_usb_camera_kernel(meta_user: Path) -> None:
 
 
 def stage_reference(project: Path, official_meta_user: Path,
-                    *, xmodel: Path | None = None) -> dict[str, object]:
+                    *, xmodel: Path | None = None,
+                    runtime_source: Path | None = None) -> dict[str, object]:
     """Copy the exact DPU 4.0 runtime additions into one PetaLinux project."""
     project = project.resolve()
     official_meta_user = official_meta_user.resolve()
@@ -190,7 +242,13 @@ def stage_reference(project: Path, official_meta_user: Path,
     _enable_usb_camera_kernel(target_meta_user)
     _append_rootfs_packages(target_meta_user / "conf" / "user-rootfsconfig")
     xmodel_manifest = _stage_xmodel(target_meta_user, xmodel) if xmodel is not None else None
-    _install_runtime_packages(target_meta_user, include_xmodel=xmodel_manifest is not None)
+    runtime_manifest = (_stage_project_runtime(target_meta_user, runtime_source)
+                        if runtime_source is not None else None)
+    _install_runtime_packages(
+        target_meta_user,
+        include_xmodel=xmodel_manifest is not None,
+        include_project_runtime=runtime_manifest is not None,
+    )
 
     manifest: dict[str, object] = {
         "dpu_ip_version": "4.0",
@@ -200,6 +258,8 @@ def stage_reference(project: Path, official_meta_user: Path,
     }
     if xmodel_manifest is not None:
         manifest["xmodel"] = xmodel_manifest
+    if runtime_manifest is not None:
+        manifest["runtime"] = runtime_manifest
     (project / ".pynq_zu_dpu_4_0_stage.json").write_text(
         json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8"
     )
@@ -225,6 +285,8 @@ def main() -> None:
                         help="PetaLinux 2022.1 installation root")
     parser.add_argument("--xmodel", type=Path,
                         help="optional compiled B512 .xmodel to install at /opt/models")
+    parser.add_argument("--runtime-source", type=Path,
+                        help="optional project root whose minimal GraphRunner tracker runs from the rootfs")
     arguments = parser.parse_args()
 
     detected = petalinux_version(arguments.petalinux_root / "settings.sh")
@@ -233,7 +295,7 @@ def main() -> None:
             f"PetaLinux 2022.1 is required for DPU 4.0/Vitis AI 2.5; detected {detected!r}."
         )
     manifest = stage_reference(arguments.project, arguments.official_meta_user,
-                               xmodel=arguments.xmodel)
+                               xmodel=arguments.xmodel, runtime_source=arguments.runtime_source)
     print(f"PYNQ_ZU_DPU_PETALINUX_STAGE_PASS={arguments.project.resolve()}")
     print(json.dumps(manifest, sort_keys=True))
 

@@ -795,3 +795,11 @@
 - 驗證界線／未完成：這只證明 2022.1 FPGA hardware handoff。尚未建立 matching 2022.1 PetaLinux image、device tree/DPU driver/VART/XIR、xmodel 或板上 bitstream/SD/UVC/DMA/YOLOv8/Wi-Fi 實測。official source、generated bit/XSA/reports/logs 留在 external paths、不入 Git。
 - Git：本筆與兩份進度文件將隨文件提交推送至 `main`。
 
+## 2026-11-13 — Prepared the exact 2022.1 PetaLinux DPU 4.0 integration path
+
+- 需求／決策：在尚未取得 PetaLinux 2022.1 installer 前，先把 official DPU 4.0 PetaLinux reference 轉為可重跑、拒絕錯版工具鏈的 external-project staging flow；不能用現有 PetaLinux 2024.1 假裝完成 Linux image。
+- 實際完成：新增 `prepare_dpu_4_0_petalinux_project.py` 和 tests。工具驗證 official 4.0 kernel patch、`CONFIG_XILINX_DPU=y` 及 VART/XIR/unilog/target-factory/vitis-ai-library recipes，將它們合併進 external project 並保留既有 rootfs entries。對 actual official DPUCZDX8G reference 的 temporary external project stage PASS；tests 3/3 PASS。實跑先揭露 official patch filename 本身是 `compatibale`，且 bbappend 也引用這個拼字；工具現在從 bbappend 解析 patch filename，避免 staging 後 recipe reference 斷裂。
+- 版本更正：Vivado/Vitis 實際已安裝於 `C:\Xilinx\Vivado\2022.1`，DPU B512 XSA 也是這套 2022.1 產生；舊 README 的 2024.2 host 描述已更正。仍只有 PetaLinux 2024.1 安裝，helper/README 明確拒絕其用於 DPU 4.0/2.5 route。
+- 驗證界線／未完成：尚無 PetaLinux 2022.1 installer/project/image、未 import XSA、未編譯 device tree/rootfs、未寫 SD、未載入 DPU driver/VART、未 compiled xmodel、未做板端 inference、UVC DMA 或兩板 Wi-Fi。official source、temporary staged project、bitstream/XSA 和帳密不入 Git。
+- Git：本項 source/tests/docs 將隨本次提交推送至 `main`。
+

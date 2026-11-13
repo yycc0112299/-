@@ -925,3 +925,10 @@
 - Final routed timing summary：setup 0 failing endpoints、worst slack `+5.017 ns`；hold 0 failing endpoints、worst slack `+0.011 ns`；pulse-width 0 failing endpoints、worst slack `+3.500 ns`。write_bitstream 完成時 DRC 為 0 errors、0 critical warnings、98 warnings（DPU/DSP pipelining advisories）；無阻斷性錯誤。實作後 utilization：32,048 LUT (27.36%)、41,321 FF (17.64%)、72 BRAM tiles (50.00%)、134 DSP (10.74%)。
 - 驗證界線：這是 Windows Vivado 2022.1 的 hardware handoff proof，不是 PetaLinux 2022.1 image、DPU device tree/driver、VART/XIR、matching `.xmodel`、board download/SD boot、UVC/DMA capture、YOLOv8 DPU inference 或 Wi-Fi peer proof。external source/build/log/bit/XSA 均不入 Git。
 
+### 2026-11-13：PetaLinux 2022.1 DPU 4.0 reference staging helper
+
+- 新增 `vitis/pynq_zu_dpu/linux/prepare_dpu_4_0_petalinux_project.py` 及 3 個 behavioral unit tests。script 僅操作 caller 指定的 external PetaLinux project；要求 official DPU reference 的 `project-spec/meta-user`，驗證 `linux-xlnx_%.bbappend` 所引用的 exact DPU compatible patch、`CONFIG_XILINX_DPU=y` 和 VART/XIR/unilog/target-factory/vitis-ai-library recipes，再合併 `recipes-kernel`、`recipes-vitis-ai`、rootfs package selections，並寫一份小 manifest。
+- 官方 2022.1 reference 的 patch filename 和 bbappend 都使用 `compatibale` 的既有拼字。初版 staging tool 錯把 patch name 寫成 `compatible`，用 exact official reference 實跑時 fail-fast 揭露；修正為從 bbappend 的 `file://...patch` 讀取實際 filename 後，official staging run PASS。這避免 copy 後 recipe 指向不存在的 patch。
+- script CLI 讀 `PETALINUX_VER` 並拒絕非 2022.1 root，防止 DPU 4.0/Vitis AI 2.5 hardware 被誤送進已安裝的 2024.1 PetaLinux。Windows Vivado/Vitis truth 已同步更正：`C:\Xilinx\Vivado\2022.1` 中的 Vivado 與 Vitis 2022.1 均可啟動，DPU B512 bitstream/XSA 亦由 2022.1 產生。
+- 驗證界線：使用 official source 到 temporary external project 的 staging proof，不是 real PetaLinux 2022.1 install/config/build、XSA import、device-tree compilation、rootfs/SD image、driver load、VART/YOLOv8 board inference 或 Wi-Fi proof。PetaLinux 2022.1 installer 尚未取得；official source and temporary staged recipes remain outside Git.
+

@@ -26,10 +26,12 @@ recipe also depends on XIR, target-factory and (for the Vitis flow) XRT.  Do
 not copy ZCU102 device-tree addresses, boot files, or prebuilt libraries into
 this project.
 
-The available Windows host has Embedded Vitis 2024.2 but no PetaLinux
-installation.  A matching image therefore remains an explicit build/deployment
-task on a supported PetaLinux host; it is not silently substituted with the
-existing PYNQ SD image.
+The Windows host now has usable Vivado/Vitis **2022.1** and the DPU B512 XSA
+was rebuilt with that version. It has PetaLinux 2024.1 for unrelated earlier
+work, but **not** PetaLinux 2022.1; the 2024.1 installation must not be used
+to build this DPU 4.0 image. A matching image remains an explicit
+build/deployment task and is not silently substituted with the existing PYNQ
+SD image.
 
 ## Board-side acceptance test
 
@@ -65,12 +67,11 @@ python3 preflight_dpu_build_host.py \
 The generated hardware's `component.xml` identifies it as DPUCZDX8G **4.0**.
 AMD's compatibility matrix pairs that IP with Vitis AI **2.5** and
 Vivado/Vitis/PetaLinux **2022.1**. Vitis AI 3.5's 2023.1 contract applies to
-DPUCZDX8G **4.1**, not this bitstream. The present hardware was built with
-Vivado 2024.2 and the installed PetaLinux host is 2024.1, neither of which is
-the published compatible toolchain for this DPU 4.0 build. Do not infer
-runtime compatibility from a successful Vivado implementation. Either rebuild
-this IP using the 2.5/2022.1 contract, or first replace it with DPU 4.1 and
-then use the 3.5/2023.1 contract.
+DPUCZDX8G **4.1**, not this bitstream. The present hardware is now built with
+Vivado 2022.1; the remaining toolchain mismatch is the installed PetaLinux
+2024.1 host. Do not infer Linux runtime compatibility from a successful Vivado
+implementation. Either use a 2022.1 PetaLinux host for this 4.0 IP, or first
+replace it with DPU 4.1 and then use the 3.5/2023.1 contract.
 
 The preflight requires the exact local Docker compiler image for the selected
 DPU contract (DPU 4.0: `xilinx/vitis-ai:2.5.0`) or `vai_c_xir`, a PetaLinux
@@ -81,6 +82,27 @@ fingerprint or compile an `.xmodel` from a board-family JSON. It prints
 `PYNQ_ZU_DPU_BUILD_HOST_PASS` only for the compatible build contract; it does
 not download software, alter the workstation, build an image or touch the
 board.
+
+## Stage the official 2022.1 DPU additions
+
+After installing PetaLinux **2022.1** and creating/configuring an external
+project from the exact B512 XSA, stage only the official DPU 4.0 additions:
+
+```sh
+python3 prepare_dpu_4_0_petalinux_project.py \
+  --project /work/pynq_zu_dpu_2022_1 \
+  --petalinux-root /opt/petalinux/2022.1 \
+  --official-meta-user /external/DPUCZDX8G/prj/Vivado/xilinx_zcu102_bsp/project-spec/meta-user
+```
+
+The helper validates the official `xlnx_dpu` 4.0-compatible patch and
+`CONFIG_XILINX_DPU=y`, then copies only the official kernel/Vitis-AI recipe
+trees into the external project. It appends the VART/XIR/unilog/target-factory
+rootfs selections without deleting existing user selections, writes a small
+manifest, and rejects every PetaLinux release other than 2022.1. It deliberately
+does not copy ZCU102 device-tree addresses or boot assets, build an image, or
+touch the board. Run `petalinux-config --get-hw-description` against the exact
+PYNQ-ZU XSA before staging so the generated DPU node comes from this hardware.
 
 From the repository's `ModelSim_YOLOX_PersonTracking` root, the tracked helper
 below extracts that file from a completed Vivado project:

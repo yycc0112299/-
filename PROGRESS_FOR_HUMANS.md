@@ -743,3 +743,9 @@
 - 最終時序檢查沒有 setup、hold 或 pulse-width 違反；bitstream 為 7,797,815 bytes，XSA 為 2,628,256 bytes，並含硬體描述與 PS 初始化資料。
 - 這代表 FPGA 硬體交接檔已可供下一步 Linux/PetaLinux 整合；尚未寫入板子或 SD 卡，Linux DPU driver、device tree、VART/XIR、YOLOv8 `.xmodel`、相機 DMA 及兩板 Wi-Fi 都仍未實機驗證。
 
+## 2026-11-13：2022.1 Linux DPU 整合已可預先準備
+
+- 已更正文件：目前 Vivado 與 Vitis 都是已實際可用的 **2022.1**，DPU B512 也是以 2022.1 完成；不是 2024.2。
+- 新增可重跑的 PetaLinux staging 工具。等正確的 PetaLinux 2022.1 安裝後，它會把 AMD 官方 DPU 4.0 的 kernel driver patch、DPU kernel config 與 VART/XIR recipes 放進外部 PetaLinux project，且保留原本 rootfs 設定。
+- 工具已用官方 DPU reference 實跑驗證。現有 PetaLinux 是 2024.1，工具會明確拒絕拿它來建這份 DPU 4.0 image；仍需要下載/安裝 PetaLinux 2022.1，之後才能產生 Linux image、燒錄 SD 和做板端 DPU inference。
+

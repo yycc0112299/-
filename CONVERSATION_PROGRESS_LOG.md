@@ -948,3 +948,10 @@
 - 驗證範圍／未完成：no physical SD write, target boot, device node, GraphRunner import, UVC frame, positive person detection, same-board two-camera capture or Wi-Fi peer is claimed. The external model/image/logs are excluded from Git; `petalinux_installation_log` remains intentionally untracked.
 - Git／同步：all code, tests, README and progress files for this deliverable are to be committed and pushed to `origin/main` together.
 
+## 2026-11-13 — Exported the verified DPU/YOLOv8/UVC WIC for controlled SD writing
+
+- 需求／決策：make the final image accessible to Windows without guessing or overwriting a physical SD target.
+- 實際完成：copied the verified 6,442,455,040-byte WIC to `C:\pynq_zu_dpu_2022_20261113\sd_image_20261113\pynq_zu_dpu_yolov8_usb_2022_1.wic`; copy-side SHA-256 exactly matches the source image (`a4acc61f63febb28ab343f38c53b84ef7167e941888015c54d7a27ec0c7b914e`). Read-only disk inventory found only fixed 2 TB and 512 GB disks.
+- 驗證範圍／未完成：no removable SD is present; no disk selection, formatting, write, SD boot, board runtime or camera/DPU inference occurred. The file is an external generated artifact and is not committed to Git.
+- Git／同步：progress records for this export are to be committed and pushed to `origin/main`; `petalinux_installation_log` remains intentionally untracked.
+

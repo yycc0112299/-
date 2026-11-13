@@ -1043,3 +1043,8 @@
 - 原因已確認：`user-rootfsconfig` 是 rootfs menu declaration，不支援 `CONFIG_...=y`；silent config 不會將只列出的 Vitis-AI packages 選進 image。staging helper 現會把先前錯誤的 `=y` 行正規化回合法 declaration，並寫 `recipes-core/images/petalinux-image-minimal.bbappend` 以 `IMAGE_INSTALL:append` 明確納入 `vart`、`xir`、`unilog`、`target-factory`、`vitis-ai-library`。更新後 rootfs silentconfig PASS，Linux staging unit tests 3/3 PASS；runtime rebuild 正在 external WSL background job 進行中，尚不可宣稱 target import 或 image runtime 已完成。
 - 手動待辦（不阻礙目前 build）：完成 image 後仍需使用者在場確認要寫入的 SD 卡、切回 SD boot 後實體開機；之後以 `/dev/dpu`、VART/XIR/GraphRunner import、camera→YOLOv8 實測驗證。兩板 Wi-Fi 則另需授權 SSID/密碼與第二塊板子。這些動作均尚未執行。
 
+### 2026-11-13：最終 WIC 已安全匯出至 Windows，等待 SD card 明確選擇
+
+- External WIC was copied without alteration to `C:\pynq_zu_dpu_2022_20261113\sd_image_20261113\pynq_zu_dpu_yolov8_usb_2022_1.wic` (6,442,455,040 bytes). Copy-side SHA-256 is `a4acc61f63febb28ab343f38c53b84ef7167e941888015c54d7a27ec0c7b914e`, equal to the verified PetaLinux source WIC.
+- Read-only Windows disk inventory shows only fixed disks (2 TB WDC and 512 GB Micron), no removable SD target. No disk was initialized, formatted, selected or written. The WIC is therefore ready for Etcher/a carefully selected removable disk, but no physical-media or board boot claim is made.
+

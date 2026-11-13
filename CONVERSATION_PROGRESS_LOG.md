@@ -810,3 +810,25 @@
 - 驗證界線／未完成：尚無 PetaLinux 2022.1 installer/project/image、未 import XSA、未編譯 device tree/rootfs、未寫 SD、未載入 DPU driver/VART、未 compiled xmodel、未做板端 inference、UVC DMA 或兩板 Wi-Fi。official source、temporary staged project、bitstream/XSA 和帳密不入 Git。
 - Git：本項 source/tests/docs 將隨本次提交推送至 `main`。
 
+## 2026-11-13 — Quantized and compiled YOLOv8n for the generated B512 DPU
+
+- 需求／決策：使用 YOLOv8（不偷換成 YOLOX）建立 real Vitis AI 2.5 → native DPUCZDX8G 4.0 B512 artifact，並如實保留 compiled graph execution boundary。
+- 實際完成：新增 C2f static-slice quantization helper and tests；Vitis AI 2.5 calibration/test produced `DetectionModel_int.xmodel` (12,943,875 bytes) with three raw heads. `vai_c_xir` compiled it against exact generated B512 `arch.json`, outputting external `yolov8n_b512.xmodel` (5,513,997 bytes) and MD5 `5921d60a43728ed9f40be0e433bdf0e9`.
+- 驗證範圍／未完成：compiler reports 121 device subgraphs and 60 DPU subgraphs because SiLU is retained as a float op. Therefore this proves quantization/compiler compatibility but not one-runner VART inference, person boxes, DPU-only performance, board execution, PetaLinux image, camera capture, or Wi-Fi peer. External models/logs/weights are not in Git.
+- Git／同步：依使用者要求，這個 progress chunk 暫留本機工作樹，尚未 commit/push；將在後續較大整合段落一起同步。
+
+## 2026-11-13 — Verified the B512-compatible YOLOv8 activation route
+
+- 實際完成：新增 and tested LeakyReLU activation option. Vitis AI 2.5 calibration/test plus `vai_c_xir` compiled the activation probe to B512, reducing compiler partitioning from 121/60 device/DPU subgraphs to 29/9.
+- 驗證界線：probe reused SiLU-trained weights after activation replacement, so it proves toolchain/hardware compatibility only, not detection accuracy. Hardswish was tested and rejected because the Vitis AI 2.5 quantizer's own module has two reproducible graph bugs. No commit/push yet per user instruction.
+
+## 2026-11-13 — Added tested raw YOLOv8 DFL output decoding
+
+- 實際完成：`raw_yolov8_dfl_decoder` accepts the exact three raw heads seen during Vitis AI quantization, derives DFL boxes and returns the existing tracker-compatible person detection schema. A hand-checkable DFL bin fixture verifies the box, class and confidence; full project suite passes 29 tests.
+- 驗證界線：this is decoder correctness only. It requires a future Vitis AI 2.5 GraphRunner runtime on a matching PetaLinux image to feed real heterogeneous graph outputs; no target/board inference claimed. Changes remain local/unpushed per user instruction.
+
+## 2026-11-13 — Enabled the Python GraphRunner dependency in staged PetaLinux recipes
+
+- 實際完成：the DPU 4.0 staging helper now writes the Vitis AI Library bbappend needed to enable its Python binding; behavioral Linux staging tests are 13/13 PASS.
+- 驗證界線：this only prepares an external PetaLinux 2022.1 project. PetaLinux 2022.1 is still unavailable locally, so no rootfs/image/package installation or target GraphRunner import has been verified. Changes remain local/unpushed per user instruction.
+

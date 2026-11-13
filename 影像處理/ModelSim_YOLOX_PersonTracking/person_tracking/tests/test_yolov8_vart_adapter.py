@@ -10,7 +10,7 @@ import numpy as np
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "assets"))
 
-from yolov8_vart import VartYoloV8, standard_yolov8_decoder
+from yolov8_vart import VartYoloV8, raw_yolov8_dfl_decoder, standard_yolov8_decoder
 
 
 class FakeTensor:
@@ -41,6 +41,25 @@ class FakeRunner:
 
 
 class VartYoloV8Tests(unittest.TestCase):
+    def test_raw_three_head_decoder_decodes_a_person_from_dfl_bins(self) -> None:
+        heads = {}
+        for size in (80, 40, 20):
+            heads[f"head_{size}"] = np.zeros((1, 144, size, size), dtype=np.float32)
+        # On the stride-32 grid, cell (0, 0) has center (16, 16).  Each DFL
+        # distribution peaks at bin 1, giving four 32-pixel distances.
+        selected = heads["head_20"]
+        for side in range(4):
+            selected[0, side * 16 + 1, 0, 0] = 20.0
+        selected[0, 64, 0, 0] = .90
+
+        decoder = raw_yolov8_dfl_decoder(confidence_threshold=.30, nms_threshold=.45)
+        detections = decoder(heads, 640, 640)
+
+        self.assertEqual(len(detections), 1)
+        self.assertEqual(detections[0]["class_id"], 0)
+        self.assertAlmostEqual(float(detections[0]["confidence"]), .90)
+        self.assertEqual(detections[0]["box"], [0, 0, 48, 48])
+
     def test_standard_decoder_adapts_a_single_raw_yolov8_head_to_person_boxes(self) -> None:
         raw = np.zeros((1, 84, 1), dtype=np.float32)
         raw[0, :4, 0] = [320, 320, 320, 160]

@@ -66,6 +66,60 @@ def standard_yolov8_decoder(*, output_name: str | None = None,
     return decode
 
 
+def raw_yolov8_dfl_decoder(*, confidence_threshold: float = .30,
+                           nms_threshold: float = .45, input_size: int = 640) -> Decoder:
+    """Decode the three `(1,144,H,W)` raw Ultralytics YOLOv8 Detect heads.
+
+    This is the decoder contract for the compiled Vitis-AI raw-head graph:
+    64 DFL channels (4 x 16 bins), then 80 COCO class channels.  It remains
+    deliberately separate from runner construction because GraphRunner must
+    be used for multi-subgraph xmodels.
+    """
+    if input_size <= 0:
+        raise ValueError("input_size must be positive")
+
+    def decode(outputs: Mapping[str, np.ndarray], source_width: int,
+               source_height: int) -> list[dict[str, object]]:
+        rows: list[np.ndarray] = []
+        bins = np.arange(16, dtype=np.float32).reshape(1, 16, 1, 1)
+        for name, value in outputs.items():
+            head = np.asarray(value, dtype=np.float32)
+            if head.ndim != 4 or head.shape[0] != 1 or head.shape[1] != 144:
+                raise ValueError(f"raw YOLOv8 head {name!r} must be (1,144,H,W), got {head.shape}")
+            _, _, height, width = head.shape
+            if input_size % height or input_size % width:
+                raise ValueError(f"raw YOLOv8 head {name!r} has incompatible grid {height}x{width}")
+            stride_x, stride_y = input_size / width, input_size / height
+            logits = head[:, :64].reshape(1, 4, 16, height, width)
+            logits = logits - logits.max(axis=2, keepdims=True)
+            probabilities = np.exp(logits)
+            distances = (probabilities / probabilities.sum(axis=2, keepdims=True) * bins).sum(axis=2)[0]
+            grid_x, grid_y = np.meshgrid(np.arange(width), np.arange(height))
+            center_x = (grid_x.astype(np.float32) + .5) * stride_x
+            center_y = (grid_y.astype(np.float32) + .5) * stride_y
+            left, top, right, bottom = distances
+            x0 = center_x - left * stride_x
+            y0 = center_y - top * stride_y
+            x1 = center_x + right * stride_x
+            y1 = center_y + bottom * stride_y
+            person = head[0, 64]
+            for values in zip(x0.ravel(), y0.ravel(), x1.ravel(), y1.ravel(), person.ravel()):
+                x_start, y_start, x_end, y_end, score = (float(item) for item in values)
+                if score >= confidence_threshold:
+                    rows.append(np.array([(x_start + x_end) / 2, (y_start + y_end) / 2,
+                                          x_end - x_start, y_end - y_start, score], dtype=np.float32))
+        if not rows:
+            return []
+        # Reuse the existing tested letterbox reversal and NMS boundary.
+        return YoloV8.decode_predictions(np.stack(rows)[None, :, :],
+                                         source_width=source_width,
+                                         source_height=source_height,
+                                         confidence_threshold=confidence_threshold,
+                                         nms_threshold=nms_threshold)
+
+    return decode
+
+
 def _tensor_fix_point(tensor: Any) -> int:
     try:
         return int(tensor.get_attr("fix_point"))

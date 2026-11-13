@@ -66,6 +66,15 @@ def _append_rootfs_packages(rootfs_config: Path) -> None:
     rootfs_config.write_text("\n".join(lines).rstrip() + "\n", encoding="utf-8")
 
 
+def _enable_vitis_ai_library_python(meta_user: Path) -> None:
+    """Enable Python bindings required by the target GraphRunner integration."""
+    recipe = meta_user / "recipes-vitis-ai" / "vitis-ai-library"
+    recipe.mkdir(parents=True, exist_ok=True)
+    (recipe / "vitis-ai-library_2.5.bbappend").write_text(
+        'PACKAGECONFIG:append = " python"\n', encoding="utf-8"
+    )
+
+
 def stage_reference(project: Path, official_meta_user: Path) -> dict[str, object]:
     """Copy the exact DPU 4.0 runtime additions into one PetaLinux project."""
     project = project.resolve()
@@ -81,6 +90,7 @@ def stage_reference(project: Path, official_meta_user: Path) -> dict[str, object
             target_meta_user / directory,
             dirs_exist_ok=True,
         )
+    _enable_vitis_ai_library_python(target_meta_user)
     _append_rootfs_packages(target_meta_user / "conf" / "user-rootfsconfig")
 
     manifest: dict[str, object] = {

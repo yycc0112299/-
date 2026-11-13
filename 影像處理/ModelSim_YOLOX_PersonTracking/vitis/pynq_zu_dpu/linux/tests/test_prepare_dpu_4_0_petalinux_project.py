@@ -66,6 +66,14 @@ class PrepareDpu40PetaLinuxProjectTests(unittest.TestCase):
             self.assertTrue(
                 (target_meta_user / "recipes-vitis-ai" / "xir" / "xir_2.5.bb").is_file()
             )
+            graph_runner_append = (
+                target_meta_user / "recipes-vitis-ai" / "vitis-ai-library" /
+                "vitis-ai-library_2.5.bbappend"
+            )
+            self.assertEqual(
+                graph_runner_append.read_text(encoding="utf-8"),
+                'PACKAGECONFIG:append = " python"\n',
+            )
             rootfs_text = rootfs.read_text(encoding="utf-8")
             self.assertIn("CONFIG_existing_package", rootfs_text)
             self.assertIn("CONFIG_vart", rootfs_text)

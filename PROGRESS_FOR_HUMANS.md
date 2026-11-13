@@ -755,3 +755,24 @@
 - 新增可重跑的 PetaLinux staging 工具。等正確的 PetaLinux 2022.1 安裝後，它會把 AMD 官方 DPU 4.0 的 kernel driver patch、DPU kernel config 與 VART/XIR recipes 放進外部 PetaLinux project，且保留原本 rootfs 設定。
 - 工具已用官方 DPU reference 實跑驗證。現有 PetaLinux 是 2024.1，工具會明確拒絕拿它來建這份 DPU 4.0 image；仍需要下載/安裝 PetaLinux 2022.1，之後才能產生 Linux image、燒錄 SD 和做板端 DPU inference。
 
+## 2026-11-13：YOLOv8 已真正編譯給 B512 DPU
+
+- YOLOv8n 已在 Vitis AI 2.5 實際完成量化並輸出 xmodel，接著也成功編譯給這塊 PYNQ-ZU 的 B512 DPU。
+- 原始 YOLOv8 的一個 C2f 寫法不能被 Vitis AI 2.5 處理；已用等價的通道切片修正，三個偵測輸出頭都已確認產生。
+- 但目前還不是可上板的人物辨識：SiLU activation 造成編譯後切成 60 個 DPU 小段與 CPU 小段，不能用現有的單一 DPU runner。下一步要把模型改成更適合 B512 的 activation / execution graph，並在板上驗證 DFL decoder。
+
+## 2026-11-13：LeakyReLU 的 DPU 相容性已驗證
+
+- B512 支援 LeakyReLU；把 YOLOv8 的 SiLU 改為 LeakyReLU 後，編譯碎片從 60 個 DPU 小段降為 9 個。
+- 這是很明確的硬體相容性改善，但目前僅是編譯探測，尚未用 LeakyReLU 架構重新訓練，所以不能當作人物辨識模型使用。
+
+## 2026-11-13：YOLOv8 的硬體輸出解碼已完成
+
+- 已能把 DPU/GraphRunner 的三個 YOLOv8 raw output heads 轉回 person 方框，包含 NMS 與原始影像座標還原。
+- 尚待 PetaLinux/VART GraphRunner 實機執行；目前是有測試的軟體 decoder，不是板端推論驗證。
+
+## 2026-11-13：PetaLinux 已補上 Python GraphRunner 設定
+
+- Linux image 的準備工具現在會啟用 Vitis AI Library 的 Python bindings，未來可讓 Python 的 YOLOv8 程式直接使用 GraphRunner。
+- 尚未真正建 image 或寫入 SD；這是避免之後 rootfs 少套件的預先設定。
+

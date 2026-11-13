@@ -1121,3 +1121,8 @@
 - Test-first coverage verifies all three environment selections and no CPU fallback; person-tracking suite is 35/35 PASS. The full-duplex two-board README commands now pass `/opt/models/yolov8n_b512.xmodel` explicitly. This remains code/loopback coverage only: no second board, Wi-Fi association or two-board DPU/camera result exists.
 - Actual host-only DPU bundle construction via `live_site/prepare_pynq_dual_bundle.py --dpu-runtime` PASSed. Archive inspection proves it contains `pynq_yolov8_peer.py`, `peer_protocol.py`, `pynq_wifi_peer_preflight.py`, the DPU camera gate and `yolov8_vart.py`, while deliberately excluding `yolov8n.onnx`. The temporary 41,042-byte archive is outside Git and was not uploaded to a board.
 
+### 2026-11-14：建立單一驗收核對表與跨鏡頭 metadata 設計/計畫
+
+- Added `PROJECT_ACCEPTANCE_CHECKLIST.md` as the user-facing authoritative checklist. It separates built/JTAG proof, host-only code proof, ready-to-flash artifacts, and physical blockers; it must be updated instead of converting `READY`/`BLOCKED` into unverified PASS claims.
+- Added a design and implementation plan for the next no-SD code increment: carry optional normalized appearance features in two-board packets and associate only repeated unambiguous observations as cross-camera candidates. It preserves local tracker IDs, transfers no raw frames, and explicitly forbids describing appearance similarity as identity recognition.
+

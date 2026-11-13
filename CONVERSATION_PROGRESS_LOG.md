@@ -1025,6 +1025,13 @@
 - 驗證範圍／未完成：host archive-content verification only; no Wi-Fi credentials, physical second board, target upload, camera frame or peer packet over a real network is claimed.
 - Git／同步：progress records are committed and pushed to `main` in this change.
 
+## 2026-11-14 — Added one authoritative project acceptance checklist
+
+- 需求／決策：the user requested one table to track every remaining item while SD access is unavailable, so future updates remain concrete and distinguish code readiness from physical verification.
+- 實際完成：added `PROJECT_ACCEPTANCE_CHECKLIST.md` with the Vivado/Vitis/PetaLinux/SD/single-board/two-board evidence boundaries, current state, and the exact next hardware verification order. Also recorded the design/plan for the next offline code task: optional appearance metadata plus conservative cross-camera candidate fusion.
+- 驗證範圍／未完成：the checklist reports existing evidence only; it does not change hardware state or turn any blocked physical gate into PASS. The corrected WIC remains unwritten to the unavailable SD.
+- Git／同步：checklist, design/plan and all progress records are committed and pushed to `main` in this change.
+
 ## 2026-11-13 — Made the two-board sender select DPU GraphRunner explicitly
 
 - 需求／決策：prepare the future one-camera-per-board Wi-Fi path so a DPU deployment cannot silently run the CPU ONNX fallback.

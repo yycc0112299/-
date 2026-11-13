@@ -935,3 +935,8 @@
 - Wi‑Fi、第二塊板與兩台相機尚未實測，這次是先把未來的啟動程式與測試準備正確。
 - 已實際建立並檢查未來兩板用的 DPU 部署包：有 Wi‑Fi/TCP 與 DPU 程式，沒有不需要的 CPU ONNX 模型。這仍不是兩塊板已連線的證據。
 
+## 2026-11-14：之後統一用驗收表核對
+
+- 新增 `PROJECT_ACCEPTANCE_CHECKLIST.md`，把 Vivado、Vitis、Linux、SD、單板鏡頭/DPU、兩板 Wi‑Fi 與跨鏡頭追蹤分開列出 PASS、READY、IN PROGRESS、BLOCKED。
+- 接下來會依同一份表更新，不會把「程式準備好」誤說成「硬體已完成」。
+

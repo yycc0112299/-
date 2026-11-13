@@ -1,5 +1,12 @@
 # 對話與進度同步紀錄
 
+## 2026-11-13 — Verified the local Vitis AI 2.5 DPU compilation boundary for YOLOv8
+
+- 需求／決策：PetaLinux 2022.1 download form remains external-account gated, so continue an independent YOLOv8/DPU preflight rather than wait.
+- 實際完成：read-only Docker inspection of pre-existing `xilinx/vitis-ai:2.5.0` confirms `vitis-ai-pytorch`, PyTorch 1.10.1, `pytorch_nndct 2.5.0`, and `vai_c_xir`. Its actual help requires `-x XMODEL`; `vai_q_onnx` is absent. This establishes that tracked `yolov8n.onnx` is a CPU fallback input, not a compile-ready DPU model.
+- 驗證範圍／未完成：未下載 weights、未量化／編譯 `.xmodel`、未檢查 real compiled tensors、未做 VART/board inference。現有 VART adapter remains deliberately decoder-gated.
+- Git／同步：本次文件變更將與同一筆 Git commit 推送至 `origin/main`；Docker image 與外部 DPU build assets 不入 Git。
+
 ## 2026-11-13 — Audited board Wi‑Fi readiness without changing network configuration
 
 - 需求／決策：在 Vivado 安裝仍進行時，先以唯讀 SSH 檢查目標端將來兩板 Wi‑Fi 互傳的基本條件。

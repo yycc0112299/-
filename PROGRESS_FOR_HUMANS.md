@@ -1,5 +1,11 @@
 # 專題進度（重點版）
 
+## 2026-11-13：YOLOv8 的 DPU 轉換路線已核對
+
+- 本機已有正確的 Vitis AI 2.5 Docker 環境，裡面有 DPU 編譯器與 PyTorch quantizer。
+- 編譯器需要先有量化後的 `.xmodel`；目前只有 CPU 用的 YOLOv8 ONNX 檔，不能直接編譯成 DPU 模型。
+- 所以現在不能宣稱 YOLOv8 已在 DPU 上運作；下一步是以相容的 YOLOv8 PyTorch 模型量化、編譯，再依實際輸出接上人物框 decoder。
+
 ## 2026-11-13：板端 Wi‑Fi 目前尚不可作為兩板互傳通道
 
 - `wlan0` 介面存在但未連線，顯示 `ESSID:off/any`、`Not-Associated`，MAC 為全 0。

@@ -1,5 +1,12 @@
 # 專題狀態與交接記錄（供 Codex）
 
+## 2026-11-13：本機 Vitis AI 2.5／YOLOv8 DPU toolchain read-only preflight
+
+- 已實際檢查本機既有 Docker image `xilinx/vitis-ai:2.5.0`（image digest `sha256:eaa85efb06924995ebdb973546e7f69169b003b8cc525764bd9524ad554dddbe`）。它含 `vitis-ai-pytorch` conda environment、PyTorch `1.10.1`、`pytorch_nndct 2.5.0`，並含 `vai_c_xir`。
+- `vai_c_xir --help` 的實際 CLI 只接受 `-x XMODEL -a ARCH -o OUTPUT_DIR -n NET_NAME`，所以它是把已量化的 `.xmodel` 編譯給 DPU 的步驟；現有 `person_tracking/assets/yolov8n.onnx` 不能直接餵給這個 compiler。base image 亦未發現 `vai_q_onnx` command。
+- 目前 repo 僅有 tracked `yolov8n.onnx`，沒有可由 Vitis AI 2.5 PyTorch quantizer 使用、已驗證相容的 YOLOv8 PyTorch/quantized `.xmodel`。現有 `yolov8_vart.py` 因此正確維持 fail-closed：沒有 inspected compiled output decoder 時不會回傳假人物框。
+- 下一條正確路線：在 matching Vitis AI 2.5 PyTorch environment 使用 DPU-compatible YOLOv8 source/weights 建立 quantized `.xmodel`，以 external `arch.json`（B512 DPU）編譯，再先檢查 actual output tensor layouts，最後才註冊 decoder。這次未下載模型、未生成 xmodel、未寫入板子或變更 Docker image。
+
 ## 2026-11-13：Wi‑Fi transport read-only preflight
 
 - Board SSH diagnostic: `wlan0` is managed but `ESSID:off/any`, `Access Point: Not-Associated`, MAC `00:00:00:00:00:00`; `usb0` remains the working host connection.

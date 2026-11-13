@@ -1018,6 +1018,13 @@
 - 驗證範圍／未完成：host test only. The timeout behavior must still be observed on the corrected SD image; no DPU query success, camera frame or inference result is claimed.
 - Git／同步：source, test, README and progress records are committed and pushed to `main` in this change.
 
+## 2026-11-13 — Verified the future two-board DPU deployment bundle contents
+
+- 需求／決策：prove the host can construct a DPU-only two-board deployment artifact without waiting for the physical SD or boards.
+- 實際完成：ran `prepare_pynq_dual_bundle.py --dpu-runtime` and inspected the 41,042-byte temporary tarball. It contains the TCP peer protocol, Wi-Fi preflight, DPU peer sender, DPU camera gate and GraphRunner adapter, and excludes the CPU ONNX model. The temporary artifact remains outside Git and was not uploaded.
+- 驗證範圍／未完成：host archive-content verification only; no Wi-Fi credentials, physical second board, target upload, camera frame or peer packet over a real network is claimed.
+- Git／同步：progress records are committed and pushed to `main` in this change.
+
 ## 2026-11-13 — Made the two-board sender select DPU GraphRunner explicitly
 
 - 需求／決策：prepare the future one-camera-per-board Wi-Fi path so a DPU deployment cannot silently run the CPU ONNX fallback.

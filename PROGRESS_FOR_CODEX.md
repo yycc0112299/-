@@ -1119,4 +1119,5 @@
 
 - `person_tracking/pynq_yolov8_peer.py` now accepts `--dpu-xmodel`. It validates the supplied nonempty `.xmodel`, sets `PERSON_DETECTOR=yolov8_vart`, `PYNQ_VART_XMODEL` and `PYNQ_VART_GRAPH_RUNNER=1`, then constructs the DPU backend. This prevents the future DPU deployment bundle from silently selecting its CPU ONNX default.
 - Test-first coverage verifies all three environment selections and no CPU fallback; person-tracking suite is 35/35 PASS. The full-duplex two-board README commands now pass `/opt/models/yolov8n_b512.xmodel` explicitly. This remains code/loopback coverage only: no second board, Wi-Fi association or two-board DPU/camera result exists.
+- Actual host-only DPU bundle construction via `live_site/prepare_pynq_dual_bundle.py --dpu-runtime` PASSed. Archive inspection proves it contains `pynq_yolov8_peer.py`, `peer_protocol.py`, `pynq_wifi_peer_preflight.py`, the DPU camera gate and `yolov8_vart.py`, while deliberately excluding `yolov8n.onnx`. The temporary 41,042-byte archive is outside Git and was not uploaded to a board.
 

@@ -1069,3 +1069,15 @@
 - JTAG-only work is now exhausted for the current design. The older `run_pynq_zu_usb_video_jtag.tcl` is intentionally excluded because it targets a different FPGA address map/bitstream and bare-metal controller; mixing it with DPU B512 would not test this goal. Linux boot, DPU driver, VART/GraphRunner, UVC capture and YOLOv8 tracking require SD mode and cannot be truthfully completed while the board remains in JTAG boot.
 - Added `linux/write_pynq_zu_single_camera_sd.ps1`, tested red then green (2/2 plus PowerShell parser). It checks the latest 6,442,455,040-byte WIC and exact SHA-256, requires an explicit disk number plus acknowledgement, accepts only USB/SD bus types and rejects system/boot/read-only/undersized targets. It has not been run against a physical disk; no SD has been written or booted.
 
+### 2026-11-13：已偵測可移除 SD，但 Windows elevation 尚未取得
+
+- Read-only inventory now sees the inserted target as Windows Disk 2 (`Generic- Multi-Card`, `SDHC Card`, USB, 15,931,539,456 bytes). It is neither boot nor system disk, is writable and has sufficient capacity for the 6,442,455,040-byte authoritative tracker WIC. `-WhatIf` completed the image-hash and disk-identity gate.
+- The actual writer deliberately refused to continue from the non-elevated host session before taking the disk offline. Two `Start-Process -Verb RunAs` attempts then returned failure and Disk 2 remained online, proving no raw write began. No disk was formatted, initialized or partially overwritten.
+- Tightened the writer so its internally safe `Set-Disk` offline call does not create a second interactive confirmation after the explicit script acknowledgement; added optional `-ErrorReportPath` for a non-secret elevated failure report. Static safety tests and PowerShell parser pass. The remaining physical prerequisite is a successful Windows UAC elevation, not a missing PetaLinux/Vivado/Vitis artifact.
+
+### 2026-11-13：SD writer elevation failure root cause isolated and fixed
+
+- Root-cause investigation found two independent host-side defects before any write could begin. First, `powershell.exe -File ... -Confirm:$false` passes that text as a string in this invocation form, so Windows PowerShell rejects it before executing the writer. The correct automated caller uses an encoded `-Command` where `$false` is evaluated as a Boolean. Second, the writer's original top-level rethrowing `trap` could recursively catch its own rethrow, explaining the hung/opaque elevation attempts.
+- Replaced the top-level trap with a single `try/catch` that writes `-ErrorReportPath` once and exits with failure. A child non-elevated PowerShell run now creates a concrete error report stating that administrator rights are required; Disk 2 remains online. The writer safety test now explicitly rejects reintroducing a top-level trap; the suite passes 3/3. This is a host control-flow repair, not an SD-write claim.
+- A new elevated `-WhatIf` process is awaiting the Windows UAC consent dialog at this record. It performs no write even if approved. No physical SD has been modified, and the final raw-write stage remains contingent on this proof succeeding.
+

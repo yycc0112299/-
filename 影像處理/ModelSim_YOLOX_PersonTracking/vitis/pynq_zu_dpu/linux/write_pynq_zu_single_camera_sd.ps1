@@ -20,14 +20,19 @@ param(
     [string]$ImagePath = 'C:\pynq_zu_dpu_2022_20261113\sd_image_20261113\pynq_zu_dpu_single_camera_tracker_2022_1.wic',
 
     [Parameter(Mandatory = $true)]
-    [switch]$IUnderstandThisErasesDisk
+    [switch]$IUnderstandThisErasesDisk,
+
+    [Parameter()]
+    [string]$ErrorReportPath
 )
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
-$expectedSha256 = '013f29c2f3feb8c0cf26b2f7f3987557905899d44b2157713cb0c9ae8e5791d6'
-$approvedBusTypes = 'USB', 'SD'
+try {
+
+    $expectedSha256 = '013f29c2f3feb8c0cf26b2f7f3987557905899d44b2157713cb0c9ae8e5791d6'
+    $approvedBusTypes = 'USB', 'SD'
 
 function Test-Administrator {
     $identity = [Security.Principal.WindowsIdentity]::GetCurrent()
@@ -75,7 +80,7 @@ if (-not $PSCmdlet.ShouldProcess($targetDescription, "write verified image $($im
     return
 }
 
-Set-Disk -Number $DiskNumber -IsOffline $true
+Set-Disk -Number $DiskNumber -IsOffline $true -Confirm:$false
 
 $inputStream = $null
 $outputStream = $null
@@ -103,4 +108,13 @@ try {
 finally {
     if ($null -ne $outputStream) { $outputStream.Dispose() }
     if ($null -ne $inputStream) { $inputStream.Dispose() }
+}
+}
+catch {
+    $errorText = $_ | Out-String
+    if (-not [string]::IsNullOrWhiteSpace($ErrorReportPath)) {
+        Set-Content -LiteralPath $ErrorReportPath -Value $errorText -Encoding utf8
+    }
+    Write-Error $errorText
+    exit 1
 }

@@ -219,3 +219,16 @@ Use `-WhatIf` first for a no-write review. A successful raw write is still not
 a target proof: power down, move the PYNQ-ZU switch to SD, boot the card, then
 run `verify_dpu_runtime.py --xmodel /opt/models/yolov8n_b512.xmodel
 --require-camera` and the target tracker command above.
+
+The script requires an elevated PowerShell because Windows must take the raw
+removable disk offline. Its optional `-ErrorReportPath <path>` records a
+non-secret error report when an elevated invocation fails; it does not weaken
+the disk-selection or hash checks.
+
+For non-interactive elevation, invoke PowerShell with an encoded `-Command`
+that passes `-Confirm:$false` as a Boolean expression. Do not pass the literal
+text `-Confirm:$false` through `powershell.exe -File`: Windows PowerShell can
+then treat it as a string and reject the common `Confirm` switch before the
+writer starts. The writer reports failures with a single top-level `try/catch`;
+it intentionally has no rethrowing top-level `trap`, which could recursively
+handle its own error and conceal the actual failure.

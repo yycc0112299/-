@@ -19,6 +19,8 @@ class WritePynqZuSingleCameraSdTests(unittest.TestCase):
             "IsBoot -or $disk.IsSystem",
             "'USB', 'SD'",
             "Set-Disk -Number $DiskNumber -IsOffline $true",
+            "Set-Disk -Number $DiskNumber -IsOffline $true -Confirm:$false",
+            "ErrorReportPath",
             r"\\.\PhysicalDrive$DiskNumber",
             "ShouldProcess",
         ):
@@ -28,6 +30,12 @@ class WritePynqZuSingleCameraSdTests(unittest.TestCase):
         source = SCRIPT.read_text(encoding="utf-8")
         self.assertNotIn("Get-Disk | Select-Object -First", source)
         self.assertNotIn("diskpart", source.lower())
+
+    def test_reports_failures_without_a_rethrowing_top_level_trap(self):
+        source = SCRIPT.read_text(encoding="utf-8")
+        self.assertNotIn("trap {", source)
+        self.assertIn("catch {", source)
+        self.assertIn("ErrorReportPath", source)
 
 
 if __name__ == "__main__":

@@ -976,3 +976,17 @@
 - 驗證範圍／未完成：JTAG proof is FPGA configuration only. No SD card was present or written; no SD boot, DPU device node, Linux VART/GraphRunner import, UVC frame, YOLOv8/person-tracker result or Wi-Fi exchange is claimed. The legacy USB-video bare-metal JTAG program was intentionally not used because it is a different hardware design.
 - Git／同步：the JTAG programmer, guarded writer, tests and documentation are to be committed and pushed to `origin/main`; external build outputs and the intentional `petalinux_installation_log` remain untracked.
 
+## 2026-11-13 — Detected the physical SD card without writing it
+
+- 需求／決策：prepare the verified tracker image for the actual removable card while preserving the no-implicit-target safety invariant.
+- 實際完成：read-only Windows inventory identified Disk 2 as a 16 GB USB-attached SDHC card, not a boot/system disk and large enough for the verified WIC. The writer's `-WhatIf` completed its hash and target gate. Actual writes were refused before raw access because the originating session is not elevated; subsequent elevation launches returned failure and an immediate disk recheck proved Disk 2 remained online. The writer now suppresses only the redundant internal offline confirmation after its explicit erase acknowledgement and can emit an optional non-secret failure report.
+- 驗證範圍／未完成：no SD content was changed, no formatting or initialization occurred, and no board SD boot/runtime result is claimed. A successful Windows UAC elevation remains necessary before destructive writing can proceed.
+- Git／同步：writer/test/readme/progress changes will be committed and pushed to `origin/main`; generated image/model assets and `petalinux_installation_log` stay outside Git.
+
+## 2026-11-13 — Repaired the SD writer's Windows elevation error path
+
+- 需求／決策：diagnose the failed raw-write launch before retrying, preserving the removable card's untouched state.
+- 實際完成：evidence showed `-Confirm:$false` passed through `powershell.exe -File` is parsed as a string rather than a common-parameter Boolean, preventing the script from starting. A rethrowing top-level PowerShell trap also recursed on its own error. Replaced that trap with one top-level `try/catch`, retained explicit hash/disk safeguards, and added a regression test. A child non-elevated run now reliably emits the expected administrator-rights error report; Disk 2 remains online and unwritten.
+- 驗證範圍／未完成：an encoded-command elevated `-WhatIf` is currently awaiting the real Windows UAC consent dialog. It cannot write by design. No SD write, SD boot, target runtime or camera/DPU result is claimed.
+- Git／同步：writer/test/readme/progress changes will be committed and pushed to `origin/main`; generated image/model assets and `petalinux_installation_log` stay outside Git.
+

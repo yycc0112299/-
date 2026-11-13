@@ -846,6 +846,6 @@
 ## 2026-11-13：正在把 USB 相機驅動加入 kernel
 
 - 檢查發現映像還沒有啟用 C270 所需的 USB/UVC 相機 kernel driver，因此已補上設定。
-- 最終 kernel config 已確認會啟用 USB host、V4L2 與 UVC；完整 kernel/image 正在重建。
-- 重建尚未結束前，舊 SD 映像不應拿來宣稱可讀取相機。
+- 第一次完整重建發現 Xilinx kernel 的 USB host-only 設定有連結錯誤，因此沒有採用那個失敗成果。
+- 已改用仍支援 host 的 USB dual-role 設定，現在正在重新完整編譯；尚未結束前，舊 SD 映像不應拿來宣稱可讀取相機。
 

@@ -73,7 +73,7 @@ class PrepareDpu40PetaLinuxProjectTests(unittest.TestCase):
             for option in (
                 "CONFIG_USB_SUPPORT=y",
                 "CONFIG_USB_DWC3=y",
-                "CONFIG_USB_DWC3_XILINX=y",
+                "CONFIG_USB_DWC3_DUAL_ROLE=y",
                 "CONFIG_MEDIA_SUPPORT=y",
                 "CONFIG_MEDIA_USB_SUPPORT=y",
                 "CONFIG_USB_VIDEO_CLASS=y",

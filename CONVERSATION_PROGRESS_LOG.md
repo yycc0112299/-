@@ -927,3 +927,10 @@
 - 驗證範圍／未完成：rebuild remains live at this record; no new WIC, physical SD write, target boot or camera frame capture is claimed. The result will be separately verified after the live build terminates.
 - Git／同步：helper/test/README/progress changes will be committed and pushed to `main`; external build logs and artifacts remain untracked.
 
+## 2026-11-13 — Corrected the DWC3 mode after the USB-camera kernel build failed
+
+- 需求／決策：make the USB UVC configuration buildable instead of retaining an image setting that fails at kernel link.
+- 實際完成：the first UVC rebuild failed at Linux `do_compile`: host-only DWC3 configuration omitted `gadget_hibernation.o`, while Xilinx DWC3 `core.o` references `dwc3_gadget_exit_hibernation`. Kernel source/Kconfig inspection verified `USB_GADGET=y` and `EXTCON=y` are already available. Test-first replacement of `CONFIG_USB_DWC3_HOST=y` with `CONFIG_USB_DWC3_DUAL_ROLE=y` failed under old staging output, then full Linux tests passed 14/14 after implementation. The corrected external PetaLinux build has started.
+- 驗證範圍／未完成：the corrected build is live; no successful UVC image, SD write, target boot or camera frame capture is claimed yet. Failed build logs and later artifacts remain external.
+- Git／同步：source/test/README and progress documentation will be committed and pushed to `main`; no generated images or logs are tracked.
+

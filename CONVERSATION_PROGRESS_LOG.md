@@ -1086,5 +1086,5 @@
 - 需求／決策：deployment audit found the documented first board-side DPU gate was not installed by the runtime recipe; fix it before any SD becomes available.
 - 實際完成：added explicit source-to-target runtime mapping so maintained `verify_dpu_runtime.py` installs alongside the PYNQ tracking scripts. Test-first mapping regression passes. Restaged/rebuilt the external PetaLinux project (6,385 tasks, all succeeded), verified the target path in rootfs, and exported final `pynq_zu_dpu_single_camera_tracker_fusion_acceptance_2022_1.wic` (6,442,455,040 bytes, SHA-256 `02627acaef390c72b6641ae2b94b3466b6b3d0769b168c8654616230cf7a52e7`).
 - 驗證範圍／未完成：image/archive/hash evidence only. No SD write, board boot, camera, target DPU execution, second board or Wi-Fi result is claimed. Generated images and external PetaLinux files remain outside Git.
-- Git／同步：pending the commit and push that includes the mapping, tests, writer identity and documentation changes.
+- Git／同步：committed and pushed to `main` as `6b05509` (`Include board DPU gate in final image`).
 

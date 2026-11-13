@@ -204,10 +204,13 @@ model and the target-side single-camera tracker.
 `write_pynq_zu_single_camera_sd.ps1` is deliberately unable to guess a
 destination. It requires an explicit Windows disk number and an erase
 acknowledgement, accepts only a USB or SD bus, rejects boot/system/read-only
-or undersized disks, verifies the image hash, and then leaves the written disk
-offline. It neither formats disks nor writes configuration flash. Run it only
-from an elevated PowerShell after separately reviewing the removable disk
-number:
+or undersized disks, and verifies the image hash. For removable media Windows
+does not support `Set-Disk -IsOffline`; instead the writer finds only mounted
+access paths belonging to the selected disk, locks and dismounts each volume
+with `FSCTL_LOCK_VOLUME` / `FSCTL_DISMOUNT_VOLUME`, and retains those handles
+until the raw write ends. It neither formats disks nor writes configuration
+flash. Run it only from an elevated PowerShell after separately reviewing the
+removable disk number:
 
 ```powershell
 & .\write_pynq_zu_single_camera_sd.ps1 `
@@ -221,7 +224,7 @@ run `verify_dpu_runtime.py --xmodel /opt/models/yolov8n_b512.xmodel
 --require-camera` and the target tracker command above.
 
 The script requires an elevated PowerShell because Windows must take the raw
-removable disk offline. Its optional `-ErrorReportPath <path>` records a
+removable-card volume out of service. Its optional `-ErrorReportPath <path>` records a
 non-secret error report when an elevated invocation fails; it does not weaken
 the disk-selection or hash checks.
 
@@ -232,3 +235,8 @@ then treat it as a string and reject the common `Confirm` switch before the
 writer starts. The writer reports failures with a single top-level `try/catch`;
 it intentionally has no rethrowing top-level `trap`, which could recursively
 handle its own error and conceal the actual failure.
+
+Before running it, close every `D:`/PYNQ File Explorer window and choose
+**Do not scan and continue** for any Windows repair prompt. If the lock fails,
+the tool stops before opening `PhysicalDriveN` for writing; do not bypass that
+failure or use `diskpart` to guess at another disk.

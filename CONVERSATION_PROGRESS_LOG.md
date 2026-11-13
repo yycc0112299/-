@@ -983,6 +983,13 @@
 - 驗證範圍／未完成：no SD content was changed, no formatting or initialization occurred, and no board SD boot/runtime result is claimed. A successful Windows UAC elevation remains necessary before destructive writing can proceed.
 - Git／同步：writer/test/readme/progress changes will be committed and pushed to `origin/main`; generated image/model assets and `petalinux_installation_log` stay outside Git.
 
+## 2026-11-13 — Replaced unsupported removable-disk offlining with safe volume locking
+
+- 需求／決策：address the actual elevated SD-writer errors without widening the destructive target scope.
+- 實際完成：the actual card reports as removable and rejects `Set-Disk -IsOffline`; Disk 2's old PYNQ FAT partition remains mounted as `D:`, explaining the subsequent raw-write access denial. Replaced disk offlining with a native Windows volume-control path: enumerate access paths only from the already validated selected disk, lock and dismount them via `FSCTL_LOCK_VOLUME` / `FSCTL_DISMOUNT_VOLUME`, hold the handles through the raw image write, and fail before raw access if any lock fails. Test-first regression checks reject `Set-Disk`; writer tests (4/4), PowerShell parser and C# P/Invoke compilation pass.
+- 驗證範圍／未完成：no physical SD write succeeded in the failed attempt; the card remains pending an administrator-side rerun with File Explorer and the Windows scan prompt closed. No SD boot, Linux DPU, UVC, YOLOv8 or tracker result is claimed.
+- Git／同步：writer/test/readme/progress changes will be committed and pushed to `origin/main`; generated image/model assets and `petalinux_installation_log` stay outside Git.
+
 ## 2026-11-13 — Repaired the SD writer's Windows elevation error path
 
 - 需求／決策：diagnose the failed raw-write launch before retrying, preserving the removable card's untouched state.

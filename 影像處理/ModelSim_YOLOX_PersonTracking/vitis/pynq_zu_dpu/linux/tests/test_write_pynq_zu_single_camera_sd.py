@@ -18,8 +18,10 @@ class WritePynqZuSingleCameraSdTests(unittest.TestCase):
             "Get-Disk -Number $DiskNumber",
             "IsBoot -or $disk.IsSystem",
             "'USB', 'SD'",
-            "Set-Disk -Number $DiskNumber -IsOffline $true",
-            "Set-Disk -Number $DiskNumber -IsOffline $true -Confirm:$false",
+            "Get-Partition -DiskNumber $TargetDiskNumber",
+            "FSCTL_LOCK_VOLUME",
+            "FSCTL_DISMOUNT_VOLUME",
+            "DeviceIoControl",
             "ErrorReportPath",
             r"\\.\PhysicalDrive$DiskNumber",
             "ShouldProcess",
@@ -36,6 +38,11 @@ class WritePynqZuSingleCameraSdTests(unittest.TestCase):
         self.assertNotIn("trap {", source)
         self.assertIn("catch {", source)
         self.assertIn("ErrorReportPath", source)
+
+    def test_locks_and_dismounts_mounted_volumes_instead_of_offlining_removable_disk(self):
+        source = SCRIPT.read_text(encoding="utf-8")
+        self.assertNotIn("Set-Disk", source)
+        self.assertIn("$volumeHandles", source)
 
 
 if __name__ == "__main__":

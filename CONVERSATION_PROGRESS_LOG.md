@@ -856,3 +856,10 @@
 - 驗證範圍／未完成：host-only format contract; no target DPU/VART/GraphRunner, camera, second board or Wi-Fi test.
 - Git／同步：本次修正與三份進度文件待完整 regression 後提交並推送至 `main`；無外部模型或私密資料加入 Git。
 
+## 2026-11-13 — Verified the current one-board/two-C270 topology cannot stream concurrently
+
+- 需求／決策：在等候 matching DPU Linux image 時，實機驗證原需求的單板雙 USB camera path，而不是由各自可開啟的結果推定可同時使用。
+- 實際完成：SSH on the live PYNQ-ZU verified `video0` and `video2` individually deliver MJPEG frames. Concurrent two-thread tests failed at both 320×240/15 FPS (one side 60 frames, the other 0) and 160×120/10 FPS (40/0); which side succeeded changed between tests. Added `pynq_usb_camera_preflight.py --simultaneous`, whose actual 20-frame board run correctly failed 20/0 and whose temporary board copy was removed. Added two fake-device regression tests for pass/fail contracts.
+- 驗證範圍／未完成：proves this tested shared USB topology is unsuitable for live two-camera capture, not that all possible hardware wiring fails. No PL/DPU/SD/Wi-Fi settings were changed; use one camera per board or an independent USB controller and re-run the gate.
+- Git／同步：source/tests/docs are pending full regression then push; no images, board secrets or external build artifacts are added.
+

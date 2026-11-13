@@ -17,14 +17,23 @@ $env:PROJECT_PYTHON = 'C:\path\to\python.exe'
 
 `dual_server.py` 現在會在 Windows 使用 DirectShow、在 PYNQ Linux 使用 V4L2；同一套網站可在
 PYNQ-ZU 上執行。開發電腦先執行 `python prepare_pynq_dual_bundle.py --output C:\\pynq_zu_bringup\\pynq_dual_dashboard.tar.gz`，
-再把 tarball 複製到 PYNQ SD-boot Linux。解壓後，在 PYNQ 執行
-`python3 live_site/pynq_usb_camera_preflight.py` 先確認兩支 UVC 鏡頭，再執行
-`bash live_site/start_pynq_dual.sh <PYNQ-IP>`；電腦以 `http://<PYNQ-IP>:8766/` 開啟。
+再把 tarball 複製到 PYNQ SD-boot Linux。解壓後，必須先在 PYNQ 執行：
+
+```sh
+python3 live_site/pynq_usb_camera_preflight.py \
+  --camera-a 0 --camera-b 2 --simultaneous --frames 30
+```
+
+它不只確認兩個 device 可個別開啟，還要求兩邊在同一時間各交付所有影格。只有印出
+`PYNQ_SIMULTANEOUS_CAMERA_PASS` 時才可執行 `bash live_site/start_pynq_dual.sh <PYNQ-IP>`；
+否則不可把 dashboard 說成雙鏡頭已成功。現有 PYNQ-ZU 實測兩支 C270 (`video0`、`video2`)
+即使使用 160×120 MJPEG/10 FPS 仍只會有其中一支交付影格，故目前應採一板一鏡頭、兩板 Wi-Fi
+拓撲，或先更換 USB controller/topology 後再重跑本 gate。電腦以 `http://<PYNQ-IP>:8766/` 開啟。
 參數必須是瀏覽器連到網站時所用的 PYNQ 位址，因為它同時是網站的 HTTP Host
 白名單；不是觀看網站的電腦 IP。
 
 板上需要 Python 3、`numpy`、含 V4L2 的 `opencv-python`，且兩支 UVC 鏡頭必須可列為
-`/dev/video0`、`/dev/video1`（或以 `PYNQ_CAMERA_A/B` 指定其他 index）。這是 PYNQ 的 CPU
+`/dev/video0`、`/dev/video2`（或以 `PYNQ_CAMERA_A/B` 指定其他 index）。這是 PYNQ 的 CPU
 執行 YOLOX / tracker 網站；目前 FPGA bitstream 的 video inputs 尚未接到 USB capture，不可宣稱
 USB 影像已走入 FPGA RTL。
 

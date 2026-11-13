@@ -961,3 +961,9 @@
 - 修正 `pipeline.Detector.detect()`：`yolov8_vart` 的 `GraphRunnerYoloV8.infer()` 回傳與 CPU YOLOv8 相同的 dictionary rows（`box`/`confidence`/`class_id`），先前分支卻錯落入 legacy YOLOX ndarray parser。現在 DPU output 和 CPU YOLOv8 都走相同的 size filter、confidence conversion 與 HSV histogram feature path，後續 existing tracker、RTL feature 和 peer packet 不需改介面。
 - 新增 regression，注入 one-row GraphRunner model 並驗證 tracker-ready box/confidence/hist；adapter/backend suite 11/11 PASS。這是 host contract fix，不是 DPU board inference proof。
 
+### 2026-11-13：一板兩 C270 同時 UVC 影格實測 FAIL（拓撲已確定）
+
+- 透過 SSH 在 live PYNQ 2024.1 board 實測 physical `video0`、`video2`（兩個 C270 的 valid capture nodes）。兩者 individually negotiated MJPEG 320×240/15 FPS and delivered frames；concurrent reader threads then tested MJPEG 320×240/15 FPS, and again 160×120/10 FPS. In both tests both devices opened but exactly one delivered every requested frame while the other delivered zero (`60/0` then `40/0`; successful side can change), so this is not an index or sequential-open error.
+- 新增 `live_site/pynq_usb_camera_preflight.py --simultaneous --frames N`，two independent V4L2 reader threads must each deliver all N frames or it emits `PYNQ_SIMULTANEOUS_CAMERA_FAIL`. Added fake-device regression for full dual success and one-side failure. Actual board executed the new gate with `video0/video2/20` and correctly failed (`video0=20`, `video2=0`); temporary `/tmp` script was removed afterward.
+- 結論／限制：current shared USB topology cannot be claimed as one-board/two-live-camera. Keep sequential tests only for packing/device checks. The deployable topology is one C270 per PYNQ-ZU plus Wi-Fi metadata exchange, unless hardware moves one camera to an independent root controller and this gate passes. This test neither changes PL/DPU nor proves Wi-Fi/DPU inference.
+

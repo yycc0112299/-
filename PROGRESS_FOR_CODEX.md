@@ -992,6 +992,14 @@
 - 實測 `source /home/petalinux/xilinx/petalinux/2022.1/settings.sh` 後 `petalinux-create --help` 可正常執行；安裝目錄約 12 GB。installer 對目前 Ubuntu 顯示 unsupported-OS warning，並顯示 no-TFTP warning；兩者未阻止 host tools 安裝或 command-load proof。
 - 驗證界線：尚未以 DPU B512 XSA 建 project、尚未套用 tracked DPU 4.0 staging helper、build image/boot files、寫 SD、開機或 target DPU/GraphRunner/YOLOv8 驗證。下一步必須在 external PetaLinux project import matching XSA，才可把這次 host-install claim 擴展為 image proof。
 
+### 2026-11-13：DPU runtime PetaLinux image、BOOT.BIN 與 SD WIC image PASS
+
+- External project `/home/petalinux/work/pynq_zu_dpu_2022_1` 以 matching DPU B512 XSA 重建完成；PetaLinux/BitBake summary 為 6,355 tasks attempted、all succeeded。VART、XIR、unilog、target-factory 及 Vitis AI Library 均已納入 image rootfs。build 只有 host OS/TFTP 相關 warning，沒有 task failure。
+- 對 generated `images/linux/rootfs.tar.gz` 的唯讀檢查確認 `xdputil`、`libvart-*.so`、`libxir` 與 `libvitis_ai_library-*.so` 已存在。`system.dtb` 含 exact `xlnx,dpuczdx8g-4.0` node；實際 kernel build `.config` 含 `CONFIG_XILINX_DPU=y`，表示 DPU driver built into kernel，不應期待 rootfs 另有 `.ko` file。
+- `petalinux-package --boot` 已生成 external `images/linux/BOOT.BIN`（9,506,328 bytes），內容包含 FSBL、PMUFW、DPU `system.bit`、ATF、device tree 與 U-Boot。Bootgen 有 FSBL/ATF load-range overlap warning，但明確回報 bootimage generated successfully。
+- `petalinux-package --wic --bootfiles "BOOT.BIN,image.ub,boot.scr"` 已產生 external `images/linux/petalinux-sdimage.wic`（6.1 GiB；SHA-256 `04bdbe7d7284db7149061eb25a259593b6724c4639934a37e295f389a0d5b910`）。唯讀 partition inspection verifies a FAT32 boot partition plus ext4 rootfs; FAT32 partition contains exactly `BOOT.BIN`、`image.ub`、`boot.scr` with matching generated sizes. `boot.scr` loads `image.ub` first, consistent with the initrd `/dev/ram0` configuration.
+- 驗證界線／後續：尚未寫入任何 physical SD card，也尚未切 SD boot 或 boot target；所以 `/dev/dpu*`、`xdputil`、Python VART/XIR/GraphRunner imports、camera→YOLOv8 inference 仍未在 board 驗證。The board’s currently installed PYNQ 2024.1 SD image remains incompatible. Generated WIC/BOOT/image/rootfs, tool logs and external PetaLinux project remain outside Git.
+
 ### 2026-11-13：PYNQ-ZU JTAG scan-chain 與 DPU B512 暫態下載 PASS
 
 - 使用者將板子切至 JTAG boot 後，Vivado 2022.1 Hardware Manager read-only scan 成功列出一個 target `localhost:3121/xilinx_tcf/Xilinx/1234-tulA`、`xczu5_0` FPGA device 與 `arm_dap_1`。此前 XSCT blank output 不是可靠的 target scan evidence；Hardware Manager query 是本次 authoritative evidence。

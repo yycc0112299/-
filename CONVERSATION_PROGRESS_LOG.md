@@ -905,3 +905,10 @@
 - 驗證範圍和未完成：新的 runtime image rebuild 已在 external WSL background job 啟動，尚未完成時不宣稱 VART/GraphRunner package 或 board import 成功。尚未寫入 SD、切 SD boot、boot target、run `/dev/dpu`、camera→YOLOv8，亦未設定 Wi-Fi credentials 或測第二板。
 - Git／同步：程式、tests 和三份進度文件將在 runtime rebuild 結束並完成 regression 後一併提交並推送 `main`。`petalinux_installation_log` 是本機暫存安裝記錄，刻意不納入 Git；外部 XSA/XPFM/image/bitstream/logs 也不追蹤。
 
+## 2026-11-13 — Built and verified the DPU runtime SD image
+
+- 需求／決策：完成不需使用者實體操作的 DPU Linux artifact，SD 卡寫入與 SD boot 仍保留為人工確認步驟。
+- 實際完成：PetaLinux 2022.1 runtime build completed 6,355 tasks with all succeeded. Rootfs inspection confirms VART, XIR, `xdputil` and Vitis AI Library. Device tree contains DPU 4.0 and the actual kernel build config contains built-in `CONFIG_XILINX_DPU=y`. `BOOT.BIN` and `petalinux-sdimage.wic` were generated externally; the 6.1 GiB WIC image was read-only checked for a FAT32 boot partition, ext4 rootfs partition, and the required boot files (`BOOT.BIN`, `image.ub`, `boot.scr`).
+- 驗證範圍／未完成：this proves artifact composition, not physical SD writing, target boot, `/dev/dpu`, VART/XIR/GraphRunner target imports, camera-to-YOLOv8 inference or two-board Wi-Fi. The existing PYNQ 2024.1 card remains unchanged. External WIC/rootfs/build logs are intentionally not committed.
+- Git／同步：本次三份 progress documents will be committed and pushed to `main`; only the local `petalinux_installation_log` remains untracked because it is a temporary installation log.
+

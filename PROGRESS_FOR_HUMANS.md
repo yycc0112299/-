@@ -830,3 +830,9 @@
 - PetaLinux 已成功建過一次最小 Linux image，也確認 device tree 內有 DPU；但第一次 image 尚未含 VART/XIR 等 YOLOv8 所需 runtime。
 - 已修正 image 套件納入方式，新的重建正在背景進行。完成後仍要由使用者實體確認 SD 卡、切回 SD 開機，才能驗證真正的相機→DPU→YOLOv8。
 
+## 2026-11-13：可開機的 DPU Linux SD 映像已產生
+
+- 含 DPU driver、VART、XIR、Vitis AI Library 的 PetaLinux 2022.1 映像已完整建置成功。
+- 已產生 `BOOT.BIN` 和約 6.1 GB 的 SD 映像；並確認其開機分割區真的有 `BOOT.BIN`、`image.ub`、`boot.scr`。
+- 還沒有寫入實體 SD 卡，也還沒有讓板子用此映像開機。因此 DPU、YOLOv8、相機的實機成功尚未宣稱完成。
+

@@ -764,7 +764,7 @@
 ## 2026-11-13：LeakyReLU 的 DPU 相容性已驗證
 
 - B512 支援 LeakyReLU；把 YOLOv8 的 SiLU 改為 LeakyReLU 後，編譯碎片從 60 個 DPU 小段降為 9 個。
-- 這是很明確的硬體相容性改善，但目前僅是編譯探測，尚未用 LeakyReLU 架構重新訓練，所以不能當作人物辨識模型使用。
+- 這是硬體相容性探測，沒有採用作為人物辨識模型。實際部署仍使用別人已訓練好的官方 Ultralytics YOLOv8n；以 GraphRunner 執行它的 DPU 與 CPU 子圖，不需要自行訓練模型。
 
 ## 2026-11-13：YOLOv8 的硬體輸出解碼已完成
 
@@ -775,4 +775,9 @@
 
 - Linux image 的準備工具現在會啟用 Vitis AI Library 的 Python bindings，未來可讓 Python 的 YOLOv8 程式直接使用 GraphRunner。
 - 尚未真正建 image 或寫入 SD；這是避免之後 rootfs 少套件的預先設定。
+
+## 2026-11-13：目前 SD 卡仍不是 DPU Linux
+
+- 板子可看到四個相機節點，但沒有 DPU device，VART、XIR 與 Python GraphRunner 也都不存在。
+- 新的部署檢查會把 GraphRunner 列為必要條件，避免把現在的 PYNQ 2024.1 SD 卡誤用於 DPU bitstream。
 

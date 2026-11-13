@@ -822,6 +822,11 @@
 - 實際完成：新增 and tested LeakyReLU activation option. Vitis AI 2.5 calibration/test plus `vai_c_xir` compiled the activation probe to B512, reducing compiler partitioning from 121/60 device/DPU subgraphs to 29/9.
 - 驗證界線：probe reused SiLU-trained weights after activation replacement, so it proves toolchain/hardware compatibility only, not detection accuracy. Hardswish was tested and rejected because the Vitis AI 2.5 quantizer's own module has two reproducible graph bugs. No commit/push yet per user instruction.
 
+## 2026-11-13 — Chose the upstream YOLOv8n model as the deployment baseline
+
+- 決策：依使用者要求，project uses the pretrained upstream Ultralytics YOLOv8n model directly; no custom LeakyReLU retraining is part of the deliverable. The existing original-SiLU compiled B512 xmodel plus Vitis AI GraphRunner is the selected DPU deployment route. LeakyReLU remains documented only as an untrained hardware-partitioning experiment.
+- 驗證界線：the compiled model still awaits matching PetaLinux 2022.1 / GraphRunner target runtime; no model accuracy or on-board inference claim is made.
+
 ## 2026-11-13 — Added tested raw YOLOv8 DFL output decoding
 
 - 實際完成：`raw_yolov8_dfl_decoder` accepts the exact three raw heads seen during Vitis AI quantization, derives DFL boxes and returns the existing tracker-compatible person detection schema. A hand-checkable DFL bin fixture verifies the box, class and confidence; full project suite passes 29 tests.
@@ -831,4 +836,9 @@
 
 - 實際完成：the DPU 4.0 staging helper now writes the Vitis AI Library bbappend needed to enable its Python binding; behavioral Linux staging tests are 13/13 PASS.
 - 驗證界線：this only prepares an external PetaLinux 2022.1 project. PetaLinux 2022.1 is still unavailable locally, so no rootfs/image/package installation or target GraphRunner import has been verified. Changes remain local/unpushed per user instruction.
+
+## 2026-11-13 — Strengthened the target DPU runtime gate and rechecked the board
+
+- 實際完成：runtime gate now requires Python `vitis_ai_library.GraphRunner`, and Linux tests are 14/14 PASS. Read-only SSH inspection of the current PYNQ board found four UVC video nodes but no DPU node or VART/XIR/GraphRunner Python modules.
+- 驗證界線：this is negative runtime evidence for the present PYNQ 2024.1 SD image, not a PetaLinux 2022.1 target deployment. Changes remain local/unpushed pending the next larger batch.
 

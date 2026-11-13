@@ -61,6 +61,16 @@ def module_result(name: str) -> dict[str, object]:
     return {"available": True, "version": getattr(module, "__version__", None)}
 
 
+def graph_runner_result(import_module=importlib.import_module) -> dict[str, object]:
+    """Check the Python binding required for heterogeneous xmodel execution."""
+    try:
+        module = import_module("vitis_ai_library")
+        getattr(module, "GraphRunner")
+    except Exception as error:
+        return {"available": False, "error": f"{type(error).__name__}: {error}"}
+    return {"available": True, "version": getattr(module, "__version__", None)}
+
+
 def cma_total_kib() -> int | None:
     try:
         for line in Path("/proc/meminfo").read_text().splitlines():
@@ -93,6 +103,7 @@ def main() -> int:
     device_files = sorted(str(path) for path in Path("/dev").glob("dpu*"))
     vart = module_result("vart")
     xir = module_result("xir")
+    graph_runner = graph_runner_result()
     xdputil = command_result(["xdputil", "query"])
     cameras = sorted(str(path) for path in Path("/dev").glob("video*"))
     model_ok = arguments.xmodel is None or valid_xmodel(arguments.xmodel)
@@ -103,6 +114,7 @@ def main() -> int:
         "cma_total_kib": cma_total_kib(),
         "vart": vart,
         "xir": xir,
+        "graph_runner": graph_runner,
         "xdputil": xdputil,
         "camera_nodes": cameras,
         "xmodel": str(arguments.xmodel) if arguments.xmodel else None,
@@ -115,6 +127,7 @@ def main() -> int:
         cma_total_kib() not in (None, 0),
         bool(vart["available"]),
         bool(xir["available"]),
+        bool(graph_runner["available"]),
         bool(xdputil.get("available")) and xdputil.get("returncode") == 0,
         model_ok,
     ]

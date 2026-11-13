@@ -9,7 +9,12 @@ import unittest
 LINUX_DIR = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(LINUX_DIR))
 
-from verify_dpu_runtime import DPU_COMPATIBLE, dpu_device_tree_nodes, valid_xmodel
+from verify_dpu_runtime import (
+    DPU_COMPATIBLE,
+    dpu_device_tree_nodes,
+    graph_runner_result,
+    valid_xmodel,
+)
 
 
 class DpuRuntimeGateTests(unittest.TestCase):
@@ -34,6 +39,16 @@ class DpuRuntimeGateTests(unittest.TestCase):
             model.write_bytes(b"compiled-graph")
             self.assertTrue(valid_xmodel(model))
             self.assertFalse(valid_xmodel(model.with_suffix(".bin")))
+
+    def test_accepts_only_a_python_binding_that_exposes_graph_runner(self) -> None:
+        graph_runner_type = type("GraphRunner", (), {})
+        good_module = type("GoodModule", (), {"GraphRunner": graph_runner_type})
+        missing_module = type("MissingModule", (), {})
+
+        self.assertEqual(graph_runner_result(lambda _: good_module)["available"], True)
+        missing = graph_runner_result(lambda _: missing_module)
+        self.assertFalse(missing["available"])
+        self.assertIn("GraphRunner", str(missing["error"]))
 
 
 if __name__ == "__main__":

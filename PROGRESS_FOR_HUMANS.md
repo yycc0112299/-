@@ -812,3 +812,9 @@
 - PYNQ-ZU 的 UART/JTAG 可共用 FTDI cable，但官方手冊要求要做 JTAG boot/download 時，板上的 JTAG/SD switch 必須切到 **JTAG 左側**。
 - 現在板子為了跑 SD 卡 Linux 而在 SD 右側。下次要測 Vivado/Vitis 的 bitstream 時，需關機後切到 JTAG、開機並確認 Vivado 看得到 target；測完要回到 SD 才能開 PYNQ Linux。
 
+## 2026-11-13：PetaLinux 2022.1 已可在 WSL 使用
+
+- 已下載並安裝與 Vivado/Vitis/DPU 2022.1 相容的 PetaLinux 2022.1，且命令可正常載入。
+- 2024.1 安裝保留不動；新工具放在獨立的 2022.1 資料夾。
+- 下一步是以 DPU 的 XSA 建立 Linux 專案、產生 SD image；尚未換 SD 卡或在板子上跑 DPU/YOLOv8。
+

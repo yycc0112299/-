@@ -884,3 +884,10 @@
 - 驗證範圍／未完成：documentation evidence only; no physical switch/power cycle was performed. JTAG target visibility after switching remains unverified, and SD mode remains required for current Linux workflow.
 - Git／同步：three progress records are being committed/pushed; no private board, account or network data is recorded.
 
+## 2026-11-13 — Installed and verified the matching PetaLinux 2022.1 host tools
+
+- 需求／決策：為已完成的 Vivado/Vitis 2022.1 DPU 4.0 B512 handoff 補上相同 release 的 PetaLinux host tool，避免將 2022.1 hardware 交給既有的 2024.1 toolchain。
+- 實際完成：從 AMD Download Center 取得 timestamped 2022.1 installer，於 WSL Ubuntu 的非 root development account 安裝 aarch64 sources 到獨立 2022.1 directory；補上 installer 明確要求的 `zlib1g:i386` prerequisite。`settings.sh` and `petalinux-create --help` verified successfully; existing 2024.1 installation remains separate.
+- 驗證範圍／未完成：host-install only. No PetaLinux project/XSA import, DPU recipe staging, image build, SD write, target boot, DPU driver/VART/GraphRunner, camera or YOLO inference has been claimed. AMD installer, hashes, logs and WSL tool files are intentionally not tracked.
+- Git／同步：本筆與三份 progress documents will be committed and pushed to `main`; no account, address, credential, network identifier, installer or generated image is included.
+

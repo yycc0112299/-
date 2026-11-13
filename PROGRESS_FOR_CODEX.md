@@ -985,3 +985,10 @@
 - This makes SD/JTAG boot selection the first physical condition to recheck before changing drivers or programming hardware. For a JTAG Vivado/Vitis smoke test, power down, move the board's JTAG/SD switch left to JTAG, power up, then repeat read-only `hw_server`/`targets`; only a visible XCZU5EG scan chain authorizes the existing bitstream/ELF download. Returning to SD boot is required for current PYNQ Linux image use.
 - This is a documented hardware procedure, not a claim that switching will certainly fix the target; no board switch, reset, bitstream, ELF, SD or source change occurred in this record.
 
+### 2026-11-13：PetaLinux 2022.1 aarch64 host tool 安裝與載入 PASS
+
+- 已從 AMD Download Center 取得 `petalinux-v2022.1-04191534-installer.run`；SHA-256 已在本機驗證。安裝器與雜湊均為外部工具資產，未加入 Git。
+- 在 WSL Ubuntu 的非 root `petalinux` 開發帳號下，安裝到獨立路徑 `/home/petalinux/xilinx/petalinux/2022.1`，只選 PYNQ-ZU 所需的 `aarch64` platform sources；既有 `/home/petalinux/xilinx/petalinux/2024.1` 未被覆蓋。為滿足 2022.1 installer prerequisite，WSL 補裝 `zlib1g:i386`。
+- 實測 `source /home/petalinux/xilinx/petalinux/2022.1/settings.sh` 後 `petalinux-create --help` 可正常執行；安裝目錄約 12 GB。installer 對目前 Ubuntu 顯示 unsupported-OS warning，並顯示 no-TFTP warning；兩者未阻止 host tools 安裝或 command-load proof。
+- 驗證界線：尚未以 DPU B512 XSA 建 project、尚未套用 tracked DPU 4.0 staging helper、build image/boot files、寫 SD、開機或 target DPU/GraphRunner/YOLOv8 驗證。下一步必須在 external PetaLinux project import matching XSA，才可把這次 host-install claim 擴展為 image proof。
+

@@ -30,6 +30,21 @@ class DetectorBackendTests(unittest.TestCase):
             with self.assertRaisesRegex(RuntimeError, "PYNQ_VART_XMODEL"):
                 pipeline.Detector(backend="yolov8_vart")
 
+    def test_graph_runner_yolov8_detections_use_the_existing_tracker_contract(self) -> None:
+        class GraphRunnerModel:
+            def infer(self, frame):
+                return [{"box": [10, 20, 50, 80], "confidence": .91, "class_id": 0}]
+
+        detector = pipeline.Detector.__new__(pipeline.Detector)
+        detector.backend = "yolov8_vart"
+        detector.model = GraphRunnerModel()
+        rows = detector.detect(__import__("numpy").zeros((100, 100, 3), dtype="uint8"))
+
+        self.assertEqual(len(rows), 1)
+        self.assertEqual(rows[0]["box"], [10, 20, 50, 80])
+        self.assertAlmostEqual(rows[0]["confidence"], .91)
+        self.assertIn("hist", rows[0])
+
 
 if __name__ == "__main__":
     unittest.main()

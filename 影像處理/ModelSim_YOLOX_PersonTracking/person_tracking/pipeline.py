@@ -125,7 +125,7 @@ class Detector:
             self.model=YoloX(str(cache),confThreshold=.3,nmsThreshold=.45)
         cv2.setNumThreads(4)
     def detect(self,frame):
-        if self.backend=='yolov8':
+        if self.backend in ('yolov8','yolov8_vart'):
             result=[]
             for row in self.model.infer(frame):
                 box=row['box']

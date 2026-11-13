@@ -849,3 +849,10 @@
 - 驗證範圍和未完成：僅 host-side contract tests；目前 PYNQ 2024.1 SD 沒有 DPU/VART/XIR/GraphRunner，未執行 target GraphRunner、真實人像辨識、兩鏡頭或 Wi-Fi。仍需 matching Linux image/SD 後做完整 camera→DPU→YOLOv8 verification。
 - Git／同步：本項 source、tests 和三份進度文件待本次完整 regression 後一併提交與推送至 `main`；外部 `.pt`/`.xmodel`/build logs 不納入 Git。
 
+## 2026-11-13 — Connected GraphRunner YOLOv8 detections to the existing tracker
+
+- 需求／決策：讓 DPU bridge 的既有 YOLOv8 output 能直接供 project tracker、RTL feature 與 peer protocol 使用，而非另創模型或格式。
+- 實際完成：修正 `Detector.detect()` 將 `yolov8_vart` dictionary output 與 CPU `yolov8` 共用既有 box filtering/HSV histogram contract；新增 injected GraphRunner-row regression。relevant adapter/backend tests 11/11 PASS。
+- 驗證範圍／未完成：host-only format contract; no target DPU/VART/GraphRunner, camera, second board or Wi-Fi test.
+- Git／同步：本次修正與三份進度文件待完整 regression 後提交並推送至 `main`；無外部模型或私密資料加入 Git。
+

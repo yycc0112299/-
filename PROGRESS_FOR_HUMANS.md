@@ -787,3 +787,8 @@
 - Vivado 的 DPU 硬體、Vitis AI 的整張模型執行圖、以及相機影格/人物框之間，現在有一個 GraphRunner 橋樑。它會把相機影格交給原始 YOLOv8 的 CPU+DPU 子圖共同執行，再把三個輸出頭交給現有的人物框解碼器。
 - 此橋樑目前已通過 10 個電腦端合約測試；尚未能說已上板成功，因為現在 SD 卡沒有 DPU/Vitis AI GraphRunner runtime。完成相容 Linux image 並換 SD 後，才可做真正的相機→DPU→YOLOv8 人物辨識驗證。
 
+## 2026-11-13：DPU 人物框已能直接接既有追蹤流程
+
+- 修正了一個上板才會觸發的資料格式問題：DPU/GraphRunner 回來的 YOLOv8 人物框現在會直接進入既有追蹤、人物特徵與兩板封包流程，不會被錯當成舊 YOLOX 格式。
+- 電腦端回歸測試通過；仍待相容 DPU Linux image 的實機驗證。
+

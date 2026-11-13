@@ -956,3 +956,8 @@
 - `pipeline.py` 在 `PERSON_DETECTOR=yolov8_vart` + `PYNQ_VART_GRAPH_RUNNER=1` 時選擇上述 whole-graph bridge，並綁定已驗證 shape contract 的 `raw_yolov8_dfl_decoder()`；仍必須另設定 `PYNQ_VART_XMODEL`。新增 ndarray-backed TensorBuffer fake regression，覆蓋 input/output buffer selection、memory sync、async execution、fixed-point output conversion。`test_yolov8_vart_adapter.py` + `test_detector_backend.py` 共 10 tests PASS。
 - 驗證界線：這是 host-only bridge contract，尚未在 PetaLinux target 取得 actual GraphRunner/TensorBuffer、尚未透過 B512 DPU 推論真實人像，也沒有改 SD、board、camera or Wi-Fi state。current 2024.1 PYNQ SD still lacks DPU/VART/XIR/GraphRunner and cannot run it.
 
+### 2026-11-13：GraphRunner YOLOv8 偵測資料已接入既有 tracker contract
+
+- 修正 `pipeline.Detector.detect()`：`yolov8_vart` 的 `GraphRunnerYoloV8.infer()` 回傳與 CPU YOLOv8 相同的 dictionary rows（`box`/`confidence`/`class_id`），先前分支卻錯落入 legacy YOLOX ndarray parser。現在 DPU output 和 CPU YOLOv8 都走相同的 size filter、confidence conversion 與 HSV histogram feature path，後續 existing tracker、RTL feature 和 peer packet 不需改介面。
+- 新增 regression，注入 one-row GraphRunner model 並驗證 tracker-ready box/confidence/hist；adapter/backend suite 11/11 PASS。這是 host contract fix，不是 DPU board inference proof。
+

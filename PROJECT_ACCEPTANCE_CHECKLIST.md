@@ -9,6 +9,7 @@
 | Vivado | PYNQ-ZU DPU B512 Block Design | PASS（建置／JTAG） | PS、AXI、DDR HP ports、clock/reset、IRQ 已建置；JTAG 實測 bitstream startup 成功。 |
 | Vitis | 2022.1 XSA → XPFM handoff | PASS | 同一份 DPU XSA 已產生 Vitis 2022.1 platform；Linux DPU 推論不需額外 bare-metal inference ELF。 |
 | PetaLinux | 2022.1 DPU Linux、VART/XIR、模型與 UVC | READY | 修正版 WIC 含 DPU runtime、模型、追蹤程式與 Python modules，且 rootfs pre-flash gate PASS。 |
+| 下一版 PetaLinux | 兩板 fusion runtime source staging | READY（主機測試） | runtime recipe／rootfs gate 已納入 fusion source set；尚未重建 WIC，現有 WIC 不含這些新檔。 |
 | SD | 修正版映像寫入 SD | BLOCKED | 需把 SD 卡插回這台電腦；寫入工具已鎖定修正版 WIC 與 SHA-256。 |
 | 單板 Linux | SD 開機與 UART 登入 | PASS（舊映像） | 已從 SD 開到 `pynqzudpu20221` UART login；修正版仍待寫卡。 |
 | 單板 DPU | NumPy/OpenCV/VART/XIR/GraphRunner 實際 import | BLOCKED | 修正版 SD 開機後跑 `verify_dpu_runtime.py`；舊映像因缺 Python `json` 未通過。 |
@@ -16,7 +17,7 @@
 | 單板 YOLOv8 | GraphRunner → DPU → YOLOv8 人物偵測＋Tracker | BLOCKED | 修正版 SD 開機後執行 `pynq_yolov8_dpu_inference.py --frames 3`。 |
 | 兩板程式 | TCP metadata protocol／Wi-Fi preflight／重試 | PASS（主機測試） | 封包、預檢與重試測試通過；未宣稱實體 Wi-Fi 已完成。 |
 | 兩板程式 | DPU-only deployment bundle | PASS（主機測試） | bundle 內含 DPU sender、GraphRunner、Wi-Fi/TCP，且不含 CPU ONNX。 |
-| 跨鏡頭程式 | 外觀特徵封包與保守候選關聯 | READY（主機測試） | 2×15 特徵、confirmed gate、TCP 接收與保守候選服務已通過 host tests；下一步納入 rootfs/bundle。 |
+| 跨鏡頭程式 | 外觀特徵封包與保守候選關聯 | PASS（主機／封裝測試） | 2×15 特徵、confirmed gate、TCP 接收、候選服務、rootfs staging／DPU bundle tests 都通過；待新 WIC／實機。 |
 | 兩板實機 | 各一支鏡頭、Wi-Fi 雙向資料交換 | BLOCKED | 需要第二塊板、各自鏡頭、授權 Wi-Fi 與實際 IP。 |
 | 兩板實機 | 跨鏡頭人物候選追蹤 | BLOCKED | 前一列完成後，用跨鏡頭候選服務驗收；不會把衣物外觀候選稱為身份辨識。 |
 

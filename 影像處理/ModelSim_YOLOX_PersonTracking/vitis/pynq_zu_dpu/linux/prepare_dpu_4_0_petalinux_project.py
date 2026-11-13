@@ -38,7 +38,13 @@ PROJECT_RUNTIME_PACKAGE = "pynq-yolov8-runtime"
 PROJECT_RUNTIME_TARGET_ROOT = "/opt/pynq-yolov8"
 PROJECT_RUNTIME_SOURCE_FILES = (
     Path("person_tracking") / "pipeline.py",
+    Path("person_tracking") / "appearance_features.py",
+    Path("person_tracking") / "cross_camera.py",
+    Path("person_tracking") / "peer_protocol.py",
+    Path("person_tracking") / "pynq_cross_camera_fusion.py",
     Path("person_tracking") / "pynq_yolov8_dpu_inference.py",
+    Path("person_tracking") / "pynq_yolov8_peer.py",
+    Path("person_tracking") / "pynq_wifi_peer_preflight.py",
     Path("person_tracking") / "assets" / "yolov8.py",
     Path("person_tracking") / "assets" / "yolov8_vart.py",
 )

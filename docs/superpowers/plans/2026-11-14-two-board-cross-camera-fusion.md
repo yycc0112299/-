@@ -62,7 +62,7 @@
 - [x] **Step 2: Run focused test** and confirm import failure.
 - [x] **Step 3: Implement the bounded latest-observation service and CLI JSON receiver mode.**
 - [x] **Step 4: Run focused and full person-tracking tests** and confirm pass.
-- [ ] **Step 5: Commit task changes.**
+- [x] **Step 5: Commit task changes.**
 
 ### Task 3: Stage and document the future DPU fusion path
 
@@ -77,8 +77,8 @@
 - Consumes Task 1/2 source files.
 - Produces rootfs/bundle source lists containing fusion dependencies and no CPU ONNX model in DPU mode.
 
-- [ ] **Step 1: Write failing staging/bundle tests** asserting fusion sources are shipped.
-- [ ] **Step 2: Run focused tests** and confirm they fail against current lists.
-- [ ] **Step 3: Add only required source files to staging and bundle lists; document start commands.**
-- [ ] **Step 4: Run all FPGA/Linux/tracking/live-site tests** and confirm pass.
-- [ ] **Step 5: Commit, update mandatory progress records, and push `main`.**
+- [x] **Step 1: Write failing staging/bundle tests** asserting fusion sources are shipped.
+- [x] **Step 2: Run focused tests** and confirm they fail against current lists.
+- [x] **Step 3: Add only required source files to staging and bundle lists; document start commands.**
+- [x] **Step 4: Run all FPGA/Linux/tracking/live-site tests** and confirm pass.
+- [x] **Step 5: Commit, update mandatory progress records, and push `main`.**

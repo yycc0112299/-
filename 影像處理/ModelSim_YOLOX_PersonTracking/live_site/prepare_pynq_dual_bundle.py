@@ -24,7 +24,9 @@ def runtime_sources(*, dpu_runtime: bool = False) -> list[Path]:
     sources = [
         ROOT / "dual_server.py", ROOT / "dual_index.html", ROOT / "start_pynq_dual.sh",
         ROOT / "pynq_usb_camera_preflight.py", ROOT / "pynq_system_preflight.py",
-        TRACKING / "pipeline.py", TRACKING / "cross_camera.py", TRACKING / "dual_camera.py",
+        TRACKING / "pipeline.py", TRACKING / "appearance_features.py",
+        TRACKING / "cross_camera.py", TRACKING / "pynq_cross_camera_fusion.py",
+        TRACKING / "dual_camera.py",
         TRACKING / "peer_protocol.py", TRACKING / "pynq_yolov8_peer.py",
         TRACKING / "pynq_wifi_peer_preflight.py",
         TRACKING / "pynq_yolov8_dpu_inference.py",

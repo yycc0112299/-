@@ -1138,3 +1138,9 @@
 - `serve` mode keeps matcher state while it receives the existing framed TCP protocol. The DPU peer sender can atomically publish its local validated metadata with `--local-packet-output`; the fusion receiver reads that compact JSON, receives the remote packet on the selected port, and atomically writes candidate JSON. A local refresh alone cannot reuse a stale remote frame to inflate the evidence streak.
 - Test-first evidence: new fusion tests cover repeated evidence, no feature/tentative exclusion, missing remote evidence reset, wrong board IDs and stale-frame protection; focused fusion/sender tests are 12/12 PASS. This has not been staged into PetaLinux, placed on a board, or run over Wi-Fi.
 
+### 2026-11-14：下一次 PetaLinux／兩板 bundle 已納入跨鏡頭程式
+
+- `prepare_dpu_4_0_petalinux_project.py` now stages `appearance_features.py`, `cross_camera.py`, `peer_protocol.py`, `pynq_cross_camera_fusion.py`, the peer sender and Wi-Fi preflight alongside the existing GraphRunner runtime. The pre-flash rootfs gate now analyzes those same deployed sources rather than silently excluding their imports.
+- `prepare_pynq_dual_bundle.py --dpu-runtime` includes the appearance helper and fusion service while retaining the guard that excludes CPU `yolov8n.onnx`. `person_tracking/README.md` documents one command pair per board: fusion receiver on TCP 8791 plus DPU sender that atomically publishes its local metadata.
+- Verification boundary: tracking tests 45/45 plus legacy matcher 6/6, Linux tests 30/30, live-site tests 6/6 and FPGA contracts 17/17 PASS on the host. The existing WIC was deliberately not rebuilt, so it does not yet include these newest two-board files; no board, Wi-Fi or camera/DPU execution is claimed.
+

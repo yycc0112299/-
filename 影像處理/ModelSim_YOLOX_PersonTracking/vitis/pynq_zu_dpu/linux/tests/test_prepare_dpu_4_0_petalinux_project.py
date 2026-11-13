@@ -20,6 +20,18 @@ def load_module():
 
 
 class PrepareDpu40PetaLinuxProjectTests(unittest.TestCase):
+    def test_runtime_recipe_stages_cross_camera_fusion_dependencies(self) -> None:
+        module = load_module()
+        expected = {
+            Path("person_tracking") / "appearance_features.py",
+            Path("person_tracking") / "cross_camera.py",
+            Path("person_tracking") / "peer_protocol.py",
+            Path("person_tracking") / "pynq_cross_camera_fusion.py",
+            Path("person_tracking") / "pynq_yolov8_peer.py",
+            Path("person_tracking") / "pynq_wifi_peer_preflight.py",
+        }
+        self.assertTrue(expected.issubset(set(module.PROJECT_RUNTIME_SOURCE_FILES)))
+
     def create_official_reference(self, root: Path) -> Path:
         meta_user = root / "project-spec" / "meta-user"
         kernel = meta_user / "recipes-kernel" / "linux"

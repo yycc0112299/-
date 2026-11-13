@@ -1067,3 +1067,10 @@
 - 驗證範圍／未完成：focused host tests pass (fusion/sender 12/12); no PetaLinux staging, SD rewrite, physical board, UVC/DPU result or Wi-Fi transfer has occurred.
 - Git／同步：pending the commit and push that includes this source, tests and progress records.
 
+## 2026-11-14 — Staged the future fusion path without rebuilding the SD image
+
+- 需求／決策：complete the remaining no-SD packaging work while preserving the known-good corrected WIC and its honest verification boundary.
+- 實際完成：the next PetaLinux runtime recipe and rootfs import gate now include every fusion dependency; the DPU-only two-board bundle includes the fusion helper/service and still excludes CPU ONNX. README commands use a persistent fusion listener at TCP 8791 and local metadata files, without hard-coded board IPs or camera indices. Host tests: tracking 45/45 plus matcher 6/6, Linux 30/30, live-site 6/6, FPGA contracts 17/17.
+- 驗證範圍／未完成：no PetaLinux rebuild, no new WIC, no SD write, no board deployment, and no physical Wi-Fi/UVC/DPU inference. The existing WIC remains the corrected single-board runtime artifact but lacks the new fusion source set.
+- Git／同步：pending the commit and push that includes this source, tests and progress records.
+

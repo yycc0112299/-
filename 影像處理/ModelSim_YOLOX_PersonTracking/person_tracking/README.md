@@ -109,12 +109,14 @@ same person-packet schema.
 
 `pynq_yolov8_peer.py` captures exactly one C270 per board, calls the selected
 YOLOv8/tracker pipeline, and sends compact person metadata through
-`peer_protocol.py`; it never transfers raw frames. On board A, run a receiver
-on board B first, then run:
+`peer_protocol.py`; it never transfers raw frames. It can also atomically
+publish local metadata for `pynq_cross_camera_fusion.py`. On board A, run a
+receiver on board B first, then run:
 
 ```sh
 python3 person_tracking/pynq_yolov8_peer.py \
-  --board-id pynq-a --peer-host <board-b-wifi-ip> --camera 0 \
+  --board-id pynq-a --peer-host <board-b-wifi-ip> --port 8791 --camera 0 \
+  --local-packet-output /tmp/pynq-a-local.json \
   --dpu-xmodel /opt/models/yolov8n_b512.xmodel
 ```
 
@@ -141,10 +143,10 @@ and, when a peer address is supplied, attempts one TCP connection:
 
 ```sh
 python3 person_tracking/pynq_wifi_peer_preflight.py \
-  --interface wlan0 --peer-host <other-board-wifi-ip> --port 8790
+  --interface wlan0 --peer-host <other-board-wifi-ip> --port 8791
 ```
 
-Start `peer_protocol.py receive` on the other board before this command. Only
+Start `pynq_cross_camera_fusion.py serve` on the other board before this command. Only
 `PYNQ_WIFI_PEER_PREFLIGHT_PASS` proves the local interface is up with IPv4 and
 that its peer TCP port is reachable. The currently tested PYNQ has `wlan0` but
 it is down and unconfigured, so this check correctly fails until an authorized
@@ -159,11 +161,13 @@ each board. After both boards are associated with the authorized Wi-Fi network:
 
 ```sh
 # Board A: first terminal (keep running)
-python3 person_tracking/peer_protocol.py receive \
-  --bind 0.0.0.0 --port 8790 --output /tmp/peer_from_b.json
+python3 person_tracking/pynq_cross_camera_fusion.py serve \
+  --local-board-id pynq-a --local-input /tmp/pynq-a-local.json \
+  --bind 0.0.0.0 --port 8791 --output /tmp/pynq-a-candidates.json
 # Board B: first terminal (keep running)
-python3 person_tracking/peer_protocol.py receive \
-  --bind 0.0.0.0 --port 8790 --output /tmp/peer_from_a.json
+python3 person_tracking/pynq_cross_camera_fusion.py serve \
+  --local-board-id pynq-b --local-input /tmp/pynq-b-local.json \
+  --bind 0.0.0.0 --port 8791 --output /tmp/pynq-b-candidates.json
 ```
 
 Then run the read-only Wi-Fi gate on each board using the other board's actual
@@ -172,19 +176,24 @@ address. Only after both gates pass, start one sender on each board:
 ```sh
 # Board A: its own camera and board B's address
 python3 person_tracking/pynq_yolov8_peer.py \
-  --board-id pynq-a --camera <camera-index-on-a> --peer-host <board-b-ip> \
+  --board-id pynq-a --camera <camera-index-on-a> --peer-host <board-b-ip> --port 8791 \
+  --local-packet-output /tmp/pynq-a-local.json \
   --dpu-xmodel /opt/models/yolov8n_b512.xmodel
 # Board B: its own camera and board A's address
 python3 person_tracking/pynq_yolov8_peer.py \
-  --board-id pynq-b --camera <camera-index-on-b> --peer-host <board-a-ip> \
+  --board-id pynq-b --camera <camera-index-on-b> --peer-host <board-a-ip> --port 8791 \
+  --local-packet-output /tmp/pynq-b-local.json \
   --dpu-xmodel /opt/models/yolov8n_b512.xmodel
 ```
 
-This creates bidirectional metadata exchange, not raw-video streaming. Use
-`--frames 1` on both senders for first bring-up. The protocol has loopback TCP
-coverage and retry tests, but this sequence still needs two physical boards,
-an authorized Wi-Fi topology, and an actual two-board run before it can be
-called verified Wi-Fi operation.
+This creates bidirectional metadata exchange, not raw-video streaming. The
+fusion service writes only conservative `candidate` or
+`confirmed_candidate` labels after repeated, unambiguous appearance evidence;
+they are not identity labels and do not replace either board's local track ID.
+Use `--frames 1` on both senders for first bring-up. The protocol has host
+tests, but this sequence still needs two physical boards, an authorized Wi-Fi
+topology, and an actual two-board run before it can be called verified Wi-Fi
+operation.
 
 攝影機輸入不縮小：640×480 只在偵測模型底部補至 640×640，不縮圖。公開照片為了固定測試座標，先等比例放入 640×480 畫布；這是測試照片的前處理，和攝影機原生解析度不同。
 

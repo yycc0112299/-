@@ -21,7 +21,13 @@ PYTHON_LIBRARY_PREFIX = "usr/lib/python3.9/"
 NATIVE_BINDINGS = {"cv2", "numpy", "vart", "xir", "vitis_ai_library"}
 DEPLOYED_RUNTIME_FILES = (
     Path("pipeline.py"),
+    Path("appearance_features.py"),
+    Path("cross_camera.py"),
+    Path("peer_protocol.py"),
+    Path("pynq_cross_camera_fusion.py"),
     Path("pynq_yolov8_dpu_inference.py"),
+    Path("pynq_yolov8_peer.py"),
+    Path("pynq_wifi_peer_preflight.py"),
     Path("assets") / "yolov8.py",
     Path("assets") / "yolov8_vart.py",
 )

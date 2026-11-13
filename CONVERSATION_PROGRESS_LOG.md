@@ -788,3 +788,10 @@
 - 驗證範圍／未完成：這不是 DPU synthesis/bitstream/XSA，更不是 PetaLinux 2022.1 image、device tree/driver/VART、xmodel/YOLOv8、board camera/DMA 或 Wi-Fi peer。沒有改 board/SD/UART/network。official source and generated build are external/non-Git.
 - Git／同步：本次 scripts/tests/三份 progress documents 將提交並推送到 `main`。
 
+## 2026-11-13 — Completed DPU 4.0 B512 implementation and XSA handoff in Vivado 2022.1
+
+- 需求／決策：將已驗證的 native DPU 4.0 B512 Block Design 完成至可交接給 matching Linux/Vitis flow 的 implementation、bitstream 與 XSA，且不把 generated binaries 寫入 repository。
+- 實際完成：external `C:\pynq_zu_dpu_2022_20261113` 的 synthesis、implementation、bitgen 和 fixed include-bit XSA export 都成功。bitstream 為 7,797,815 bytes，XSA 為 2,628,256 bytes；archive check 確認包含 bitstream、HWH、`sysdef.xml`、`xsa.json`。final routed timing 的 setup/hold/pulse-width 均為 0 failing endpoints（worst slack 分別 +5.017/+0.011/+3.500 ns），final bitgen DRC=0 errors/0 critical warnings；98 項是 DPU/DSP pipelining advisories。
+- 驗證界線／未完成：這只證明 2022.1 FPGA hardware handoff。尚未建立 matching 2022.1 PetaLinux image、device tree/DPU driver/VART/XIR、xmodel 或板上 bitstream/SD/UVC/DMA/YOLOv8/Wi-Fi 實測。official source、generated bit/XSA/reports/logs 留在 external paths、不入 Git。
+- Git：本筆與兩份進度文件將隨文件提交推送至 `main`。
+

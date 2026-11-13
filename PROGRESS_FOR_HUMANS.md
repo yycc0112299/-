@@ -737,3 +737,9 @@
 - DPU 的控制、記憶體通道和中斷都已連到 PS；USB 相機仍由 Linux 的 PS USB 接管，不會錯接到 FPGA 腳位。
 - 還沒有開始完整綜合、產生新的 DPU bitstream 或上板。Linux DPU driver、VART、YOLOv8 模型和兩板 Wi-Fi 也尚未完成。
 
+## 2026-11-13：DPU B512 硬體檔已在 2022.1 完整輸出
+
+- 已完成 DPU 的 synthesis、implementation、bitstream 與含 bitstream 的 XSA 匯出；這份硬體是官方 DPUCZDX8G 4.0、B512 設定、PYNQ-ZU 的 2022.1 實際建置結果。
+- 最終時序檢查沒有 setup、hold 或 pulse-width 違反；bitstream 為 7,797,815 bytes，XSA 為 2,628,256 bytes，並含硬體描述與 PS 初始化資料。
+- 這代表 FPGA 硬體交接檔已可供下一步 Linux/PetaLinux 整合；尚未寫入板子或 SD 卡，Linux DPU driver、device tree、VART/XIR、YOLOv8 `.xmodel`、相機 DMA 及兩板 Wi-Fi 都仍未實機驗證。
+

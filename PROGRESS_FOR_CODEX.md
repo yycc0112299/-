@@ -918,3 +918,10 @@
 - 實際 external build `C:\pynq_zu_dpu_2022_20261113` 用 official `C:\pynq_toolchain_sources\DPUCZDX8G_official\DPUCZDX8G` source 成功讀入 native `xilinx.com:ip:dpuczdx8g:4.0`、套用 B512 settings、完成 `validate_bd_design`/save。read-only reopen 也確認 PS=3.4、DPU visible pins/interfaces exist。DPU data0/data1/instruction 分別接 PS HP0/HP1/HP2，control segment=`0x0400000000`（16 MiB）。USB0/USB1 保持 PS MIO；沒有把 C270 D+/D−假接為 PL pins。
 - 限制：尚未跑 2022.1 DPU synthesis/implementation/bitstream/XSA、尚未建立 2022.1 matching PetaLinux image/device tree/DPU driver/VART、編譯 YOLOv8 `.xmodel` 或上板執行。DPU build output、official source、logs 不入 Git。
 
+### 2026-11-13：2022.1 native DPU 4.0 B512 implementation/bitstream/XSA PASS
+
+- 在同一 external build `C:\pynq_zu_dpu_2022_20261113` 實跑 `synthesize_pynq_zu_dpu_b512.tcl`、`implement_pynq_zu_dpu_b512.tcl` 與 `export_pynq_zu_dpu_xsa.tcl`。三步均成功，最終 log markers 為 `PYNQ_ZU_DPU_B512_SYNTHESIS_PASS`、`PYNQ_ZU_DPU_B512_BITSTREAM_PASS` 和 `PYNQ_ZU_DPU_B512_XSA_PASS`。
+- 實作後 bitstream 路徑為 `project\pynq_zu_dpu.runs\impl_1\pynq_zu_dpu_wrapper.bit`（7,797,815 bytes）；fixed include-bit XSA 為 `pynq_zu_dpu_b512.xsa`（2,628,256 bytes）。唯讀 zip 檢查確認 XSA 有 main HWH、bitstream、`sysdef.xml` 與 `xsa.json`。
+- Final routed timing summary：setup 0 failing endpoints、worst slack `+5.017 ns`；hold 0 failing endpoints、worst slack `+0.011 ns`；pulse-width 0 failing endpoints、worst slack `+3.500 ns`。write_bitstream 完成時 DRC 為 0 errors、0 critical warnings、98 warnings（DPU/DSP pipelining advisories）；無阻斷性錯誤。實作後 utilization：32,048 LUT (27.36%)、41,321 FF (17.64%)、72 BRAM tiles (50.00%)、134 DSP (10.74%)。
+- 驗證界線：這是 Windows Vivado 2022.1 的 hardware handoff proof，不是 PetaLinux 2022.1 image、DPU device tree/driver、VART/XIR、matching `.xmodel`、board download/SD boot、UVC/DMA capture、YOLOv8 DPU inference 或 Wi-Fi peer proof。external source/build/log/bit/XSA 均不入 Git。
+

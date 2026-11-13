@@ -16,7 +16,7 @@
 | 單板 YOLOv8 | GraphRunner → DPU → YOLOv8 人物偵測＋Tracker | BLOCKED | 修正版 SD 開機後執行 `pynq_yolov8_dpu_inference.py --frames 3`。 |
 | 兩板程式 | TCP metadata protocol／Wi-Fi preflight／重試 | PASS（主機測試） | 封包、預檢與重試測試通過；未宣稱實體 Wi-Fi 已完成。 |
 | 兩板程式 | DPU-only deployment bundle | PASS（主機測試） | bundle 內含 DPU sender、GraphRunner、Wi-Fi/TCP，且不含 CPU ONNX。 |
-| 跨鏡頭程式 | 外觀特徵封包與保守候選關聯 | IN PROGRESS | 已有本地 `CrossCameraMatcher`；下一步把外觀特徵放入兩板 metadata，接收端只產生候選標籤。 |
+| 跨鏡頭程式 | 外觀特徵封包與保守候選關聯 | IN PROGRESS | host tests 已驗證 2×15 特徵與 `confirmed`/`tentative` metadata；下一步做接收端候選服務。 |
 | 兩板實機 | 各一支鏡頭、Wi-Fi 雙向資料交換 | BLOCKED | 需要第二塊板、各自鏡頭、授權 Wi-Fi 與實際 IP。 |
 | 兩板實機 | 跨鏡頭人物候選追蹤 | BLOCKED | 前一列完成後，用跨鏡頭候選服務驗收；不會把衣物外觀候選稱為身份辨識。 |
 

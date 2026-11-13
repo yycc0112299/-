@@ -30,6 +30,30 @@ class PeerProtocolTests(unittest.TestCase):
     def test_round_trip_preserves_validated_detection(self):
         self.assertEqual(peer.decode_packet(peer.encode_packet(valid_packet()))["detections"][0]["track_id"], 3)
 
+    def test_round_trip_preserves_normalized_two_region_appearance(self):
+        packet = valid_packet()
+        packet["detections"][0]["tracking_status"] = "confirmed"
+        packet["detections"][0]["appearance"] = [[1.0] + [0.0] * 14, [0.0, 1.0] + [0.0] * 13]
+        decoded = peer.decode_packet(peer.encode_packet(packet))
+        self.assertEqual(decoded["detections"][0]["appearance"], packet["detections"][0]["appearance"])
+        self.assertEqual(decoded["detections"][0]["tracking_status"], "confirmed")
+
+    def test_legacy_or_tentative_tracks_cannot_claim_confirmed_status(self):
+        self.assertEqual(peer.validate_packet(valid_packet())["detections"][0]["tracking_status"], "tentative")
+        packet = valid_packet()
+        packet["detections"][0]["tracking_status"] = "identity-known"
+        with self.assertRaisesRegex(ValueError, "tracking_status"):
+            peer.validate_packet(packet)
+
+    def test_rejects_malformed_or_nonfinite_appearance_before_fusion(self):
+        packet = valid_packet()
+        packet["detections"][0]["appearance"] = [[1.0] * 15]
+        with self.assertRaisesRegex(ValueError, "appearance"):
+            peer.validate_packet(packet)
+        packet["detections"][0]["appearance"] = [[float("nan")] + [0.0] * 14, [1.0] + [0.0] * 14]
+        with self.assertRaisesRegex(ValueError, "appearance"):
+            peer.validate_packet(packet)
+
     def test_rejects_box_outside_image(self):
         packet = valid_packet()
         packet["detections"][0]["box_xyxy"] = [20, 30, 641, 230]

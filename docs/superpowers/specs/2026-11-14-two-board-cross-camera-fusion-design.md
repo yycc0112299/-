@@ -27,11 +27,12 @@ they do not exchange camera frames.
 
 ## Chosen approach
 
-The existing `peer_protocol.py` schema remains version `v1` and adds an
-optional `appearance` field to each detection. Old packets remain valid;
-cross-camera association ignores detections without the field. The descriptor
-is a normalized 2×15 upper/lower HSV/neutral histogram generated from the
-existing project method, encoded as JSON lists.
+The existing `peer_protocol.py` schema remains version `v1` and adds optional
+`appearance` and `tracking_status` fields to each detection. Old packets
+remain valid, but are normalized as `tentative`; cross-camera association
+therefore ignores them until a sender explicitly reports a `confirmed` track.
+The descriptor is a normalized 2×15 upper/lower HSV/neutral histogram
+generated from the existing project method, encoded as JSON lists.
 
 The receiver maintains a bounded latest local and remote observation set and
 uses the existing `CrossCameraMatcher` thresholds and repeated-hit policy. A

@@ -12,10 +12,27 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
 import peer_protocol
+from appearance_features import appearance
 from pynq_yolov8_peer import build_packet, configure_dpu_backend, send_packet_with_retry
 
 
 class YoloV8PeerTests(unittest.TestCase):
+    def test_sender_serializes_two_region_appearance_from_a_frame(self) -> None:
+        frame = np.zeros((20, 10, 3), dtype=np.uint8)
+        frame[:10, :, :] = [0, 0, 255]
+        frame[10:, :, :] = [0, 255, 0]
+        feature = appearance(frame, [0, 0, 10, 20])
+        packet = build_packet(
+            "pynq-a", 1, 2, frame,
+            [{"track_id": 7, "confidence": .9, "box": [0, 0, 10, 20],
+              "status": "confirmed", "appearance": feature}],
+        )
+        serialized = packet["detections"][0]["appearance"]
+        self.assertEqual((len(serialized), len(serialized[0])), (2, 15))
+        self.assertAlmostEqual(sum(serialized[0]), 1.0)
+        self.assertAlmostEqual(sum(serialized[1]), 1.0)
+        self.assertEqual(packet["detections"][0]["tracking_status"], "confirmed")
+
     def test_dpu_model_selects_graph_runner_without_cpu_onnx_fallback(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
             xmodel = Path(temporary) / "yolov8n_b512.xmodel"

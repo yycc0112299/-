@@ -1126,3 +1126,9 @@
 - Added `PROJECT_ACCEPTANCE_CHECKLIST.md` as the user-facing authoritative checklist. It separates built/JTAG proof, host-only code proof, ready-to-flash artifacts, and physical blockers; it must be updated instead of converting `READY`/`BLOCKED` into unverified PASS claims.
 - Added a design and implementation plan for the next no-SD code increment: carry optional normalized appearance features in two-board packets and associate only repeated unambiguous observations as cross-camera candidates. It preserves local tracker IDs, transfers no raw frames, and explicitly forbids describing appearance similarity as identity recognition.
 
+### 2026-11-14：跨鏡頭候選關聯的安全 metadata 輸入已完成
+
+- `person_tracking/appearance_features.py` now creates a normalized 2×15 upper/lower appearance descriptor from the current frame and a locally tracked person box. `pynq_yolov8_peer.py` attaches it to compact metadata only; no raw frame is put on the network.
+- `peer_protocol.py` accepts that optional descriptor only when its shape, finite/non-negative bins and per-region normalization are valid. It also carries `tracking_status`. Legacy senders remain decodable, but normalize to `tentative`; only explicitly `confirmed` local tracking evidence may be considered by the later fusion service.
+- Test-first evidence: feature/protocol/sender focused tests are 13/13 PASS and existing `test_cross_camera.py` is 6/6 PASS. This is host Python evidence only; no physical board, Wi-Fi link, camera frame or DPU output is claimed.
+

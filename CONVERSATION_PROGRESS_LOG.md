@@ -1053,3 +1053,10 @@
 - 驗證範圍／未完成：an encoded-command elevated `-WhatIf` is currently awaiting the real Windows UAC consent dialog. It cannot write by design. No SD write, SD boot, target runtime or camera/DPU result is claimed.
 - Git／同步：writer/test/readme/progress changes will be committed and pushed to `origin/main`; generated image/model assets and `petalinux_installation_log` stay outside Git.
 
+## 2026-11-14 — Added safe appearance metadata to the future two-board path
+
+- 需求／決策：while the SD card is unavailable, prepare the cross-camera input without transporting video or treating appearance similarity as identity. Legacy packets must remain valid without being trusted as confirmed tracking evidence.
+- 實際完成：added `appearance_features.py`; the DPU peer sender serializes its 2×15 descriptor and `tracking_status`; protocol validation rejects malformed/non-finite appearance data and normalizes missing legacy status to `tentative`. Focused protocol/sender tests pass 13/13; existing matcher tests pass 6/6.
+- 驗證範圍／未完成：host-only unit tests. The fusion receiver, staging/bundle update, rewritten SD boot, camera/DPU inference and physical two-board Wi-Fi are still pending. No generated image, model binary, credential or `petalinux_installation_log` is added to Git.
+- Git／同步：pending the commit and push that includes this source, tests and progress records.
+

@@ -38,6 +38,8 @@
 
 **Interfaces:**
 - Produces optional detection field `appearance: list[list[float]]` with exactly two rows of fifteen finite, non-negative values normalized per row.
+- Produces `tracking_status: "tentative" | "confirmed"`; a legacy packet with
+  no status normalizes to `tentative` so it cannot be matched by assumption.
 - Produces `appearance_features.appearance(frame, box) -> numpy.ndarray`.
 
 - [ ] **Step 1: Write failing packet and sender tests** for valid 2×15 appearance round trip, malformed appearance rejection, and sender packet feature serialization.

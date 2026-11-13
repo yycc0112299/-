@@ -13,7 +13,9 @@ import time
 from pathlib import Path
 
 import cv2
+import numpy as np
 
+from appearance_features import appearance
 import peer_protocol
 import pipeline
 
@@ -32,23 +34,27 @@ def configure_dpu_backend(xmodel: Path, environment: dict[str, str] = os.environ
 def build_packet(board_id, frame_id, capture_monotonic_ns, frame, tracked):
     """Map project tracker output to the strict two-board peer schema."""
     height, width = frame.shape[:2]
-    return {
+    packet = {
         "schema": peer_protocol.SCHEMA,
         "board_id": board_id,
         "frame_id": int(frame_id),
         "capture_monotonic_ns": int(capture_monotonic_ns),
         "image_width": int(width),
         "image_height": int(height),
-        "detections": [
-            {
+        "detections": [],
+    }
+    for item in tracked:
+        detection = {
                 "track_id": int(item["track_id"]),
                 "class_name": "person",
                 "confidence": float(item["confidence"]),
                 "box_xyxy": [int(value) for value in item["box"]],
-            }
-            for item in tracked
-        ],
-    }
+                "tracking_status": item.get("status", "tentative"),
+        }
+        if "appearance" in item:
+            detection["appearance"] = np.asarray(item["appearance"], dtype=float).tolist()
+        packet["detections"].append(detection)
+    return packet
 
 
 def open_camera(index, width, height, fps):
@@ -128,6 +134,8 @@ def main() -> None:
             if not ok or frame is None:
                 raise RuntimeError("camera did not return a frame")
             tracked = tracker.update(detector.detect(frame))
+            for item in tracked:
+                item["appearance"] = appearance(frame, item["box"])
             packet = build_packet(args.board_id, sent, capture_monotonic_ns, frame, tracked)
             used_attempts = send_packet_with_retry(
                 args.peer_host, args.port, packet, attempts=args.send_attempts,

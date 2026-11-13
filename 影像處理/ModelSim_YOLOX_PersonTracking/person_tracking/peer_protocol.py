@@ -7,6 +7,7 @@ VART/DPU adapter.
 """
 import argparse
 import json
+import math
 import socket
 from pathlib import Path
 
@@ -24,6 +25,8 @@ def _number(value, field, minimum=None, maximum=None):
     if isinstance(value, bool) or not isinstance(value, (int, float)):
         raise ValueError(f"{field} must be a number")
     value = float(value)
+    if not math.isfinite(value):
+        raise ValueError(f"{field} must be finite")
     if ((minimum is not None and value < minimum) or
             (maximum is not None and value > maximum)):
         raise ValueError(f"{field} is outside its allowed range")
@@ -65,9 +68,30 @@ def validate_packet(packet):
             "class_name": "person",
             "confidence": _number(detection.get("confidence"), f"detections[{index}].confidence", 0.0, 1.0),
             "box_xyxy": [x0, y0, x1, y1],
+            # A legacy sender did not report track confirmation.  Treat it as
+            # tentative: that remains decodable but can never create a
+            # cross-camera candidate by assumption.
+            "tracking_status": detection.get("tracking_status", "tentative"),
         })
         if detection.get("class_name") != "person":
             raise ValueError("only person detections are accepted by this protocol version")
+        if (not isinstance(normalized["detections"][-1]["tracking_status"], str)
+                or normalized["detections"][-1]["tracking_status"] not in {"tentative", "confirmed"}):
+            raise ValueError(f"detections[{index}].tracking_status must be tentative or confirmed")
+        if "appearance" in detection:
+            appearance = detection["appearance"]
+            if not isinstance(appearance, list) or len(appearance) != 2:
+                raise ValueError(f"detections[{index}].appearance must have two regions")
+            normalized_appearance = []
+            for region, values in enumerate(appearance):
+                if not isinstance(values, list) or len(values) != 15:
+                    raise ValueError(f"detections[{index}].appearance[{region}] must have fifteen bins")
+                normalized_values = [_number(value, f"detections[{index}].appearance[{region}][{bin_index}]", 0.0)
+                                     for bin_index, value in enumerate(values)]
+                if not math.isclose(sum(normalized_values), 1.0, rel_tol=0.0, abs_tol=1e-6):
+                    raise ValueError(f"detections[{index}].appearance[{region}] must sum to one")
+                normalized_appearance.append(normalized_values)
+            normalized["detections"][-1]["appearance"] = normalized_appearance
     return normalized
 
 

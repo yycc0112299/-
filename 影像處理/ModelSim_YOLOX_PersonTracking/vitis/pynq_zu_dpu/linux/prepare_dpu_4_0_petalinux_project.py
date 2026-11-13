@@ -9,6 +9,7 @@ from AMD's DPUCZDX8G reference tree; neither vendor tree belongs in Git.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import re
 import shutil
@@ -27,6 +28,8 @@ PROJECT_PYTHON_RUNTIME_PACKAGES = (
     "python3-numpy",
     "python3-opencv",
 )
+PROJECT_XMODEL_PACKAGE = "pynq-yolov8-model"
+TARGET_XMODEL_NAME = "yolov8n_b512.xmodel"
 USB_CAMERA_KERNEL_CONFIG = (
     "CONFIG_USB_SUPPORT=y",
     "CONFIG_USB=y",
@@ -96,14 +99,55 @@ def _append_rootfs_packages(rootfs_config: Path) -> None:
     rootfs_config.write_text("\n".join(lines).rstrip() + "\n", encoding="utf-8")
 
 
-def _install_runtime_packages(meta_user: Path) -> None:
+def _install_runtime_packages(meta_user: Path, *, include_xmodel: bool = False) -> None:
     """Make silent PetaLinux image builds include DPU and project Python runtime."""
     image_dir = meta_user / "recipes-core" / "images"
     image_dir.mkdir(parents=True, exist_ok=True)
-    packages = " ".join(RUNTIME_PACKAGE_NAMES + PROJECT_PYTHON_RUNTIME_PACKAGES)
+    package_names = RUNTIME_PACKAGE_NAMES + PROJECT_PYTHON_RUNTIME_PACKAGES
+    if include_xmodel:
+        package_names += (PROJECT_XMODEL_PACKAGE,)
+    packages = " ".join(package_names)
     (image_dir / "petalinux-image-minimal.bbappend").write_text(
         f'IMAGE_INSTALL:append = " {packages}"\n', encoding="utf-8"
     )
+
+
+def hash_file(path: Path) -> str:
+    """Return a streaming SHA-256 hash without keeping a model in memory."""
+    digest = hashlib.sha256()
+    with path.open("rb") as source:
+        for chunk in iter(lambda: source.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def _stage_xmodel(meta_user: Path, xmodel: Path) -> dict[str, object]:
+    """Install the exact compiled model under /opt/models in the target rootfs."""
+    xmodel = xmodel.resolve()
+    if xmodel.suffix != ".xmodel" or not xmodel.is_file() or xmodel.stat().st_size == 0:
+        raise ValueError(f"A nonempty .xmodel is required for target deployment: {xmodel}")
+    package_dir = meta_user / "recipes-apps" / PROJECT_XMODEL_PACKAGE
+    files_dir = package_dir / "files"
+    files_dir.mkdir(parents=True, exist_ok=True)
+    shutil.copyfile(xmodel, files_dir / TARGET_XMODEL_NAME)
+    (package_dir / f"{PROJECT_XMODEL_PACKAGE}.bb").write_text(
+        "SUMMARY = \"Compiled original YOLOv8n model for the PYNQ-ZU DPU B512\"\n"
+        "LICENSE = \"CLOSED\"\n"
+        f'SRC_URI = "file://{TARGET_XMODEL_NAME}"\n'
+        "S = \"${WORKDIR}\"\n\n"
+        "do_install() {\n"
+        "    install -d ${D}/opt/models\n"
+        f"    install -m 0644 ${{WORKDIR}}/{TARGET_XMODEL_NAME} "
+        f"${{D}}/opt/models/{TARGET_XMODEL_NAME}\n"
+        "}\n\n"
+        f'FILES:${{PN}} += "/opt/models/{TARGET_XMODEL_NAME}"\n',
+        encoding="utf-8",
+    )
+    return {
+        "target_path": f"/opt/models/{TARGET_XMODEL_NAME}",
+        "bytes": xmodel.stat().st_size,
+        "sha256": hash_file(xmodel),
+    }
 
 
 def _enable_vitis_ai_library_python(meta_user: Path) -> None:
@@ -126,7 +170,8 @@ def _enable_usb_camera_kernel(meta_user: Path) -> None:
     config.write_text("\n".join(lines).rstrip() + "\n", encoding="utf-8")
 
 
-def stage_reference(project: Path, official_meta_user: Path) -> dict[str, object]:
+def stage_reference(project: Path, official_meta_user: Path,
+                    *, xmodel: Path | None = None) -> dict[str, object]:
     """Copy the exact DPU 4.0 runtime additions into one PetaLinux project."""
     project = project.resolve()
     official_meta_user = official_meta_user.resolve()
@@ -144,7 +189,8 @@ def stage_reference(project: Path, official_meta_user: Path) -> dict[str, object
     _enable_vitis_ai_library_python(target_meta_user)
     _enable_usb_camera_kernel(target_meta_user)
     _append_rootfs_packages(target_meta_user / "conf" / "user-rootfsconfig")
-    _install_runtime_packages(target_meta_user)
+    xmodel_manifest = _stage_xmodel(target_meta_user, xmodel) if xmodel is not None else None
+    _install_runtime_packages(target_meta_user, include_xmodel=xmodel_manifest is not None)
 
     manifest: dict[str, object] = {
         "dpu_ip_version": "4.0",
@@ -152,6 +198,8 @@ def stage_reference(project: Path, official_meta_user: Path) -> dict[str, object
         "staged_directories": ["recipes-kernel", "recipes-vitis-ai"],
         "rootfs_packages": list(ROOTFS_PACKAGES),
     }
+    if xmodel_manifest is not None:
+        manifest["xmodel"] = xmodel_manifest
     (project / ".pynq_zu_dpu_4_0_stage.json").write_text(
         json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8"
     )
@@ -175,6 +223,8 @@ def main() -> None:
                         help="official DPUCZDX8G 4.0 reference project-spec/meta-user")
     parser.add_argument("--petalinux-root", type=Path, required=True,
                         help="PetaLinux 2022.1 installation root")
+    parser.add_argument("--xmodel", type=Path,
+                        help="optional compiled B512 .xmodel to install at /opt/models")
     arguments = parser.parse_args()
 
     detected = petalinux_version(arguments.petalinux_root / "settings.sh")
@@ -182,7 +232,8 @@ def main() -> None:
         raise SystemExit(
             f"PetaLinux 2022.1 is required for DPU 4.0/Vitis AI 2.5; detected {detected!r}."
         )
-    manifest = stage_reference(arguments.project, arguments.official_meta_user)
+    manifest = stage_reference(arguments.project, arguments.official_meta_user,
+                               xmodel=arguments.xmodel)
     print(f"PYNQ_ZU_DPU_PETALINUX_STAGE_PASS={arguments.project.resolve()}")
     print(json.dumps(manifest, sort_keys=True))
 

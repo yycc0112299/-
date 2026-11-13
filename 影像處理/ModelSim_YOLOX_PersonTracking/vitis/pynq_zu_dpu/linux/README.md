@@ -40,7 +40,7 @@ Copy `verify_dpu_runtime.py` and the compiled model to the board after it boots
 the matching image, then run:
 
 ```sh
-python3 verify_dpu_runtime.py --xmodel /opt/models/yolov8_person.xmodel --require-camera
+python3 verify_dpu_runtime.py --xmodel /opt/models/yolov8n_b512.xmodel --require-camera
 ```
 
 It is read-only: it searches the live device tree for the exact DPU compatible
@@ -93,7 +93,8 @@ project from the exact B512 XSA, stage only the official DPU 4.0 additions:
 python3 prepare_dpu_4_0_petalinux_project.py \
   --project /work/pynq_zu_dpu_2022_1 \
   --petalinux-root /opt/petalinux/2022.1 \
-  --official-meta-user /external/DPUCZDX8G/prj/Vivado/xilinx_zcu102_bsp/project-spec/meta-user
+  --official-meta-user /external/DPUCZDX8G/prj/Vivado/xilinx_zcu102_bsp/project-spec/meta-user \
+  --xmodel /external/yolov8n_b512.xmodel
 ```
 
 The helper validates the official `xlnx_dpu` 4.0-compatible patch and
@@ -112,6 +113,14 @@ configuration used here: the host-only variant fails to link its required
 gadget-hibernation object. This is required for a C270 UVC camera to enumerate
 on the new image; it does not prove physical USB capture until the board boots
 it.
+
+When `--xmodel` is supplied, the helper copies only that nonempty compiled
+`.xmodel` into the external PetaLinux layer and creates a closed local package
+which installs it as `/opt/models/yolov8n_b512.xmodel`. Its SHA-256 and byte
+count go into the external stage manifest. The model binary itself is not
+tracked by this repository. This makes the image self-contained for the
+GraphRunner route; it is still not evidence that target-side inference works
+until the camera gate below succeeds.
 
 From the repository's `ModelSim_YOLOX_PersonTracking` root, the tracked helper
 below extracts that file from a completed Vivado project:

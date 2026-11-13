@@ -11,6 +11,14 @@ PORT="${PYNQ_DASHBOARD_PORT:-8766}"
 
 cd "$SCRIPT_DIR"
 export PERSON_DETECTOR="${PERSON_DETECTOR:-yolov8}"
+if [[ "$PERSON_DETECTOR" == "yolov8_vart" ]]; then
+  export PYNQ_VART_XMODEL="${PYNQ_VART_XMODEL:-/opt/models/yolov8n_b512.xmodel}"
+  export PYNQ_VART_GRAPH_RUNNER="${PYNQ_VART_GRAPH_RUNNER:-1}"
+  if [[ ! -s "$PYNQ_VART_XMODEL" ]]; then
+    echo "Compiled DPU model is missing or empty: $PYNQ_VART_XMODEL" >&2
+    exit 2
+  fi
+fi
 exec python3 dual_server.py \
   --bind 0.0.0.0 \
   --port "$PORT" \

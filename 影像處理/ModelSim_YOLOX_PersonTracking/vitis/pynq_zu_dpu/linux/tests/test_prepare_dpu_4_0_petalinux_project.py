@@ -124,6 +124,45 @@ class PrepareDpu40PetaLinuxProjectTests(unittest.TestCase):
             settings.write_text('export PETALINUX_VER="2022.1"\n', encoding="utf-8")
             self.assertEqual(module.petalinux_version(settings), "2022.1")
 
+    def test_stages_a_nonempty_compiled_xmodel_as_a_rootfs_package(self) -> None:
+        """The deployment image must receive the exact compiled model, not its host path."""
+        module = load_module()
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            official = self.create_official_reference(root / "official")
+            project = root / "project"
+            (project / "project-spec" / "meta-user" / "conf").mkdir(parents=True)
+            xmodel = root / "yolov8n_b512.xmodel"
+            xmodel.write_bytes(b"compiled-dpu-model")
+
+            manifest = module.stage_reference(project, official, xmodel=xmodel)
+
+            model_dir = (project / "project-spec" / "meta-user" / "recipes-apps" /
+                         "pynq-yolov8-model")
+            self.assertEqual(
+                (model_dir / "files" / "yolov8n_b512.xmodel").read_bytes(),
+                b"compiled-dpu-model",
+            )
+            recipe = (model_dir / "pynq-yolov8-model.bb").read_text(encoding="utf-8")
+            self.assertIn('SRC_URI = "file://yolov8n_b512.xmodel"', recipe)
+            self.assertIn("/opt/models/yolov8n_b512.xmodel", recipe)
+            image_append = (project / "project-spec" / "meta-user" / "recipes-core" /
+                            "images" / "petalinux-image-minimal.bbappend")
+            self.assertIn("pynq-yolov8-model", image_append.read_text(encoding="utf-8"))
+            self.assertEqual(manifest["xmodel"]["sha256"], module.hash_file(xmodel))
+
+    def test_rejects_an_empty_or_wrong_extension_xmodel(self) -> None:
+        module = load_module()
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            official = self.create_official_reference(root / "official")
+            project = root / "project"
+            (project / "project-spec" / "meta-user" / "conf").mkdir(parents=True)
+            empty_model = root / "empty.xmodel"
+            empty_model.touch()
+            with self.assertRaisesRegex(ValueError, "nonempty .xmodel"):
+                module.stage_reference(project, official, xmodel=empty_model)
+
 
 if __name__ == "__main__":
     unittest.main()

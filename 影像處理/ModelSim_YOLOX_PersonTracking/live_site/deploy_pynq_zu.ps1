@@ -12,8 +12,10 @@ param(
     [int]$CameraB = 1,
     [string]$OverlayDir,
     [string]$UsbVideoOverlayDir,
+    [switch]$DpuRuntime,
     [switch]$RunSystemPreflight,
     [switch]$RunCameraPreflight,
+    [switch]$RunDpuCameraVerification,
     [switch]$RunBringupCheck,
     [switch]$RunUsbVideoOverlayCheck
 )
@@ -51,6 +53,9 @@ if ($RunBringupCheck -and [string]::IsNullOrWhiteSpace($OverlayDir)) {
 if ($RunUsbVideoOverlayCheck -and [string]::IsNullOrWhiteSpace($UsbVideoOverlayDir)) {
     throw "-RunUsbVideoOverlayCheck requires -UsbVideoOverlayDir containing pynq_zu_usb_video.bit and .hwh."
 }
+if ($RunDpuCameraVerification -and -not $DpuRuntime) {
+    throw "-RunDpuCameraVerification requires -DpuRuntime, which selects the SD image's GraphRunner xmodel."
+}
 
 $scriptDir = Split-Path -Parent $PSCommandPath
 $bundle = Join-Path $env:TEMP "pynq_dual_dashboard.tar.gz"
@@ -60,6 +65,9 @@ if (-not [string]::IsNullOrWhiteSpace($OverlayDir)) {
 }
 if (-not [string]::IsNullOrWhiteSpace($UsbVideoOverlayDir)) {
     $bundleArgs += @("--usb-video-overlay-dir", $UsbVideoOverlayDir)
+}
+if ($DpuRuntime) {
+    $bundleArgs += "--dpu-runtime"
 }
 
 Write-Host "Building deployment bundle..."
@@ -77,20 +85,30 @@ Write-Host "Copying bundle (authentication may be requested)..."
 & scp $bundle "${target}:~/pynq_dual_dashboard.tar.gz"
 if ($LASTEXITCODE -ne 0) { throw "SCP copy failed." }
 
-$remoteInstall = "set -eu; test ! -e '$RemoteDir'; mkdir '$RemoteDir'; tar -xzf ~/pynq_dual_dashboard.tar.gz -C '$RemoteDir'; chmod +x '$RemoteDir/live_site/start_pynq_dual.sh'; test -f '$RemoteDir/person_tracking/assets/yolov8n.onnx'"
+if ($DpuRuntime) {
+    $remoteInstall = "set -eu; test ! -e '$RemoteDir'; mkdir '$RemoteDir'; tar -xzf ~/pynq_dual_dashboard.tar.gz -C '$RemoteDir'; chmod +x '$RemoteDir/live_site/start_pynq_dual.sh'; test -s /opt/models/yolov8n_b512.xmodel; test -f '$RemoteDir/person_tracking/pynq_yolov8_dpu_inference.py'"
+} else {
+    $remoteInstall = "set -eu; test ! -e '$RemoteDir'; mkdir '$RemoteDir'; tar -xzf ~/pynq_dual_dashboard.tar.gz -C '$RemoteDir'; chmod +x '$RemoteDir/live_site/start_pynq_dual.sh'; test -f '$RemoteDir/person_tracking/assets/yolov8n.onnx'"
+}
 Write-Host "Unpacking on board..."
 & ssh $target $remoteInstall
 if ($LASTEXITCODE -ne 0) { throw "Remote unpack validation failed." }
 
 if ($RunSystemPreflight) {
     Write-Host "Running read-only board dependency and model preflight..."
-    & ssh $target "cd '$RemoteDir'; $PythonCommand live_site/pynq_system_preflight.py"
+    $preflightArgs = if ($DpuRuntime) { "--dpu-runtime" } else { "" }
+    & ssh $target "cd '$RemoteDir'; $PythonCommand live_site/pynq_system_preflight.py $preflightArgs"
     if ($LASTEXITCODE -ne 0) { throw "System preflight failed; deployment remains on the board for diagnosis." }
 }
 if ($RunCameraPreflight) {
     Write-Host "Running read-only UVC camera preflight..."
     & ssh $target "cd '$RemoteDir'; $PythonCommand live_site/pynq_usb_camera_preflight.py --camera-a $CameraA --camera-b $CameraB"
     if ($LASTEXITCODE -ne 0) { throw "Camera preflight failed; deployment remains on the board for diagnosis." }
+}
+if ($RunDpuCameraVerification) {
+    Write-Host "Running one-camera UVC -> GraphRunner -> original YOLOv8 verification..."
+    & ssh $target "cd '$RemoteDir'; PERSON_DETECTOR=yolov8_vart PYNQ_VART_GRAPH_RUNNER=1 PYNQ_VART_XMODEL=/opt/models/yolov8n_b512.xmodel $PythonCommand person_tracking/pynq_yolov8_dpu_inference.py --camera $CameraA --frames 3"
+    if ($LASTEXITCODE -ne 0) { throw "DPU camera verification failed; deployment remains on the board for diagnosis." }
 }
 if ($RunBringupCheck) {
     Write-Host "Downloading overlay and checking AXI-Lite mailbox..."
@@ -104,4 +122,8 @@ if ($RunUsbVideoOverlayCheck) {
 }
 
 Write-Host "PYNQ_DEPLOY_PASS host=$BoardHost remote_dir=~/$RemoteDir"
-Write-Host "Start dashboard on board: cd ~/$RemoteDir && bash live_site/start_pynq_dual.sh <PYNQ-IP-USED-IN-BROWSER>"
+if ($DpuRuntime) {
+    Write-Host "Start DPU dashboard: cd ~/$RemoteDir && PERSON_DETECTOR=yolov8_vart bash live_site/start_pynq_dual.sh <PYNQ-IP-USED-IN-BROWSER>"
+} else {
+    Write-Host "Start dashboard on board: cd ~/$RemoteDir && bash live_site/start_pynq_dual.sh <PYNQ-IP-USED-IN-BROWSER>"
+}

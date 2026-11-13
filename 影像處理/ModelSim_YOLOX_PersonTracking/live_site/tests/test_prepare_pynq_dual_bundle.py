@@ -21,6 +21,12 @@ class PynqDualBundleTests(unittest.TestCase):
         self.assertIn(bundle.TRACKING / "verify_pynq_zu_usb_video_overlay.py",
                       bundle.runtime_sources())
 
+    def test_dpu_bundle_uses_the_sd_image_xmodel_and_keeps_the_camera_gate(self) -> None:
+        sources = bundle.runtime_sources(dpu_runtime=True)
+        self.assertIn(bundle.TRACKING / "pynq_yolov8_dpu_inference.py", sources)
+        self.assertIn(bundle.TRACKING / "assets" / "yolov8_vart.py", sources)
+        self.assertNotIn(bundle.MODEL, sources)
+
 
 if __name__ == "__main__":
     unittest.main()

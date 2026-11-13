@@ -59,6 +59,24 @@ Vivado 暫存、使用者資料夾或已產生的 tarball。YOLOX ONNX 依授權
 安裝 Python 3；缺少 `ssh`/`scp` 時在 Windows「選用功能」安裝 OpenSSH Client。板端帳號預設為 `xilinx`，
 可用 `-BoardUser` 覆寫。
 
+### DPU SD image 的 YOLOv8 部署模式
+
+matching 2022.1 DPU SD image booted 後，compiled original YOLOv8n B512 model lives at
+`/opt/models/yolov8n_b512.xmodel`; it does not need the CPU ONNX download. Use the DPU
+bundle mode, which first requires this image-side model and includes a one-camera
+GraphRunner gate:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File ".\影像處理\ModelSim_YOLOX_PersonTracking\live_site\deploy_pynq_zu.ps1" `
+  -BoardHost <PYNQ-IP> -DpuRuntime -RunSystemPreflight -RunDpuCameraVerification
+```
+
+The DPU verification uses one UVC camera, captures three frames and submits each
+through the full original YOLOv8 GraphRunner graph. `PYNQ_YOLOV8_DPU_CAMERA_PASS`
+means frame-to-GraphRunner execution succeeded; zero detections are valid for an
+empty scene and are not a person-recognition claim. This does not remove the
+separate two-C270 simultaneous-capture gate or prove two-board Wi-Fi exchange.
+
 ### 兩台電腦協作
 
 GitHub 只同步程式，不傳即時影像。把本目錄同步到有 USB 鏡頭的電腦後，在該電腦執行：

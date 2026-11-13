@@ -941,3 +941,10 @@
 - 驗證範圍／未完成：image composition only; no physical SD write, SD boot, target DPU device, GraphRunner import, UVC frame, YOLOv8 inference, two-camera concurrency or Wi-Fi peer is claimed. External artifacts/logs remain outside Git; `petalinux_installation_log` remains intentionally untracked.
 - Git／同步：the staging helper/test/README and all three progress records are to be committed and pushed to `origin/main` in this change.
 
+## 2026-11-13 — Put the compiled original YOLOv8 model into the DPU SD image
+
+- 需求／決策：the target image must contain the exact B512 `.xmodel` used by GraphRunner, rather than relying on an untracked Windows path or switching to a CPU ONNX model.
+- 實際完成：test-first staging now accepts a validated `--xmodel`, packages it at `/opt/models/yolov8n_b512.xmodel`, and records its hash externally. The actual 5,513,997-byte model was staged and its extracted rootfs SHA-256 matches the compiler output. PetaLinux build completed 6,370/6,370 tasks, then BOOT/WIC were regenerated. Added explicit DPU deployment mode, DPU-aware preflight, and one-camera UVC→GraphRunner camera gate. Linux tests 16/16, tracking/DPU bridge tests 34/34, and bundle tests 5/5 passed; PowerShell and Bash parsing passed.
+- 驗證範圍／未完成：no physical SD write, target boot, device node, GraphRunner import, UVC frame, positive person detection, same-board two-camera capture or Wi-Fi peer is claimed. The external model/image/logs are excluded from Git; `petalinux_installation_log` remains intentionally untracked.
+- Git／同步：all code, tests, README and progress files for this deliverable are to be committed and pushed to `origin/main` together.
+

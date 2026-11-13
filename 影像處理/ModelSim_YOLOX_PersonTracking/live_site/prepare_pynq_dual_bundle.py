@@ -19,18 +19,22 @@ TRACKING = PROJECT / "person_tracking"
 MODEL = TRACKING / "assets" / "yolov8n.onnx"
 EXPORTER = TRACKING / "assets" / "prepare_yolov8_onnx.py"
 
-def runtime_sources() -> list[Path]:
+def runtime_sources(*, dpu_runtime: bool = False) -> list[Path]:
     """Return all tracked runtime sources needed by either PYNQ board role."""
-    return [
+    sources = [
         ROOT / "dual_server.py", ROOT / "dual_index.html", ROOT / "start_pynq_dual.sh",
         ROOT / "pynq_usb_camera_preflight.py", ROOT / "pynq_system_preflight.py",
         TRACKING / "pipeline.py", TRACKING / "cross_camera.py", TRACKING / "dual_camera.py",
         TRACKING / "peer_protocol.py", TRACKING / "pynq_yolov8_peer.py",
         TRACKING / "pynq_wifi_peer_preflight.py",
-        TRACKING / "assets" / "yolov8.py", TRACKING / "assets" / "yolov8_vart.py", MODEL,
+        TRACKING / "pynq_yolov8_dpu_inference.py",
+        TRACKING / "assets" / "yolov8.py", TRACKING / "assets" / "yolov8_vart.py",
         TRACKING / "verify_pynq_zu_bringup.py",
         TRACKING / "verify_pynq_zu_usb_video_overlay.py",
     ]
+    if not dpu_runtime:
+        sources.append(MODEL)
+    return sources
 
 def ensure_model() -> None:
     """Build the ignored, pinned YOLOv8 ONNX artifact on a deployment PC."""
@@ -50,9 +54,12 @@ def main() -> None:
                         help="optional directory containing pynq_zu_yolox.bit/.hwh")
     parser.add_argument("--usb-video-overlay-dir", type=Path,
                         help="optional directory containing pynq_zu_usb_video.bit/.hwh")
+    parser.add_argument("--dpu-runtime", action="store_true",
+                        help="use /opt/models/yolov8n_b512.xmodel from the DPU SD image")
     args = parser.parse_args()
-    ensure_model()
-    sources = runtime_sources()
+    if not args.dpu_runtime:
+        ensure_model()
+    sources = runtime_sources(dpu_runtime=args.dpu_runtime)
     missing = [path for path in sources if not path.is_file()]
     if missing:
         raise FileNotFoundError("Missing bundle files: " + ", ".join(map(str, missing)))

@@ -877,3 +877,10 @@
 - 驗證範圍／未完成：host-side FTDI enumeration is not scan-chain proof. Repeat after physical JTAG chain/power/boot-selection check; only a listed target authorizes programming/hardware validation.
 - Git／同步：three progress documents are being committed/pushed; external artifacts and any board identifiers are excluded.
 
+## 2026-11-13 — Identified the PYNQ-ZU JTAG boot-selection prerequisite
+
+- 需求／決策：resolve empty JTAG target using board-specific primary documentation before mutating USB drivers or programming hardware.
+- 實際完成：official PYNQ-ZU Reference User Manual v1.2 confirms JTAG/SD DIP selects boot mode; JTAG is left and MicroSD is right. Current project work deliberately uses SD boot for SSH/PYNQ Linux, making boot selection the first physical prerequisite for a JTAG-target recheck.
+- 驗證範圍／未完成：documentation evidence only; no physical switch/power cycle was performed. JTAG target visibility after switching remains unverified, and SD mode remains required for current Linux workflow.
+- Git／同步：three progress records are being committed/pushed; no private board, account or network data is recorded.
+

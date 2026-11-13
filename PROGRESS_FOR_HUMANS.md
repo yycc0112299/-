@@ -807,3 +807,8 @@
 - 電腦有偵測到板子的 FTDI USB/JTAG-UART cable，但 Vivado 目前掃不到 FPGA JTAG target。
 - 因此沒有冒險把 bitstream 或 Vitis 控制程式下載到板子；要等 Vivado 的 target 清單真正看得到板子後，才可進行 JTAG 硬體實測。
 
+## 2026-11-13：找到 JTAG target 空白的首要檢查點
+
+- PYNQ-ZU 的 UART/JTAG 可共用 FTDI cable，但官方手冊要求要做 JTAG boot/download 時，板上的 JTAG/SD switch 必須切到 **JTAG 左側**。
+- 現在板子為了跑 SD 卡 Linux 而在 SD 右側。下次要測 Vivado/Vitis 的 bitstream 時，需關機後切到 JTAG、開機並確認 Vivado 看得到 target；測完要回到 SD 才能開 PYNQ Linux。
+

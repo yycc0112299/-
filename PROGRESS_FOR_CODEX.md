@@ -979,3 +979,9 @@
 - Started Vivado 2022.1 `hw_server` only and connected XSCT on localhost port 3121. Windows enumerates present FTDI `VID_0403&PID_6010` dual channels, including a COM5 serial channel; channel A uses a healthy FTDI driver. Nevertheless `targets` returned no JTAG targets. No bitstream, ELF, reset, boot mode or board state was changed.
 - Do not program either hardware artifact until `targets` lists the PYNQ-ZU scan chain. This observation does not prove a permanently bad cable: inspect physical JTAG chain/power/boot-selection and repeat read-only enumeration first. It is independent of current SSH/UART Linux access.
 
+### 2026-11-13：官方 PYNQ-ZU JTAG boot setting 已確認
+
+- Official PYNQ-ZU Reference User Manual v1.2 states that the board selects MicroSD vs JTAG boot using the JTAG/SD DIP switch: JTAG is left; SD is right. The project has deliberately kept the board in SD mode to boot current PYNQ Linux/SSH, while the JTAG target scan was empty.
+- This makes SD/JTAG boot selection the first physical condition to recheck before changing drivers or programming hardware. For a JTAG Vivado/Vitis smoke test, power down, move the board's JTAG/SD switch left to JTAG, power up, then repeat read-only `hw_server`/`targets`; only a visible XCZU5EG scan chain authorizes the existing bitstream/ELF download. Returning to SD boot is required for current PYNQ Linux image use.
+- This is a documented hardware procedure, not a claim that switching will certainly fix the target; no board switch, reset, bitstream, ELF, SD or source change occurred in this record.
+

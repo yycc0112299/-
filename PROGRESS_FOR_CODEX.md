@@ -1001,6 +1001,13 @@
 - 另對 rootfs 內的 Python binding 做 binary-level check：`/usr/lib/python3.9/site-packages/vitis_ai_library.so` 是 ARM64 ELF，並含 `vitis::ai::GraphRunner` 與 `create_graph_runner` symbols；Python 3.9、`vart.so`、`xir.so` 也都位於同一 site-packages。這是 image-content proof；actual Python import still requires target boot.
 - 驗證界線／後續：尚未寫入任何 physical SD card，也尚未切 SD boot 或 boot target；所以 `/dev/dpu*`、`xdputil`、Python VART/XIR/GraphRunner imports、camera→YOLOv8 inference 仍未在 board 驗證。The board’s currently installed PYNQ 2024.1 SD image remains incompatible. Generated WIC/BOOT/image/rootfs, tool logs and external PetaLinux project remain outside Git.
 
+### 2026-11-13：PetaLinux image 已補足本專題 Python camera runtime
+
+- Host-only rootfs audit found the first runtime image had Python GraphRunner binding but lacked `numpy` and Python OpenCV, both required by tracked `person_tracking/pipeline.py` before any camera frame can reach GraphRunner. This was an image-composition gap, not a board claim.
+- Updated `prepare_dpu_4_0_petalinux_project.py` so its generated image bbappend appends `python3-numpy` and `python3-opencv` alongside DPU Vitis AI packages. Test-first change: updated the stage contract, observed the expected old-image assertion failure, then implemented the smallest package-list change; full Linux suite is 14/14 PASS.
+- Re-staged the external PetaLinux 2022.1 project using the exact official `prj/Vivado/xilinx_zcu102_bsp` DPU reference (the zcu104 Vitis variant was correctly rejected because it lacks the helper's one-patch DPU driver contract). Incremental build completed 6,355 tasks with all succeeded. `rootfs.tar.gz` now contains ARM64 NumPy extension modules and `cv2.cpython-39-aarch64-linux-gnu.so`; `rootfs.manifest` names `python3-numpy 1.21.2` and `python3-opencv 4.5.2`.
+- BOOT.BIN and WIC were regenerated from that rootfs. New external WIC hash is `a66273c7e0d88a6245b10631dcb1e4c9f0f54377dc7291143238dc835ed211a3`; its FAT32 boot partition contains updated `image.ub` (111,043,644 bytes) plus BOOT.BIN and boot.scr. This remains artifact-content evidence only: no physical SD card was modified and no target import/camera/inference was run.
+
 ### 2026-11-13：PYNQ-ZU JTAG scan-chain 與 DPU B512 暫態下載 PASS
 
 - 使用者將板子切至 JTAG boot 後，Vivado 2022.1 Hardware Manager read-only scan 成功列出一個 target `localhost:3121/xilinx_tcf/Xilinx/1234-tulA`、`xczu5_0` FPGA device 與 `arm_dap_1`。此前 XSCT blank output 不是可靠的 target scan evidence；Hardware Manager query 是本次 authoritative evidence。

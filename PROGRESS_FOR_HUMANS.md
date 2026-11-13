@@ -837,3 +837,9 @@
 - 映像內也有 Python 的 GraphRunner bridge；尚待上板實際 import。
 - 還沒有寫入實體 SD 卡，也還沒有讓板子用此映像開機。因此 DPU、YOLOv8、相機的實機成功尚未宣稱完成。
 
+## 2026-11-13：映像已加入相機 Python 相依套件
+
+- 發現專題程式要使用 NumPy 和 Python OpenCV，因此已把它們加入 DPU Linux 映像並重建。
+- 已檢查新版映像內有 ARM64 NumPy 與 OpenCV Python 模組，現在具備執行相機影格處理加 GraphRunner 的軟體相依條件。
+- 仍需將新版映像寫入 SD、讓板子從 SD 開機後，才能實測相機→DPU→YOLOv8。
+

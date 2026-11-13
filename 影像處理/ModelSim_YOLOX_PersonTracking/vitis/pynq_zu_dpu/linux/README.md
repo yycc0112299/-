@@ -17,6 +17,8 @@ Build the boot image from the same `pynq_zu_dpu_b512.xsa` exported by
 3. enough CMA contiguous memory for DPU buffers;
 4. mutually compatible VART, XIR, XRT and DPU driver packages; and
 5. an INT8 B512-matched `.xmodel` compiled using the DPU-specific `arch.json`.
+6. Python 3, NumPy and Python OpenCV when using the tracked Python
+   GraphRunner/camera pipeline.
 
 The official AMD DPUCZDX8G 4.0 source includes a 2022.1 ZCU102 reference
 PetaLinux project.  Its kernel patch only adds the `4.0` compatible string to
@@ -26,12 +28,11 @@ recipe also depends on XIR, target-factory and (for the Vitis flow) XRT.  Do
 not copy ZCU102 device-tree addresses, boot files, or prebuilt libraries into
 this project.
 
-The Windows host now has usable Vivado/Vitis **2022.1** and the DPU B512 XSA
-was rebuilt with that version. It has PetaLinux 2024.1 for unrelated earlier
-work, but **not** PetaLinux 2022.1; the 2024.1 installation must not be used
-to build this DPU 4.0 image. A matching image remains an explicit
-build/deployment task and is not silently substituted with the existing PYNQ
-SD image.
+The Windows host now has usable Vivado/Vitis and PetaLinux **2022.1**. The
+DPU B512 XSA was built with that version and the external matching PetaLinux
+project has produced `BOOT.BIN` and `petalinux-sdimage.wic`. The current
+PYNQ 2024.1 SD card remains a different, incompatible image; no generated
+artifact is silently substituted onto that card.
 
 ## Board-side acceptance test
 
@@ -98,11 +99,12 @@ python3 prepare_dpu_4_0_petalinux_project.py \
 The helper validates the official `xlnx_dpu` 4.0-compatible patch and
 `CONFIG_XILINX_DPU=y`, then copies only the official kernel/Vitis-AI recipe
 trees into the external project. It appends the VART/XIR/unilog/target-factory
-rootfs selections without deleting existing user selections, writes a small
-manifest, and rejects every PetaLinux release other than 2022.1. It deliberately
-does not copy ZCU102 device-tree addresses or boot assets, build an image, or
-touch the board. Run `petalinux-config --get-hw-description` against the exact
-PYNQ-ZU XSA before staging so the generated DPU node comes from this hardware.
+rootfs selections and adds `python3-numpy` plus `python3-opencv` to the image
+without deleting existing user selections, writes a small manifest, and rejects
+every PetaLinux release other than 2022.1. It deliberately does not copy ZCU102
+device-tree addresses or boot assets, build an image, or touch the board. Run
+`petalinux-config --get-hw-description` against the exact PYNQ-ZU XSA before
+staging so the generated DPU node comes from this hardware.
 
 From the repository's `ModelSim_YOLOX_PersonTracking` root, the tracked helper
 below extracts that file from a completed Vivado project:

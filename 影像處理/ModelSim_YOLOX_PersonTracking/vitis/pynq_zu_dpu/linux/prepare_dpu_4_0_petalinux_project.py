@@ -23,6 +23,10 @@ ROOTFS_PACKAGES = (
     "CONFIG_vitis-ai-library",
 )
 RUNTIME_PACKAGE_NAMES = tuple(package.removeprefix("CONFIG_") for package in ROOTFS_PACKAGES)
+PROJECT_PYTHON_RUNTIME_PACKAGES = (
+    "python3-numpy",
+    "python3-opencv",
+)
 
 
 def _require_file(path: Path, description: str) -> None:
@@ -78,10 +82,10 @@ def _append_rootfs_packages(rootfs_config: Path) -> None:
 
 
 def _install_runtime_packages(meta_user: Path) -> None:
-    """Make silent PetaLinux image builds include the staged Vitis AI packages."""
+    """Make silent PetaLinux image builds include DPU and project Python runtime."""
     image_dir = meta_user / "recipes-core" / "images"
     image_dir.mkdir(parents=True, exist_ok=True)
-    packages = " ".join(RUNTIME_PACKAGE_NAMES)
+    packages = " ".join(RUNTIME_PACKAGE_NAMES + PROJECT_PYTHON_RUNTIME_PACKAGES)
     (image_dir / "petalinux-image-minimal.bbappend").write_text(
         f'IMAGE_INSTALL:append = " {packages}"\n', encoding="utf-8"
     )

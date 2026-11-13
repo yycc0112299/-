@@ -913,3 +913,10 @@
 - 驗證範圍／未完成：this proves artifact composition, not physical SD writing, target boot, `/dev/dpu`, VART/XIR/GraphRunner target imports, camera-to-YOLOv8 inference or two-board Wi-Fi. The existing PYNQ 2024.1 card remains unchanged. External WIC/rootfs/build logs are intentionally not committed.
 - Git／同步：本次三份 progress documents will be committed and pushed to `main`; only the local `petalinux_installation_log` remains untracked because it is a temporary installation log.
 
+## 2026-11-13 — Added the Python camera runtime to the DPU SD image
+
+- 需求／決策：the tracked GraphRunner camera pipeline imports NumPy and OpenCV, so a DPU-only VART runtime is insufficient for the actual project.
+- 實際完成：test-first update to the staging helper appends `python3-numpy` and `python3-opencv` to the generated image bbappend. The newly written contract failed on the prior output, then passed after the minimal implementation; Linux suite passed 14/14. The external 2022.1 project was restaged from the exact official DPU 4.0 source and rebuilt successfully (6,355 tasks, all succeeded). Rootfs inspection confirms ARM64 NumPy and Python OpenCV, then BOOT.BIN/WIC were regenerated and WIC boot files were read-only verified.
+- 驗證範圍／未完成：image package contents only. No physical SD write, SD boot, target Python imports, `/dev/dpu`, UVC capture or YOLOv8 inference occurred. Generated WIC/rootfs remain external.
+- Git／同步：helper, test, Linux README and the three progress documents will be committed and pushed to `main`; local `petalinux_installation_log` remains intentionally untracked.
+

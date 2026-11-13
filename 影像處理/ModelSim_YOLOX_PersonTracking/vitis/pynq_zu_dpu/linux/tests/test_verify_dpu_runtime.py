@@ -13,6 +13,7 @@ from verify_dpu_runtime import (
     DPU_COMPATIBLE,
     dpu_device_tree_nodes,
     graph_runner_result,
+    python_runtime_results,
     valid_xmodel,
 )
 
@@ -49,6 +50,18 @@ class DpuRuntimeGateTests(unittest.TestCase):
         missing = graph_runner_result(lambda _: missing_module)
         self.assertFalse(missing["available"])
         self.assertIn("GraphRunner", str(missing["error"]))
+
+    def test_requires_numpy_and_opencv_imports_before_runtime_can_pass(self) -> None:
+        def modules(name: str) -> dict[str, object]:
+            return {"available": name != "cv2"}
+
+        report = python_runtime_results(
+            module_probe=modules,
+            graph_probe=lambda: {"available": True},
+        )
+        self.assertTrue(report["numpy"]["available"])
+        self.assertFalse(report["cv2"]["available"])
+        self.assertFalse(report["ok"])
 
 
 if __name__ == "__main__":

@@ -1,10 +1,10 @@
 # PYNQ-ZU DPU Linux runtime gate
 
-The native DPU B512 bitstream and XSA are deliberately **not** deployed to the
-current PYNQ SD image yet.  That image was inspected on hardware and lacks the
-DPU device, DPU driver and VART.  Programming this bitstream without the
-matching Linux description/runtime would not prove inference and may leave the
-running image unable to use the PL.
+The matching native DPU B512 PetaLinux image has booted from SD and exposed
+`/dev/dpu`; the first hardware boot found a missing Python standard-library
+package, so the corrected image must be written before any inference claim.
+Programming only a bitstream without the matching Linux description/runtime
+does not prove inference and may leave the running image unable to use the PL.
 
 ## Required matching Linux image
 
@@ -30,9 +30,8 @@ this project.
 
 The Windows host now has usable Vivado/Vitis and PetaLinux **2022.1**. The
 DPU B512 XSA was built with that version and the external matching PetaLinux
-project has produced `BOOT.BIN` and `petalinux-sdimage.wic`. The current
-PYNQ 2024.1 SD card remains a different, incompatible image; no generated
-artifact is silently substituted onto that card.
+project has produced the corrected `BOOT.BIN` and `petalinux-sdimage.wic`.
+The guarded SD writer never silently substitutes an artifact onto a card.
 
 ## Board-side acceptance test
 
@@ -44,8 +43,8 @@ python3 verify_dpu_runtime.py --xmodel /opt/models/yolov8n_b512.xmodel --require
 ```
 
 It is read-only: it searches the live device tree for the exact DPU compatible
-string, checks `/dev/dpu*`, CMA, Python `vart`/`xir`, `xdputil query`, optional
-model file and UVC camera nodes.  It prints JSON followed by
+string, checks `/dev/dpu*`, CMA, Python NumPy/OpenCV/`vart`/`xir`/GraphRunner,
+`xdputil query`, optional model file and UVC camera nodes.  It prints JSON followed by
 `PYNQ_ZU_DPU_LINUX_RUNTIME_PASS` only when each requested prerequisite exists.
 Passing this gate still does not replace an end-to-end camera inference test;
 the next test must run VART on a frame and validate a person-detection packet.
@@ -68,11 +67,9 @@ python3 preflight_dpu_build_host.py \
 The generated hardware's `component.xml` identifies it as DPUCZDX8G **4.0**.
 AMD's compatibility matrix pairs that IP with Vitis AI **2.5** and
 Vivado/Vitis/PetaLinux **2022.1**. Vitis AI 3.5's 2023.1 contract applies to
-DPUCZDX8G **4.1**, not this bitstream. The present hardware is now built with
-Vivado 2022.1; the remaining toolchain mismatch is the installed PetaLinux
-2024.1 host. Do not infer Linux runtime compatibility from a successful Vivado
-implementation. Either use a 2022.1 PetaLinux host for this 4.0 IP, or first
-replace it with DPU 4.1 and then use the 3.5/2023.1 contract.
+DPUCZDX8G **4.1**, not this bitstream. The present hardware and external build
+host use 2022.1. Do not infer Linux runtime compatibility from a successful
+Vivado implementation; target-side DPU and camera gates remain required.
 
 The preflight requires the exact local Docker compiler image for the selected
 DPU contract (DPU 4.0: `xilinx/vitis-ai:2.5.0`) or `vai_c_xir`, a PetaLinux

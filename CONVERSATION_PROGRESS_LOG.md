@@ -997,6 +997,13 @@
 - 驗證範圍／未完成：archive and host-contract verification only. The new WIC has not been rewritten to the unavailable SD, booted, or run through target Python/DPU/camera verification. The two-board Wi-Fi protocol remains host-tested only; no network credentials, live peer or second board is claimed. Generated WIC/rootfs and `petalinux_installation_log` remain outside Git.
 - Git／同步：source, tests, documentation and the three progress records are committed and pushed to `main` in this change.
 
+## 2026-11-13 — Made the board-side DPU gate reject incomplete Python environments
+
+- 需求／決策：make the next board boot diagnose NumPy/OpenCV import failures before any misleading DPU acceptance result, while correcting obsolete setup documentation.
+- 實際完成：`verify_dpu_runtime.py` now reports and requires NumPy, OpenCV, VART, XIR and GraphRunner together. Test-first coverage proves a failed `cv2` import prevents PASS; focused tests 4/4 and Linux suite 27/27 pass. The runtime README now reflects the booted-but-superseded image, the corrected 2022.1 build environment and the stricter gate.
+- 驗證範圍／未完成：host tests only; the corrected WIC still has not been written to the unavailable physical SD. No board-side import after the change, camera frame, DPU execution or two-board Wi-Fi result is claimed.
+- Git／同步：source, test and all progress documentation are committed and pushed to `main` in this change; generated images/logs remain outside Git.
+
 ## 2026-11-13 — Replaced unsupported removable-disk offlining with safe volume locking
 
 - 需求／決策：address the actual elevated SD-writer errors without widening the destructive target scope.

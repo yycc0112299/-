@@ -71,6 +71,20 @@ def graph_runner_result(import_module=importlib.import_module) -> dict[str, obje
     return {"available": True, "version": getattr(module, "__version__", None)}
 
 
+def python_runtime_results(module_probe=module_result,
+                           graph_probe=graph_runner_result) -> dict[str, object]:
+    """Probe every Python binding the deployed camera/DPU path imports."""
+    results = {
+        "numpy": module_probe("numpy"),
+        "cv2": module_probe("cv2"),
+        "vart": module_probe("vart"),
+        "xir": module_probe("xir"),
+        "graph_runner": graph_probe(),
+    }
+    results["ok"] = all(bool(result.get("available")) for result in results.values())
+    return results
+
+
 def cma_total_kib() -> int | None:
     try:
         for line in Path("/proc/meminfo").read_text().splitlines():
@@ -101,9 +115,7 @@ def main() -> int:
 
     device_nodes = dpu_device_tree_nodes()
     device_files = sorted(str(path) for path in Path("/dev").glob("dpu*"))
-    vart = module_result("vart")
-    xir = module_result("xir")
-    graph_runner = graph_runner_result()
+    python_runtime = python_runtime_results()
     xdputil = command_result(["xdputil", "query"])
     cameras = sorted(str(path) for path in Path("/dev").glob("video*"))
     model_ok = arguments.xmodel is None or valid_xmodel(arguments.xmodel)
@@ -112,9 +124,7 @@ def main() -> int:
         "device_tree_nodes": device_nodes,
         "device_files": device_files,
         "cma_total_kib": cma_total_kib(),
-        "vart": vart,
-        "xir": xir,
-        "graph_runner": graph_runner,
+        "python_runtime": python_runtime,
         "xdputil": xdputil,
         "camera_nodes": cameras,
         "xmodel": str(arguments.xmodel) if arguments.xmodel else None,
@@ -125,9 +135,7 @@ def main() -> int:
         bool(device_nodes),
         bool(device_files),
         cma_total_kib() not in (None, 0),
-        bool(vart["available"]),
-        bool(xir["available"]),
-        bool(graph_runner["available"]),
+        bool(python_runtime["ok"]),
         bool(xdputil.get("available")) and xdputil.get("returncode") == 0,
         model_ok,
     ]

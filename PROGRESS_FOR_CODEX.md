@@ -1101,3 +1101,8 @@
 - Corrected `write_pynq_zu_single_camera_sd.ps1` default image path and expected SHA-256 to the Python-modules WIC (`1c1604a7d60febe5e028e4ee64513be971a80f1f061a82caa1c25f480b6255ec`), with a red/green writer identity regression. PowerShell parser PASS. This prevents a future default invocation from silently choosing the superseded WIC.
 - The repository already contains the two-board TCP metadata protocol, Wi-Fi preflight and sender retry contracts. Their local tests pass, but neither board-to-board Wi-Fi association nor a second physical board has been tested, so no actual peer exchange is claimed.
 
+### 2026-11-13：板端 DPU acceptance gate 現在會拒絕缺 NumPy/OpenCV 的系統
+
+- `verify_dpu_runtime.py` now exposes one `python_runtime` report covering NumPy, OpenCV, VART, XIR and GraphRunner, and includes all of them in its PASS condition. A test first demonstrated that an unavailable `cv2` binding must make the report fail; focused suite is 4/4 and full Linux suite is 27/27 PASS.
+- Updated the Linux README to reflect the actual state: a DPU SD image has booted, the first image has a Python dependency defect, and the external 2022.1 build host exists. Earlier wording that said the DPU image was not deployed or that only PetaLinux 2024.1 was installed is obsolete and was removed.
+

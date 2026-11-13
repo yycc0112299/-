@@ -43,7 +43,11 @@ class FakeDetector:
 
     def detect(self, frame):
         self.shapes.append(frame.shape)
-        return [{"box": [1, 2, 10, 20], "confidence": 0.9}]
+        return [{
+            "box": [1, 2, 10, 20],
+            "confidence": 0.9,
+            "hist": np.full(96, 1 / 96, dtype=np.float32),
+        }]
 
 
 class PynqYoloV8DpuInferenceTests(unittest.TestCase):
@@ -54,7 +58,7 @@ class PynqYoloV8DpuInferenceTests(unittest.TestCase):
 
         summary = module.run_camera_inference(capture, detector, frames=3)
 
-        self.assertEqual(summary, {"frames": 3, "detections": 3})
+        self.assertEqual(summary, {"frames": 3, "detections": 3, "track_ids": 1})
         self.assertEqual(detector.shapes, [(240, 320, 3)] * 3)
         self.assertTrue(capture.released)
 

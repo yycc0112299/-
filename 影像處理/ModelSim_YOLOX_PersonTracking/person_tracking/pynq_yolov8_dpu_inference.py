@@ -47,20 +47,25 @@ def open_camera(index: int, width: int, height: int, fps: float) -> Any:
     return capture
 
 
-def run_camera_inference(capture: Any, detector: Any, *, frames: int) -> dict[str, int]:
-    """Read exactly ``frames`` images and require GraphRunner detection for each one."""
+def run_camera_inference(capture: Any, detector: Any, *, frames: int,
+                         tracker: Any | None = None) -> dict[str, int]:
+    """Track every GraphRunner result from exactly ``frames`` UVC images."""
     if frames < 1:
         raise ValueError("frames must be positive")
+    tracker = tracker or pipeline.Tracker()
     detected = 0
+    track_ids: set[int] = set()
     try:
         for _ in range(frames):
             ok, frame = capture.read()
             if not ok or frame is None:
                 raise RuntimeError("camera did not return a frame")
-            detected += len(detector.detect(frame))
+            detections = detector.detect(frame)
+            detected += len(detections)
+            track_ids.update(int(item["track_id"]) for item in tracker.update(detections))
     finally:
         capture.release()
-    return {"frames": frames, "detections": detected}
+    return {"frames": frames, "detections": detected, "track_ids": len(track_ids)}
 
 
 def main() -> int:
@@ -84,7 +89,8 @@ def main() -> int:
     model_hash = hashlib.sha256(xmodel.read_bytes()).hexdigest()
     print(
         "PYNQ_YOLOV8_DPU_CAMERA_PASS "
-        f"frames={summary['frames']} detections={summary['detections']} xmodel_sha256={model_hash}"
+        f"frames={summary['frames']} detections={summary['detections']} "
+        f"track_ids={summary['track_ids']} xmodel_sha256={model_hash}"
     )
     return 0
 

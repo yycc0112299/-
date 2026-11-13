@@ -72,10 +72,11 @@ powershell -NoProfile -ExecutionPolicy Bypass -File ".\影像處理\ModelSim_YOL
 ```
 
 The DPU verification uses one UVC camera, captures three frames and submits each
-through the full original YOLOv8 GraphRunner graph. `PYNQ_YOLOV8_DPU_CAMERA_PASS`
-means frame-to-GraphRunner execution succeeded; zero detections are valid for an
-empty scene and are not a person-recognition claim. This does not remove the
-separate two-C270 simultaneous-capture gate or prove two-board Wi-Fi exchange.
+through the full original YOLOv8 GraphRunner graph, then feeds detections into
+the project's existing single-camera Tracker. `PYNQ_YOLOV8_DPU_CAMERA_PASS`
+reports both detections and unique tracker IDs; zero remains valid for an empty
+scene and is not a person-recognition claim. This does not remove the separate
+two-C270 simultaneous-capture gate or prove two-board Wi-Fi exchange.
 
 ### 兩台電腦協作
 

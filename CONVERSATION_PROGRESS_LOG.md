@@ -955,3 +955,10 @@
 - 驗證範圍／未完成：no removable SD is present; no disk selection, formatting, write, SD boot, board runtime or camera/DPU inference occurred. The file is an external generated artifact and is not committed to Git.
 - Git／同步：progress records for this export are to be committed and pushed to `origin/main`; `petalinux_installation_log` remains intentionally untracked.
 
+## 2026-11-13 — Prepared first-stage single-camera DPU person tracking
+
+- 需求／決策：the first hardware milestone is now one PYNQ-ZU and one UVC camera; two boards with one camera each and Wi-Fi exchange remain the later topology.
+- 實際完成：the target GraphRunner camera gate now passes each YOLOv8 detection list through the existing Tracker and reports unique track IDs. Test-first fake-camera regression covers frame execution, association and capture failure; the full person-tracking suite passed 34/34.
+- 驗證範圍／未完成：no WIC write or target boot has occurred, so this remains target-code/host-test evidence, not DPU inference, person tracking or camera hardware proof. The external WIC and model remain untracked.
+- Git／同步：program, test, README and all progress records are to be committed and pushed to `origin/main` together.
+

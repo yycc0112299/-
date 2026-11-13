@@ -1048,3 +1048,9 @@
 - External WIC was copied without alteration to `C:\pynq_zu_dpu_2022_20261113\sd_image_20261113\pynq_zu_dpu_yolov8_usb_2022_1.wic` (6,442,455,040 bytes). Copy-side SHA-256 is `a4acc61f63febb28ab343f38c53b84ef7167e941888015c54d7a27ec0c7b914e`, equal to the verified PetaLinux source WIC.
 - Read-only Windows disk inventory shows only fixed disks (2 TB WDC and 512 GB Micron), no removable SD target. No disk was initialized, formatted, selected or written. The WIC is therefore ready for Etcher/a carefully selected removable disk, but no physical-media or board boot claim is made.
 
+### 2026-11-13：第一階段改為一板一鏡頭的 DPU YOLOv8 人物追蹤
+
+- Updated objective clarifies that first hardware stage is one PYNQ-ZU plus one camera and single-camera person tracking; the second board/Wi-Fi metadata exchange remains a later phase. This matches the empirical constraint that two C270 cameras on the current shared USB topology did not sustain concurrent frames, but does not erase that original two-camera evidence or claim the later topology complete.
+- `person_tracking/pynq_yolov8_dpu_inference.py` now sends each successful GraphRunner detection list through existing `pipeline.Tracker`, tracks unique IDs and prints them in `PYNQ_YOLOV8_DPU_CAMERA_PASS`. Test-first contract covers three V4L2-like frames, tracker association, GraphRunner environment selection and early capture failure. Full person-tracking suite remains 34/34 PASS.
+- Verification boundary: this is a deployable target-side code path and host fake-device proof only. It has not yet run on the PYNQ-ZU because the matching WIC is not written/booted; it is not camera, DPU, person or tracker hardware evidence.
+

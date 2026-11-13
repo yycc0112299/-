@@ -210,12 +210,13 @@ boot-image test, or board-side inference result.
 ## Controlled Windows SD writer
 
 The current first-stage image is the externally generated
-`C:\pynq_zu_dpu_2022_20261113\sd_image_20261113\pynq_zu_dpu_single_camera_tracker_fusion_2022_1.wic`.
+`C:\pynq_zu_dpu_2022_20261113\sd_image_20261113\pynq_zu_dpu_single_camera_tracker_fusion_acceptance_2022_1.wic`.
 Its required SHA-256 is
-`b7e42696ee3d6deedb7b53e7bc990d2cc1a04b368960373670e9e0d4882028c5`.
+`02627acaef390c72b6641ae2b94b3466b6b3d0769b168c8654616230cf7a52e7`.
 It supersedes every earlier exported WIC because it contains the compiled
 model, target-side single-camera tracker, and the future two-board metadata
-and conservative cross-camera-candidate runtime.
+and conservative cross-camera-candidate runtime, including the board-side
+`verify_dpu_runtime.py` acceptance gate.
 
 `write_pynq_zu_single_camera_sd.ps1` is deliberately unable to guess a
 destination. It requires an explicit Windows disk number and an erase

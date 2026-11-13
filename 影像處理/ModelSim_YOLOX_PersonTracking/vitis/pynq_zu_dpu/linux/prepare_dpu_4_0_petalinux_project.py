@@ -48,6 +48,16 @@ PROJECT_RUNTIME_SOURCE_FILES = (
     Path("person_tracking") / "assets" / "yolov8.py",
     Path("person_tracking") / "assets" / "yolov8_vart.py",
 )
+# Most files retain their project-relative paths in the rootfs.  The board-side
+# acceptance gate belongs beside the runnable tracking scripts even though its
+# maintained source lives with the PetaLinux tooling.
+PROJECT_RUNTIME_SOURCE_MAPPINGS = (
+    *((relative, relative) for relative in PROJECT_RUNTIME_SOURCE_FILES),
+    (
+        Path("vitis") / "pynq_zu_dpu" / "linux" / "verify_dpu_runtime.py",
+        Path("person_tracking") / "verify_dpu_runtime.py",
+    ),
+)
 USB_CAMERA_KERNEL_CONFIG = (
     "CONFIG_USB_SUPPORT=y",
     "CONFIG_USB=y",
@@ -186,14 +196,14 @@ def _stage_project_runtime(meta_user: Path, runtime_source: Path) -> dict[str, o
     source_uris: list[str] = []
     install_lines: list[str] = []
     file_hashes: dict[str, str] = {}
-    for relative in PROJECT_RUNTIME_SOURCE_FILES:
-        source = runtime_source / relative
+    for source_relative, target_relative in PROJECT_RUNTIME_SOURCE_MAPPINGS:
+        source = runtime_source / source_relative
         if not source.is_file():
             raise ValueError(f"PYNQ YOLOv8 runtime source is missing: {source}")
-        destination = files_dir / relative
+        destination = files_dir / target_relative
         destination.parent.mkdir(parents=True, exist_ok=True)
         shutil.copyfile(source, destination)
-        posix = relative.as_posix()
+        posix = target_relative.as_posix()
         source_uris.append(f"file://{posix}")
         target = f"{PROJECT_RUNTIME_TARGET_ROOT}/{posix}"
         install_lines.extend([

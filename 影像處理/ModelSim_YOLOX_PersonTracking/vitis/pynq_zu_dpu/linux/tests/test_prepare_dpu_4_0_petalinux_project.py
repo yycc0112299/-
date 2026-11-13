@@ -20,6 +20,12 @@ def load_module():
 
 
 class PrepareDpu40PetaLinuxProjectTests(unittest.TestCase):
+    def test_runtime_recipe_maps_the_board_acceptance_gate_into_person_tracking(self) -> None:
+        module = load_module()
+        source = Path("vitis") / "pynq_zu_dpu" / "linux" / "verify_dpu_runtime.py"
+        target = Path("person_tracking") / "verify_dpu_runtime.py"
+        self.assertIn((source, target), module.PROJECT_RUNTIME_SOURCE_MAPPINGS)
+
     def test_runtime_recipe_stages_cross_camera_fusion_dependencies(self) -> None:
         module = load_module()
         expected = {
@@ -202,18 +208,18 @@ class PrepareDpu40PetaLinuxProjectTests(unittest.TestCase):
             project = root / "project"
             (project / "project-spec" / "meta-user" / "conf").mkdir(parents=True)
             runtime = root / "runtime"
-            for relative in module.PROJECT_RUNTIME_SOURCE_FILES:
-                source = runtime / relative
+            for source_relative, target_relative in module.PROJECT_RUNTIME_SOURCE_MAPPINGS:
+                source = runtime / source_relative
                 source.parent.mkdir(parents=True, exist_ok=True)
-                source.write_text(f"# {relative.as_posix()}\n", encoding="utf-8")
+                source.write_text(f"# {source_relative.as_posix()}\n", encoding="utf-8")
 
             manifest = module.stage_reference(project, official, runtime_source=runtime)
 
             package_dir = (project / "project-spec" / "meta-user" / "recipes-apps" /
                            "pynq-yolov8-runtime")
-            for relative in module.PROJECT_RUNTIME_SOURCE_FILES:
-                self.assertEqual((package_dir / "files" / relative).read_text(encoding="utf-8"),
-                                 f"# {relative.as_posix()}\n")
+            for source_relative, target_relative in module.PROJECT_RUNTIME_SOURCE_MAPPINGS:
+                self.assertEqual((package_dir / "files" / target_relative).read_text(encoding="utf-8"),
+                                 f"# {source_relative.as_posix()}\n")
             recipe = (package_dir / "pynq-yolov8-runtime.bb").read_text(encoding="utf-8")
             self.assertIn('LICENSE = "CLOSED"', recipe)
             self.assertIn("/opt/pynq-yolov8/person_tracking/pynq_yolov8_dpu_inference.py", recipe)

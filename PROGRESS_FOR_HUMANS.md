@@ -963,3 +963,8 @@
 - 新檔是 `pynq_zu_dpu_single_camera_tracker_fusion_2022_1.wic`，已完成大小與 SHA-256 核對；寫卡工具也只會預設使用它。
 - 仍未碰 SD 卡或板子，所以相機、DPU 推論、Wi-Fi 與人物追蹤都還不能說實機完成。
 
+## 2026-11-14：最終映像也已放入板端檢查程式
+
+- 最後檢查發現原本的映像沒有放入第一步要執行的 DPU 檢查程式；已修正並再建置一次。
+- 現在寫卡工具只會指向 `pynq_zu_dpu_single_camera_tracker_fusion_acceptance_2022_1.wic`，確保開機後能直接驗證 DPU、Python、模型與相機條件。
+

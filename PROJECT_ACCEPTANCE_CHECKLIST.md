@@ -8,8 +8,8 @@
 | 硬體架構 | USB 鏡頭介面責任劃分 | PASS（設計） | USB UVC 走 Zynq PS MIO/USB，非 PL/MIPI 腳位；介面地圖已納入 `fpga/PYNQ_ZU_DPU_USB_CAMERA_INTERFACE.md`。 |
 | Vivado | PYNQ-ZU DPU B512 Block Design | PASS（建置／JTAG） | PS、AXI、DDR HP ports、clock/reset、IRQ 已建置；JTAG 實測 bitstream startup 成功。 |
 | Vitis | 2022.1 XSA → XPFM handoff | PASS | 同一份 DPU XSA 已產生 Vitis 2022.1 platform；Linux DPU 推論不需額外 bare-metal inference ELF。 |
-| PetaLinux | 2022.1 DPU Linux、VART/XIR、模型與 UVC | READY | 新 WIC 含 DPU runtime、模型、追蹤程式、Python modules 與 fusion runtime；rootfs pre-flash gate PASS。 |
-| 下一版 PetaLinux | 兩板 fusion runtime source staging | PASS（映像內容） | 6,385-task rebuild PASS；新 WIC 已匯出並以 SHA-256 核對，尚未寫入 SD。 |
+| PetaLinux | 2022.1 DPU Linux、VART/XIR、模型與 UVC | READY | final WIC 含 DPU runtime、模型、追蹤程式、Python modules、fusion runtime 與 board acceptance gate；rootfs pre-flash gate PASS。 |
+| 下一版 PetaLinux | 兩板 fusion runtime source staging | PASS（映像內容） | final 6,385-task rebuild PASS；WIC 已匯出並以 SHA-256 核對，尚未寫入 SD。 |
 | SD | 修正版映像寫入 SD | BLOCKED | 需把 SD 卡插回這台電腦；寫入工具已鎖定 fusion WIC 與 SHA-256。 |
 | 單板 Linux | SD 開機與 UART 登入 | PASS（舊映像） | 已從 SD 開到 `pynqzudpu20221` UART login；修正版仍待寫卡。 |
 | 單板 DPU | NumPy/OpenCV/VART/XIR/GraphRunner 實際 import | BLOCKED | 修正版 SD 開機後跑 `verify_dpu_runtime.py`；舊映像因缺 Python `json` 未通過。 |

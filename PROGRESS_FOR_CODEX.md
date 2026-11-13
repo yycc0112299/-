@@ -1151,3 +1151,9 @@
 - Exported artifact: `C:\pynq_zu_dpu_2022_20261113\sd_image_20261113\pynq_zu_dpu_single_camera_tracker_fusion_2022_1.wic`; size `6,442,455,040` bytes; SHA-256 `b7e42696ee3d6deedb7b53e7bc990d2cc1a04b368960373670e9e0d4882028c5`. `write_pynq_zu_single_camera_sd.ps1` now defaults to, and hash-gates, exactly this file.
 - Verification boundary: archive/package evidence only. No SD write, target boot, camera capture, DPU inference or Wi-Fi exchange occurred in this change.
 
+### 2026-11-14：final WIC 已包含板端 DPU acceptance gate
+
+- Deployment audit found `verify_dpu_runtime.py` was referenced as the first board-side acceptance command but was not installed in the prior runtime recipe. `PROJECT_RUNTIME_SOURCE_MAPPINGS` now preserves normal project-relative file paths while mapping the maintained Linux gate to `/opt/pynq-yolov8/person_tracking/verify_dpu_runtime.py`. Test-first mapping regression passes.
+- The external PetaLinux project was restaged and incrementally rebuilt: 6,385 tasks, all succeeded. Rootfs archive inspection confirms the acceptance script at its target path; the existing rootfs runtime gate still PASSes. The exported final artifact is `C:\pynq_zu_dpu_2022_20261113\sd_image_20261113\pynq_zu_dpu_single_camera_tracker_fusion_acceptance_2022_1.wic`, 6,442,455,040 bytes, SHA-256 `02627acaef390c72b6641ae2b94b3466b6b3d0769b168c8654616230cf7a52e7`.
+- `write_pynq_zu_single_camera_sd.ps1` now safely defaults to this exact final WIC. The earlier fusion WIC remains an external historical artifact but must not be selected by default. This remains image-content proof only, not an SD/board/camera/DPU/Wi-Fi result.
+

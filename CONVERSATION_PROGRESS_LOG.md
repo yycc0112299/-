@@ -934,3 +934,10 @@
 - 驗證範圍／未完成：the corrected build is live; no successful UVC image, SD write, target boot or camera frame capture is claimed yet. Failed build logs and later artifacts remain external.
 - Git／同步：source/test/README and progress documentation will be committed and pushed to `main`; no generated images or logs are tracked.
 
+## 2026-11-13 — Rebuilt and verified the final UVC-capable DPU SD image
+
+- 需求／決策：完成可自動執行的 PetaLinux work, while retaining physical SD selection/writing and boot as explicit manual gates.
+- 實際完成：corrected dual-role DWC3 build completed 6,355/6,355 tasks successfully. Actual kernel config confirms built-in Xilinx DWC3 dual-role, V4L2 and UVC symbols. `petalinux-package --boot` and `--wic` produced external `BOOT.BIN` and a 6.1 GiB WIC; read-only partition inspection verified FAT32 boot plus ext4 rootfs and the boot files. Final package manifest includes VART, XIR, Vitis AI Library, NumPy and Python OpenCV.
+- 驗證範圍／未完成：image composition only; no physical SD write, SD boot, target DPU device, GraphRunner import, UVC frame, YOLOv8 inference, two-camera concurrency or Wi-Fi peer is claimed. External artifacts/logs remain outside Git; `petalinux_installation_log` remains intentionally untracked.
+- Git／同步：the staging helper/test/README and all three progress records are to be committed and pushed to `origin/main` in this change.
+

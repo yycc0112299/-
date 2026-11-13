@@ -849,3 +849,9 @@
 - 第一次完整重建發現 Xilinx kernel 的 USB host-only 設定有連結錯誤，因此沒有採用那個失敗成果。
 - 已改用仍支援 host 的 USB dual-role 設定，現在正在重新完整編譯；尚未結束前，舊 SD 映像不應拿來宣稱可讀取相機。
 
+## 2026-11-13：含 USB 相機驅動的最終 SD 映像已完成
+
+- USB/DWC3 的修正後重建已完全成功，新的 DPU Linux 映像已同時包含 DPU runtime、GraphRunner 所需套件、NumPy、OpenCV，以及 C270 所需的 UVC/V4L2 驅動。
+- 已重新產生 6.1 GB 的 SD 映像，並確認開機分割區有 `BOOT.BIN`、`boot.scr`、`image.ub`。
+- 還沒有寫入任何實體 SD 卡，也沒有讓板子用新映像開機；因此相機、DPU、YOLOv8 的實機結果尚未完成。下一個需要人在場的步驟是明確確認要覆寫的 SD 卡後再寫入。
+

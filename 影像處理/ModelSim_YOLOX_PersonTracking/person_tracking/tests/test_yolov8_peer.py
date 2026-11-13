@@ -2,6 +2,7 @@
 
 from pathlib import Path
 import sys
+import tempfile
 import unittest
 
 import numpy as np
@@ -11,10 +12,21 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
 import peer_protocol
-from pynq_yolov8_peer import build_packet, send_packet_with_retry
+from pynq_yolov8_peer import build_packet, configure_dpu_backend, send_packet_with_retry
 
 
 class YoloV8PeerTests(unittest.TestCase):
+    def test_dpu_model_selects_graph_runner_without_cpu_onnx_fallback(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            xmodel = Path(temporary) / "yolov8n_b512.xmodel"
+            xmodel.write_bytes(b"compiled")
+            environment: dict[str, str] = {}
+            backend = configure_dpu_backend(xmodel, environment)
+        self.assertEqual(backend, "yolov8_vart")
+        self.assertEqual(environment["PERSON_DETECTOR"], "yolov8_vart")
+        self.assertEqual(environment["PYNQ_VART_GRAPH_RUNNER"], "1")
+        self.assertTrue(environment["PYNQ_VART_XMODEL"].endswith("yolov8n_b512.xmodel"))
+
     def test_build_packet_uses_tracked_persons_and_live_dimensions(self) -> None:
         frame = np.zeros((240, 320, 3), dtype=np.uint8)
         packet = build_packet(

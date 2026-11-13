@@ -929,3 +929,8 @@
 
 - DPU 檢查中的 `xdputil query` 現在最多等十秒；若 DPU driver 沒有回應，會清楚回報失敗而不是讓 UART 無限卡住。
 
+## 2026-11-13：兩塊板未來會明確使用 DPU 模型
+
+- 兩板傳送程式現在有 `--dpu-xmodel`；使用它會強制選擇 DPU/GraphRunner 的 YOLOv8，不會默默改跑需要 ONNX 的 CPU 模型。
+- Wi‑Fi、第二塊板與兩台相機尚未實測，這次是先把未來的啟動程式與測試準備正確。
+

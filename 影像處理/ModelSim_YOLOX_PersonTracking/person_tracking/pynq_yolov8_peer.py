@@ -8,12 +8,25 @@ project's default YOLOv8 backend unless ``PERSON_DETECTOR`` is explicitly set.
 from __future__ import annotations
 
 import argparse
+import os
 import time
+from pathlib import Path
 
 import cv2
 
 import peer_protocol
 import pipeline
+
+
+def configure_dpu_backend(xmodel: Path, environment: dict[str, str] = os.environ) -> str:
+    """Select the original GraphRunner graph, never the CPU ONNX fallback."""
+    xmodel = xmodel.resolve()
+    if xmodel.suffix != ".xmodel" or not xmodel.is_file() or xmodel.stat().st_size == 0:
+        raise FileNotFoundError(f"compiled DPU xmodel is missing or empty: {xmodel}")
+    environment["PERSON_DETECTOR"] = "yolov8_vart"
+    environment["PYNQ_VART_XMODEL"] = str(xmodel)
+    environment["PYNQ_VART_GRAPH_RUNNER"] = "1"
+    return "yolov8_vart"
 
 
 def build_packet(board_id, frame_id, capture_monotonic_ns, frame, tracked):
@@ -93,6 +106,8 @@ def main() -> None:
                         help="TCP attempts for each captured metadata packet")
     parser.add_argument("--retry-delay", type=float, default=.5,
                         help="seconds between retry attempts after a TCP failure")
+    parser.add_argument("--dpu-xmodel", type=Path,
+                        help="run the original GraphRunner/DPU YOLOv8 model from this .xmodel")
     parser.add_argument("--frames", type=int, default=0,
                         help="0 streams forever; a positive count sends that many frames")
     args = parser.parse_args()
@@ -101,7 +116,8 @@ def main() -> None:
         parser.error("invalid camera, dimensions, or port")
     if args.frames < 0:
         parser.error("--frames must be zero or positive")
-    detector = pipeline.Detector()
+    backend = configure_dpu_backend(args.dpu_xmodel) if args.dpu_xmodel else None
+    detector = pipeline.Detector(backend)
     tracker = pipeline.Tracker()
     capture = open_camera(args.camera, args.width, args.height, args.fps)
     sent = 0

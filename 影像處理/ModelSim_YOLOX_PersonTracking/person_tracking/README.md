@@ -107,15 +107,21 @@ same person-packet schema.
 
 ## Two-board detection packets
 
-`pynq_yolov8_peer.py` captures exactly one C270 per board, calls the default
+`pynq_yolov8_peer.py` captures exactly one C270 per board, calls the selected
 YOLOv8/tracker pipeline, and sends compact person metadata through
 `peer_protocol.py`; it never transfers raw frames. On board A, run a receiver
 on board B first, then run:
 
 ```sh
 python3 person_tracking/pynq_yolov8_peer.py \
-  --board-id pynq-a --peer-host <board-b-wifi-ip> --camera 0
+  --board-id pynq-a --peer-host <board-b-wifi-ip> --camera 0 \
+  --dpu-xmodel /opt/models/yolov8n_b512.xmodel
 ```
+
+`--dpu-xmodel` is the required DPU-mode switch: it validates the nonempty
+`.xmodel`, selects `PERSON_DETECTOR=yolov8_vart`, and sets the GraphRunner
+environment. Omitting it preserves the CPU development path and therefore
+requires its ONNX model; it must not be used for the DPU-only SD deployment.
 
 For a finite bring-up run use `--frames 1`. The board-side loopback test has
 verified one C270 frame through YOLOv8, tracker, TCP framing and strict schema
@@ -166,10 +172,12 @@ address. Only after both gates pass, start one sender on each board:
 ```sh
 # Board A: its own camera and board B's address
 python3 person_tracking/pynq_yolov8_peer.py \
-  --board-id pynq-a --camera <camera-index-on-a> --peer-host <board-b-ip>
+  --board-id pynq-a --camera <camera-index-on-a> --peer-host <board-b-ip> \
+  --dpu-xmodel /opt/models/yolov8n_b512.xmodel
 # Board B: its own camera and board A's address
 python3 person_tracking/pynq_yolov8_peer.py \
-  --board-id pynq-b --camera <camera-index-on-b> --peer-host <board-a-ip>
+  --board-id pynq-b --camera <camera-index-on-b> --peer-host <board-a-ip> \
+  --dpu-xmodel /opt/models/yolov8n_b512.xmodel
 ```
 
 This creates bidirectional metadata exchange, not raw-video streaming. Use

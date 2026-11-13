@@ -1115,3 +1115,8 @@
 
 - The first board probe showed `xdputil query` can fail to return. `verify_dpu_runtime.py` now bounds command probes and specifically gives `xdputil query` ten seconds; a timeout returns structured `timed_out: true` data and makes the runtime gate fail rather than holding the UART workflow indefinitely. Test-first timeout coverage passes; focused gate tests are 5/5 and Linux suite is 28/28 PASS.
 
+### 2026-11-13：兩板 sender 現可明確選用 DPU GraphRunner
+
+- `person_tracking/pynq_yolov8_peer.py` now accepts `--dpu-xmodel`. It validates the supplied nonempty `.xmodel`, sets `PERSON_DETECTOR=yolov8_vart`, `PYNQ_VART_XMODEL` and `PYNQ_VART_GRAPH_RUNNER=1`, then constructs the DPU backend. This prevents the future DPU deployment bundle from silently selecting its CPU ONNX default.
+- Test-first coverage verifies all three environment selections and no CPU fallback; person-tracking suite is 35/35 PASS. The full-duplex two-board README commands now pass `/opt/models/yolov8n_b512.xmodel` explicitly. This remains code/loopback coverage only: no second board, Wi-Fi association or two-board DPU/camera result exists.
+

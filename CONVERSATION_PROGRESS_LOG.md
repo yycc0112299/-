@@ -1018,6 +1018,13 @@
 - 驗證範圍／未完成：host test only. The timeout behavior must still be observed on the corrected SD image; no DPU query success, camera frame or inference result is claimed.
 - Git／同步：source, test, README and progress records are committed and pushed to `main` in this change.
 
+## 2026-11-13 — Made the two-board sender select DPU GraphRunner explicitly
+
+- 需求／決策：prepare the future one-camera-per-board Wi-Fi path so a DPU deployment cannot silently run the CPU ONNX fallback.
+- 實際完成：added `--dpu-xmodel` to `pynq_yolov8_peer.py`; it validates the model and sets the VART/GraphRunner environment before creating the detector. Test-first coverage passes and the tracking suite is 35/35. Two-board README startup commands now select `/opt/models/yolov8n_b512.xmodel` explicitly.
+- 驗證範圍／未完成：local code and loopback tests only; no corrected-SD boot, second board, authorized Wi-Fi association, UVC frame or cross-board DPU result is claimed.
+- Git／同步：source, test, README and progress records are committed and pushed to `main` in this change.
+
 ## 2026-11-13 — Replaced unsupported removable-disk offlining with safe volume locking
 
 - 需求／決策：address the actual elevated SD-writer errors without widening the destructive target scope.

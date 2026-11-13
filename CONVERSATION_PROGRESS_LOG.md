@@ -920,3 +920,10 @@
 - 驗證範圍／未完成：image package contents only. No physical SD write, SD boot, target Python imports, `/dev/dpu`, UVC capture or YOLOv8 inference occurred. Generated WIC/rootfs remain external.
 - Git／同步：helper, test, Linux README and the three progress documents will be committed and pushed to `main`; local `petalinux_installation_log` remains intentionally untracked.
 
+## 2026-11-13 — Staged USB/UVC camera support for the DPU Linux kernel
+
+- 需求／決策：the new image must support the requested USB C270 camera path, not only DPU runtime and Python packages.
+- 實際完成：rootfs/kernel audit revealed no UVC/V4L2 config in the prior image. A test-first staging change adds built-in PS USB host/DWC3, media/V4L2 and UVC configuration. The test correctly failed before implementation, then Linux suite passed 14/14. The external generated kernel config confirms all required core symbols are enabled; a full kernel/image rebuild has started.
+- 驗證範圍／未完成：rebuild remains live at this record; no new WIC, physical SD write, target boot or camera frame capture is claimed. The result will be separately verified after the live build terminates.
+- Git／同步：helper/test/README/progress changes will be committed and pushed to `main`; external build logs and artifacts remain untracked.
+

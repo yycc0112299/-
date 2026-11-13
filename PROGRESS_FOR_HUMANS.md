@@ -843,3 +843,9 @@
 - 已檢查新版映像內有 ARM64 NumPy 與 OpenCV Python 模組，現在具備執行相機影格處理加 GraphRunner 的軟體相依條件。
 - 仍需將新版映像寫入 SD、讓板子從 SD 開機後，才能實測相機→DPU→YOLOv8。
 
+## 2026-11-13：正在把 USB 相機驅動加入 kernel
+
+- 檢查發現映像還沒有啟用 C270 所需的 USB/UVC 相機 kernel driver，因此已補上設定。
+- 最終 kernel config 已確認會啟用 USB host、V4L2 與 UVC；完整 kernel/image 正在重建。
+- 重建尚未結束前，舊 SD 映像不應拿來宣稱可讀取相機。
+

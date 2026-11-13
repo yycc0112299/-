@@ -106,6 +106,10 @@ device-tree addresses or boot assets, build an image, or touch the board. Run
 `petalinux-config --get-hw-description` against the exact PYNQ-ZU XSA before
 staging so the generated DPU node comes from this hardware.
 
+The helper also appends built-in PS USB host/DWC3, V4L2 and UVC options to the
+project kernel fragment. This is required for a C270 UVC camera to enumerate on
+the new image; it does not prove physical USB capture until the board boots it.
+
 From the repository's `ModelSim_YOLOX_PersonTracking` root, the tracked helper
 below extracts that file from a completed Vivado project:
 

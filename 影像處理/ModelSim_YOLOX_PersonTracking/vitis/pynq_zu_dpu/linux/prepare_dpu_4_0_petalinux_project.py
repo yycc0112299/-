@@ -27,6 +27,21 @@ PROJECT_PYTHON_RUNTIME_PACKAGES = (
     "python3-numpy",
     "python3-opencv",
 )
+USB_CAMERA_KERNEL_CONFIG = (
+    "CONFIG_USB_SUPPORT=y",
+    "CONFIG_USB=y",
+    "CONFIG_USB_DWC3=y",
+    "CONFIG_USB_DWC3_HOST=y",
+    "CONFIG_USB_DWC3_OF_SIMPLE=y",
+    "CONFIG_USB_DWC3_XILINX=y",
+    "CONFIG_MEDIA_SUPPORT=y",
+    "CONFIG_MEDIA_CAMERA_SUPPORT=y",
+    "CONFIG_MEDIA_USB_SUPPORT=y",
+    "CONFIG_VIDEO_DEV=y",
+    "CONFIG_VIDEO_V4L2=y",
+    "CONFIG_USB_VIDEO_CLASS=y",
+    "CONFIG_USB_VIDEO_CLASS_INPUT_EVDEV=y",
+)
 
 
 def _require_file(path: Path, description: str) -> None:
@@ -100,6 +115,17 @@ def _enable_vitis_ai_library_python(meta_user: Path) -> None:
     )
 
 
+def _enable_usb_camera_kernel(meta_user: Path) -> None:
+    """Enable the PS USB host/UVC camera path as built-in kernel support."""
+    config = meta_user / "recipes-kernel" / "linux" / "linux-xlnx" / "bsp.cfg"
+    current = config.read_text(encoding="utf-8")
+    lines = current.splitlines()
+    for option in USB_CAMERA_KERNEL_CONFIG:
+        if option not in lines:
+            lines.append(option)
+    config.write_text("\n".join(lines).rstrip() + "\n", encoding="utf-8")
+
+
 def stage_reference(project: Path, official_meta_user: Path) -> dict[str, object]:
     """Copy the exact DPU 4.0 runtime additions into one PetaLinux project."""
     project = project.resolve()
@@ -116,6 +142,7 @@ def stage_reference(project: Path, official_meta_user: Path) -> dict[str, object
             dirs_exist_ok=True,
         )
     _enable_vitis_ai_library_python(target_meta_user)
+    _enable_usb_camera_kernel(target_meta_user)
     _append_rootfs_packages(target_meta_user / "conf" / "user-rootfsconfig")
     _install_runtime_packages(target_meta_user)
 

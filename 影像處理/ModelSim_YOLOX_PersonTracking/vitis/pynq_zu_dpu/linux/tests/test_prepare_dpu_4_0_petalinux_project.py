@@ -66,6 +66,19 @@ class PrepareDpu40PetaLinuxProjectTests(unittest.TestCase):
             self.assertTrue(
                 (target_meta_user / "recipes-vitis-ai" / "xir" / "xir_2.5.bb").is_file()
             )
+            kernel_config = (
+                target_meta_user / "recipes-kernel" / "linux" / "linux-xlnx" /
+                "bsp.cfg"
+            ).read_text(encoding="utf-8")
+            for option in (
+                "CONFIG_USB_SUPPORT=y",
+                "CONFIG_USB_DWC3=y",
+                "CONFIG_USB_DWC3_XILINX=y",
+                "CONFIG_MEDIA_SUPPORT=y",
+                "CONFIG_MEDIA_USB_SUPPORT=y",
+                "CONFIG_USB_VIDEO_CLASS=y",
+            ):
+                self.assertIn(option, kernel_config)
             graph_runner_append = (
                 target_meta_user / "recipes-vitis-ai" / "vitis-ai-library" /
                 "vitis-ai-library_2.5.bbappend"

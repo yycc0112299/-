@@ -909,3 +909,9 @@
 - 進一步測試發現舊映像少了 Python 的 `json` 等標準庫，所以 NumPy/OpenCV 暫時不能啟動；這不是相機或 FPGA 壞掉。
 - 已修正並重建新版映像：`pynq_zu_dpu_single_camera_tracker_python_modules_2022_1.wic`。它已完成檔案與雜湊核對，但還需要重新寫入 SD 後，才可做真正的 YOLOv8 相機測試。
 
+## 2026-11-13：防止再寫入不完整的映像
+
+- 新增「燒卡前檢查」：它會直接讀 PetaLinux 的 rootfs，確認板端程式需要的 Python 標準庫、NumPy、OpenCV 與 DPU Python 套件真的都在裡面。
+- 寫卡工具現在預設只會選修正版 WIC，不會再自動指向缺 Python 模組的舊版。
+- 單板追蹤與未來兩板 Wi‑Fi 資料交換的程式測試都已在電腦上通過；仍不代表板子相機、DPU 或兩板 Wi‑Fi 已實機成功。
+

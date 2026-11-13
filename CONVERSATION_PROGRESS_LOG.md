@@ -990,6 +990,13 @@
 - 驗證範圍／未完成：the already-booted SD still carries the previous rootfs, so target Python/GraphRunner and camera inference are not yet valid. The corrected WIC must be written and booted, then DPU import and UVC/YOLOv8 tracker verification can run. No password, personal data, generated image or build log is added to Git; `petalinux_installation_log` remains untracked.
 - Git／同步：source/test/progress changes are committed and pushed to `main` in this change.
 
+## 2026-11-13 — Added a pre-flash rootfs Python dependency gate
+
+- 需求／決策：while physical SD access is unavailable, eliminate the exact class of image-content error found only after the first SD boot and prepare the already-written two-board protocol for later hardware work.
+- 實際完成：added `verify_pynq_zu_rootfs_runtime.py`, which parses the four target-installed runtime Python files and checks their standard-library plus native DPU/OpenCV/NumPy bindings in `rootfs.tar.gz`. Test-first contracts cover missing `json`, missing native bindings and exclusion of CPU-only project helpers. Actual corrected rootfs passes. Updated the guarded writer's default WIC and SHA-256 to `pynq_zu_dpu_single_camera_tracker_python_modules_2022_1.wic` / `1c1604a7d60febe5e028e4ee64513be971a80f1f061a82caa1c25f480b6255ec`; the writer identity test, Linux suite (26/26), tracking/TCP suite (34/34), and PowerShell parser pass.
+- 驗證範圍／未完成：archive and host-contract verification only. The new WIC has not been rewritten to the unavailable SD, booted, or run through target Python/DPU/camera verification. The two-board Wi-Fi protocol remains host-tested only; no network credentials, live peer or second board is claimed. Generated WIC/rootfs and `petalinux_installation_log` remain outside Git.
+- Git／同步：source, tests, documentation and the three progress records are committed and pushed to `main` in this change.
+
 ## 2026-11-13 — Replaced unsupported removable-disk offlining with safe volume locking
 
 - 需求／決策：address the actual elevated SD-writer errors without widening the destructive target scope.

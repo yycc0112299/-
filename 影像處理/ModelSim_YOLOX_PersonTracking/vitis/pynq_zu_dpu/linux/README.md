@@ -101,7 +101,7 @@ python3 prepare_dpu_4_0_petalinux_project.py \
 The helper validates the official `xlnx_dpu` 4.0-compatible patch and
 `CONFIG_XILINX_DPU=y`, then copies only the official kernel/Vitis-AI recipe
 trees into the external project. It appends the VART/XIR/unilog/target-factory
-rootfs selections and adds `python3-numpy` plus `python3-opencv` to the image
+rootfs selections and adds `python3-modules`, `python3-numpy` plus `python3-opencv` to the image
 without deleting existing user selections, writes a small manifest, and rejects
 every PetaLinux release other than 2022.1. It deliberately does not copy ZCU102
 device-tree addresses or boot assets, build an image, or touch the board. Run
@@ -137,6 +137,24 @@ python3 /opt/pynq-yolov8/person_tracking/pynq_yolov8_dpu_inference.py \
 It prints `PYNQ_YOLOV8_DPU_CAMERA_PASS` only after each captured frame has run
 through GraphRunner and the existing tracker. It is a runtime gate, not proof
 that a person was present when the scene has zero detections.
+
+## Pre-flash Python rootfs gate
+
+Before packaging or writing an SD image, inspect the built rootfs rather than
+assuming a named package pulled in all of its dependencies:
+
+```sh
+python3 verify_pynq_zu_rootfs_runtime.py \
+  --rootfs /work/pynq_zu_dpu_2022_1/images/linux/rootfs.tar.gz \
+  --runtime-source /path/to/ModelSim_YOLOX_PersonTracking/person_tracking
+```
+
+The tool parses exactly the four Python files installed by the target runtime
+recipe, checks their standard-library imports and required DPU bindings against
+the archive, and emits `PYNQ_ZU_ROOTFS_RUNTIME_PASS` only when they exist. It
+does not execute ARM code, validate `/dev/dpu`, test a camera, or replace the
+post-boot DPU runtime gate. It prevents a known pre-flash failure mode where
+NumPy/OpenCV were present but Python's `json` module was omitted.
 
 From the repository's `ModelSim_YOLOX_PersonTracking` root, the tracked helper
 below extracts that file from a completed Vivado project:
@@ -195,9 +213,9 @@ boot-image test, or board-side inference result.
 ## Controlled Windows SD writer
 
 The current first-stage image is the externally generated
-`C:\pynq_zu_dpu_2022_20261113\sd_image_20261113\pynq_zu_dpu_single_camera_tracker_2022_1.wic`.
+`C:\pynq_zu_dpu_2022_20261113\sd_image_20261113\pynq_zu_dpu_single_camera_tracker_python_modules_2022_1.wic`.
 Its required SHA-256 is
-`013f29c2f3feb8c0cf26b2f7f3987557905899d44b2157713cb0c9ae8e5791d6`.
+`1c1604a7d60febe5e028e4ee64513be971a80f1f061a82caa1c25f480b6255ec`.
 It supersedes every earlier exported WIC because it contains both the compiled
 model and the target-side single-camera tracker.
 

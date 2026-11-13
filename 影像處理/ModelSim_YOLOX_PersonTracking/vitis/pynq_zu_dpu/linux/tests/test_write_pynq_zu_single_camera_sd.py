@@ -13,7 +13,8 @@ class WritePynqZuSingleCameraSdTests(unittest.TestCase):
         for required in (
             "[int]$DiskNumber",
             "IUnderstandThisErasesDisk",
-            "013f29c2f3feb8c0cf26b2f7f3987557905899d44b2157713cb0c9ae8e5791d6",
+            "pynq_zu_dpu_single_camera_tracker_python_modules_2022_1.wic",
+            "1c1604a7d60febe5e028e4ee64513be971a80f1f061a82caa1c25f480b6255ec",
             "Get-FileHash",
             "Get-Disk -Number $DiskNumber",
             "IsBoot -or $disk.IsSystem",

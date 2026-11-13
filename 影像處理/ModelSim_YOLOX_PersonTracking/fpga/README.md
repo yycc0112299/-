@@ -217,3 +217,16 @@ DMA/RTL IRQ。
 payload 寫入順序受 `tests/test_video_control.c` 保護。本文所記錄的 BD 已
 `validate_bd_design`，但 XSA、bitstream、Vitis BSP/UVC driver、DDR DMA 和上板影像
 仍須分別成功驗證，不能據此宣稱 USB frame 已進入 FPGA。
+
+## 目前 DPU B512 的 JTAG 暫態驗證（2026-11-13）
+
+`program_pynq_zu_dpu_jtag.tcl` 是唯一針對目前原生 DPU B512 設計的 JTAG
+programmer。它只接受外部指定的 `.bit`，只選擇 PYNQ-ZU 的 `xczu5_0`，並在
+`program_hw_devices` 後確認 EOS。它不會載入早期 USB-video bare-metal ELF、不會
+reset PS、不會寫 SD、QSPI 或設定 Flash；斷電後配置消失。2026-11-13 實測以
+`C:\pynq_zu_dpu_2022_20261113\project\pynq_zu_dpu.runs\impl_1\pynq_zu_dpu_wrapper.bit`
+成功回報 `End of startup status: HIGH` 和 EOS=`1`。
+
+這項 JTAG 證據只證明 FPGA 可接受目前 bitstream。DPU 的 Linux device tree、driver、
+VART/GraphRunner、YOLOv8 和 UVC camera 都不在這個暫態 PL 操作內；那些驗證只能從
+matching SD image boot 後進行，不能以舊 Vitis standalone controller 取代。

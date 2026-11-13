@@ -878,3 +878,10 @@
 - 後續應選用 `C:\pynq_zu_dpu_2022_20261113\sd_image_20261113\pynq_zu_dpu_single_camera_tracker_2022_1.wic`。較早匯出的 WIC 少了這組內建追蹤程式，不要選它們。
 - 映像已完成建置與檔案核對，但尚未寫入 SD 或在板上測試，不能把它當作已完成相機或人物追蹤。
 
+## 2026-11-13：JTAG 能做的現行 DPU 工作已全部完成
+
+- 已重新用 Vivado 2022.1 掃描板子，確認現在確實是 JTAG 模式，並看得到 PYNQ-ZU FPGA (`xczu5_0`) 與 ARM debug target，沒有讀到 JTAG 錯誤。
+- 已把目前 DPU B512 的正確 bitstream 暫態載入 FPGA；Vivado 顯示啟動完成。這不是寫入 SD 或 Flash，關機後會消失。
+- Vitis 2022.1 的硬體平台檔也存在且已核對。因為 DPU YOLOv8 需要 Linux 的 VART/GraphRunner，沒有缺少一個應該在 JTAG 下跑的 Vitis 裸機推論程式；舊 USB-video 的裸機測試不能拿來套在現在的 DPU 設計上。
+- 所以現行設計沒有其他必須留在 JTAG 時做的步驟。下一個真正需要的階段是把最新版映像寫到 SD、關機切到 SD 後開機，才可驗證 Linux、相機和 YOLOv8；目前尚未寫卡，沒有把那些結果誤當完成。
+

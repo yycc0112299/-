@@ -191,3 +191,31 @@ cross-compiler can consume the matching target headers and libraries; it does
 not execute VART. `vart_link_smoke.cpp` deliberately supplies a null subgraph
 and must never be run on a target. It is not a model test, DPU driver test,
 boot-image test, or board-side inference result.
+
+## Controlled Windows SD writer
+
+The current first-stage image is the externally generated
+`C:\pynq_zu_dpu_2022_20261113\sd_image_20261113\pynq_zu_dpu_single_camera_tracker_2022_1.wic`.
+Its required SHA-256 is
+`013f29c2f3feb8c0cf26b2f7f3987557905899d44b2157713cb0c9ae8e5791d6`.
+It supersedes every earlier exported WIC because it contains both the compiled
+model and the target-side single-camera tracker.
+
+`write_pynq_zu_single_camera_sd.ps1` is deliberately unable to guess a
+destination. It requires an explicit Windows disk number and an erase
+acknowledgement, accepts only a USB or SD bus, rejects boot/system/read-only
+or undersized disks, verifies the image hash, and then leaves the written disk
+offline. It neither formats disks nor writes configuration flash. Run it only
+from an elevated PowerShell after separately reviewing the removable disk
+number:
+
+```powershell
+& .\write_pynq_zu_single_camera_sd.ps1 `
+  -DiskNumber <explicit-removable-disk-number> `
+  -IUnderstandThisErasesDisk
+```
+
+Use `-WhatIf` first for a no-write review. A successful raw write is still not
+a target proof: power down, move the PYNQ-ZU switch to SD, boot the card, then
+run `verify_dpu_runtime.py --xmodel /opt/models/yolov8n_b512.xmodel
+--require-camera` and the target tracker command above.

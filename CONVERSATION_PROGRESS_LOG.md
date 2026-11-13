@@ -969,3 +969,10 @@
 - 驗證範圍／未完成：all proof is build/rootfs content only. No SD write, target boot, DPU/GraphRunner import, camera frame, person detection or tracker result occurred. Earlier WIC exports are deliberately superseded for the current first-stage goal.
 - Git／同步：helper/test/README and progress records are to be committed and pushed to `origin/main`; external image/model/logs and `petalinux_installation_log` remain untracked.
 
+## 2026-11-13 — Completed the current DPU JTAG-only verification and prepared a guarded SD writer
+
+- 需求／決策：before asking the operator to leave JTAG mode for several days, exhaust every current-design action that is meaningful in JTAG and explicitly separate it from SD/Linux validation.
+- 實際完成：Vivado 2022.1 read-only scan found the expected JTAG chain (`xczu5_0`, `arm_dap_1`) in JTAG boot mode with no reported JTAG error. Added and test-protected a DPU-specific volatile programmer, then actually loaded the current B512 bitstream; Vivado reported end-of-startup HIGH and EOS=1. Rechecked the current XSA, DPU fingerprint and Vitis 2022.1 XPFM. Added a PowerShell raw-image writer that verifies the newest tracker WIC SHA-256, requires an explicit USB/SD disk number and acknowledgment, rejects system/boot/read-only/undersized disks, and leaves the target offline after writing. Its tests and parser pass.
+- 驗證範圍／未完成：JTAG proof is FPGA configuration only. No SD card was present or written; no SD boot, DPU device node, Linux VART/GraphRunner import, UVC frame, YOLOv8/person-tracker result or Wi-Fi exchange is claimed. The legacy USB-video bare-metal JTAG program was intentionally not used because it is a different hardware design.
+- Git／同步：the JTAG programmer, guarded writer, tests and documentation are to be committed and pushed to `origin/main`; external build outputs and the intentional `petalinux_installation_log` remain untracked.
+

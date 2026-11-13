@@ -12,6 +12,7 @@
 | 下一版 PetaLinux | 兩板 fusion runtime source staging | PASS（映像內容） | final 6,385-task rebuild PASS；WIC 已匯出並以 SHA-256 核對，尚未寫入 SD。 |
 | SD | 修正版映像寫入 SD | BLOCKED | 需把 SD 卡插回這台電腦；寫入工具已鎖定 fusion WIC 與 SHA-256。 |
 | 單板 Linux | SD 開機與 UART 登入 | PASS（舊映像） | 已從 SD 開到 `pynqzudpu20221` UART login；修正版仍待寫卡。 |
+| 單板 Linux | final rootfs AArch64 Python imports | PASS（QEMU） | QEMU 實跑 final rootfs：NumPy、OpenCV、VART、XIR 與部署程式 imports PASS；不含 `/dev/dpu`／相機證明。 |
 | 單板 DPU | NumPy/OpenCV/VART/XIR/GraphRunner 實際 import | BLOCKED | 修正版 SD 開機後跑 `verify_dpu_runtime.py`；舊映像因缺 Python `json` 未通過。 |
 | 單板鏡頭 | UVC/V4L2 讀取一支 USB 鏡頭 | BLOCKED | 修正版 SD 開機且接上鏡頭後確認 `/dev/video*`、讀取影格。 |
 | 單板 YOLOv8 | GraphRunner → DPU → YOLOv8 人物偵測＋Tracker | BLOCKED | 修正版 SD 開機後執行 `pynq_yolov8_dpu_inference.py --frames 3`。 |

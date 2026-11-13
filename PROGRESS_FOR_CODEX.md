@@ -1157,3 +1157,9 @@
 - The external PetaLinux project was restaged and incrementally rebuilt: 6,385 tasks, all succeeded. Rootfs archive inspection confirms the acceptance script at its target path; the existing rootfs runtime gate still PASSes. The exported final artifact is `C:\pynq_zu_dpu_2022_20261113\sd_image_20261113\pynq_zu_dpu_single_camera_tracker_fusion_acceptance_2022_1.wic`, 6,442,455,040 bytes, SHA-256 `02627acaef390c72b6641ae2b94b3466b6b3d0769b168c8654616230cf7a52e7`.
 - `write_pynq_zu_single_camera_sd.ps1` now safely defaults to this exact final WIC. The earlier fusion WIC remains an external historical artifact but must not be selected by default. This remains image-content proof only, not an SD/board/camera/DPU/Wi-Fi result.
 
+### 2026-11-14：final rootfs 的 AArch64 Python runtime 已以 QEMU 實跑
+
+- Extracted the final rootfs to an isolated WSL temporary directory and invoked its own AArch64 `/usr/bin/python3` via the PetaLinux-built `qemu-aarch64`. Target-side `import json, numpy, cv2, vart, xir` printed `PYNQ_ZU_AARCH64_IMPORT_PASS` with NumPy `1.21.2` and OpenCV `4.5.2`.
+- With the installed `/opt/pynq-yolov8/person_tracking` on `sys.path`, the same AArch64 runtime imported `appearance_features`, `cross_camera`, `peer_protocol`, `pynq_cross_camera_fusion`, `pynq_yolov8_peer`, and `verify_dpu_runtime`, then printed `PYNQ_ZU_AARCH64_RUNTIME_IMPORT_PASS`. The temporary extracted rootfs was deleted after the read-only probe.
+- Verification boundary: QEMU/import ABI evidence cannot expose `/dev/dpu`, execute the DPU, access a UVC camera, prove UART/SD boot, or test Wi-Fi. Those remain physical-board gates.
+

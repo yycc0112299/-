@@ -968,3 +968,8 @@
 - 最後檢查發現原本的映像沒有放入第一步要執行的 DPU 檢查程式；已修正並再建置一次。
 - 現在寫卡工具只會指向 `pynq_zu_dpu_single_camera_tracker_fusion_acceptance_2022_1.wic`，確保開機後能直接驗證 DPU、Python、模型與相機條件。
 
+## 2026-11-14：先在電腦上實際啟動了映像內的 ARM Python
+
+- 不只是看檔案：已用 QEMU 啟動最終映像內的 ARM Python，確認 NumPy、OpenCV、VART、XIR 和追蹤／兩板程式都能載入。
+- 這仍不能取代板子上的 DPU 或 USB 鏡頭測試，但表示映像的 Python 動態庫與程式路徑沒有明顯缺件。
+

@@ -1088,3 +1088,10 @@
 - 驗證範圍／未完成：image/archive/hash evidence only. No SD write, board boot, camera, target DPU execution, second board or Wi-Fi result is claimed. Generated images and external PetaLinux files remain outside Git.
 - Git／同步：committed and pushed to `main` as `6b05509` (`Include board DPU gate in final image`).
 
+## 2026-11-14 — Executed final AArch64 rootfs imports under QEMU
+
+- 需求／決策：strengthen the pre-SD evidence beyond archive listing by executing the image's own AArch64 Python and deployed modules without requiring the physical PYNQ-ZU.
+- 實際完成：extracted the final rootfs into an isolated WSL temporary directory and ran its `/usr/bin/python3` through the PetaLinux QEMU user emulator. NumPy 1.21.2, OpenCV 4.5.2, VART, XIR and all deployed tracking/peer/fusion/acceptance modules imported successfully. The temporary extraction was removed after the probe.
+- 驗證範圍／未完成：QEMU imports are not `/dev/dpu`, real GraphRunner execution, UVC capture, SD boot/UART, Wi-Fi or second-board evidence. No physical media or board was modified.
+- Git／同步：pending documentation-only commit and push.
+

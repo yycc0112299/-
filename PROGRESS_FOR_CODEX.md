@@ -1106,3 +1106,8 @@
 - `verify_dpu_runtime.py` now exposes one `python_runtime` report covering NumPy, OpenCV, VART, XIR and GraphRunner, and includes all of them in its PASS condition. A test first demonstrated that an unavailable `cv2` binding must make the report fail; focused suite is 4/4 and full Linux suite is 27/27 PASS.
 - Updated the Linux README to reflect the actual state: a DPU SD image has booted, the first image has a Python dependency defect, and the external 2022.1 build host exists. Earlier wording that said the DPU image was not deployed or that only PetaLinux 2024.1 was installed is obsolete and was removed.
 
+### 2026-11-13：記錄 USB camera 的正確 Vivado/Vitis/Linux 介面邊界
+
+- Added `fpga/PYNQ_ZU_DPU_USB_CAMERA_INTERFACE.md`: the current UVC camera's D+/D-/VBUS use board-routed PS MIO/USB0-USB1, not PL top-level pins. The interface map traces PS USB → Linux DWC3/UVC/V4L2 → DDR → VART/GraphRunner → DPU AXI-Lite/HP ports/IRQ, and states exactly when a future MIPI camera would require a distinct PL IP/XDC design.
+- Updated `fpga/README.md` to remove the stale claim that the DPU SD image lacks `/dev/dpu`/`xdputil`; it now describes the real boot evidence and the remaining corrected-image runtime gate. FPGA static contract suite passes 17/17. This is design/documentation evidence only, not UVC capture or DPU inference evidence.
+

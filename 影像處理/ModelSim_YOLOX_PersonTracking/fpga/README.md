@@ -23,8 +23,13 @@ register 17.75%、BRAM 50.00%、DSP 10.74%。build 內 `.bit`/`.xsa`/report 是�
 重建的外部產物，未納入 Git。
 
 此 gate 不代表 PYNQ Linux 已能執行 DPU。仍需要與此 B512 設定一致的 device tree、
-CMA/DPU driver、VART、`arch.json`、INT8 `.xmodel` 與板端 VART test；現有 SD image
-沒有 `xdputil`、VART 或 `/dev/dpu`。
+CMA/DPU driver、VART、`arch.json`、INT8 `.xmodel` 與板端 VART test。實際 DPU SD
+image 已開機並看見 `/dev/dpu` 與 `xdputil`，但第一次 image 缺 Python 標準庫；要以
+修正版 image 完成板端 runtime/camera gate 後，才能宣稱 DPU 推論可用。
+
+目前 USB 攝像頭、PS/PL、DDR、Vitis 和 Linux 的責任與接線邊界見
+[`PYNQ_ZU_DPU_USB_CAMERA_INTERFACE.md`](PYNQ_ZU_DPU_USB_CAMERA_INTERFACE.md)。USB
+UVC 攝像頭不是 PL MIPI/parallel pinout，不能也不需要替它虛構 FPGA camera pins。
 
 `roi_feature_board_top.v` 是目前可共用的 FPGA top-level 核心：它把既有的
 `person_roi_stream.v` 接成一個同步 RGB 像素串流，完成一個 640×480 frame 後輸出

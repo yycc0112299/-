@@ -920,3 +920,8 @@
 - 板端的 DPU 檢查現在會同時驗證 NumPy、OpenCV、VART、XIR 與 GraphRunner；其中任何一項不能 import 都不會通過。
 - 文件已改成目前真實狀態：舊映像已成功開機，但要使用修正版映像才能繼續相機與 YOLOv8 實測。
 
+## 2026-11-13：釐清 USB 鏡頭與 FPGA 的接法
+
+- 現在的 USB 鏡頭是接 Zynq 的 PS USB/MIO，不是接 FPGA 的 MIPI 或平行腳位；Vivado 需要設定 PS USB 與 DPU 的 DDR/AXI/中斷路徑，Linux 負責 UVC 相機。
+- 已新增一份接線與責任地圖，清楚分開 Vivado、Vitis、Linux、DPU 與 Python 的工作。日後若換 MIPI 鏡頭，才需要另一套 PL IP 與 XDC 腳位設計。
+

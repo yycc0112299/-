@@ -1004,6 +1004,13 @@
 - 驗證範圍／未完成：host tests only; the corrected WIC still has not been written to the unavailable physical SD. No board-side import after the change, camera frame, DPU execution or two-board Wi-Fi result is claimed.
 - Git／同步：source, test and all progress documentation are committed and pushed to `main` in this change; generated images/logs remain outside Git.
 
+## 2026-11-13 — Documented the real USB-camera hardware interface boundary
+
+- 需求／決策：make the requested Vivado camera wiring auditable without falsely representing the USB UVC camera as FPGA MIPI/parallel pins.
+- 實際完成：added the PYNQ-ZU USB camera/DPU interface map and updated the FPGA README. It documents PS MIO USB ownership, Linux UVC/V4L2/DDR flow, DPU AXI control/data/interrupt routes, Vitis XSA handoff, and the distinct future MIPI/XDC requirement. FPGA static contracts pass 17/17.
+- 驗證範圍／未完成：documentation and static hardware-contract evidence only. The board's corrected image has not yet been written/booted; no UVC frame, DPU inference, person tracking or second-board Wi-Fi result is claimed.
+- Git／同步：documentation and progress records are committed and pushed to `main` in this change.
+
 ## 2026-11-13 — Replaced unsupported removable-disk offlining with safe volume locking
 
 - 需求／決策：address the actual elevated SD-writer errors without widening the destructive target scope.

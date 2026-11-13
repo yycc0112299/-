@@ -870,3 +870,10 @@
 - 驗證範圍／未完成：this proves Wi-Fi radio scan capability only. Two-board exchange still requires an authorized chosen SSID/passphrase, a second board, IPv4 association on both sides and the existing TCP peer preflight.
 - Git／同步：three progress records are being committed/pushed; no credentials, SSIDs, MAC addresses or private network data enter Git.
 
+## 2026-11-13 — Checked JTAG readiness without programming the board
+
+- 需求／決策：在相容 Linux image 尚未取得時，先驗證已建立的 Vivado 2022.1 hardware artifacts and Vitis control ELF 能否安全進入 JTAG bring-up；target enumeration must pass before any download.
+- 實際完成：confirmed external bitstreams/XSA and manual A53 ELF exist; started 2022.1 `hw_server`, connected XSCT localhost, and queried targets. Windows sees healthy FTDI dual-channel USB cable and COM5 UART, but XSCT reports no JTAG target. No bitstream/ELF download, reset, boot change, cable-driver mutation, SD write or board configuration change was performed.
+- 驗證範圍／未完成：host-side FTDI enumeration is not scan-chain proof. Repeat after physical JTAG chain/power/boot-selection check; only a listed target authorizes programming/hardware validation.
+- Git／同步：three progress documents are being committed/pushed; external artifacts and any board identifiers are excluded.
+

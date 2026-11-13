@@ -802,3 +802,8 @@
 - 已成功啟用板上的 Wi-Fi，硬體 MAC、driver 與無線掃描都正常；可掃描到附近基地台。
 - 尚未連線，因為板上沒有儲存任何 Wi-Fi 設定，也沒有第二塊板子可測試傳資料。之後只要提供授權的 SSID／密碼並準備第二塊板子，即可進行兩板 TCP 實測。
 
+## 2026-11-13：JTAG 尚不能下載硬體檔
+
+- 電腦有偵測到板子的 FTDI USB/JTAG-UART cable，但 Vivado 目前掃不到 FPGA JTAG target。
+- 因此沒有冒險把 bitstream 或 Vitis 控制程式下載到板子；要等 Vivado 的 target 清單真正看得到板子後，才可進行 JTAG 硬體實測。
+

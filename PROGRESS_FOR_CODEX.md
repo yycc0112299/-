@@ -973,3 +973,9 @@
 - A one-time authorized `iw dev wlan0 scan` returned success with 11 BSS records. SSID/BSSID data is deliberately not recorded in Git/progress logs. This proves the current image's physical Wi-Fi radio/driver can scan despite the historical boot-time regulatory database warning; it does not prove association or two-board TCP.
 - Remaining blocker is external configuration, not code: no saved Wi-Fi profile, no chosen authorized SSID/passphrase, and no second board. Existing `pynq_wifi_peer_preflight.py` remains the required post-association gate; it must show IPv4 and peer TCP reachability on both boards before claiming Wi-Fi exchange.
 
+### 2026-11-13：JTAG cable host enumeration PASS，但 target scan chain 未出現
+
+- 對 existing Vivado 2022.1 USB-video/DPU artifact 做 non-mutating JTAG readiness check。External bitstreams/XSA exist (`pynq_zu_usb_video_wrapper.bit`, `pynq_zu_dpu_wrapper.bit`; respective XSA sizes 1,612,457 and 2,628,256 bytes); manual Vitis A53 ELF also exists under `C:\pynq_vitis_usb_video_2022_20261113b\manual_a53_elf`.
+- Started Vivado 2022.1 `hw_server` only and connected XSCT on localhost port 3121. Windows enumerates present FTDI `VID_0403&PID_6010` dual channels, including a COM5 serial channel; channel A uses a healthy FTDI driver. Nevertheless `targets` returned no JTAG targets. No bitstream, ELF, reset, boot mode or board state was changed.
+- Do not program either hardware artifact until `targets` lists the PYNQ-ZU scan chain. This observation does not prove a permanently bad cable: inspect physical JTAG chain/power/boot-selection and repeat read-only enumeration first. It is independent of current SSH/UART Linux access.
+

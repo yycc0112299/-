@@ -1,6 +1,7 @@
 """Offline contract tests for the board-side DPU runtime gate."""
 
 from pathlib import Path
+import subprocess
 import sys
 import tempfile
 import unittest
@@ -11,6 +12,7 @@ sys.path.insert(0, str(LINUX_DIR))
 
 from verify_dpu_runtime import (
     DPU_COMPATIBLE,
+    command_result,
     dpu_device_tree_nodes,
     graph_runner_result,
     python_runtime_results,
@@ -62,6 +64,16 @@ class DpuRuntimeGateTests(unittest.TestCase):
         self.assertTrue(report["numpy"]["available"])
         self.assertFalse(report["cv2"]["available"])
         self.assertFalse(report["ok"])
+
+    def test_reports_a_timeout_instead_of_hanging_on_xdputil_query(self) -> None:
+        def times_out(*_args, **_kwargs):
+            raise subprocess.TimeoutExpired(cmd=[sys.executable, "--version"], timeout=2)
+
+        report = command_result([sys.executable, "--version"], timeout_seconds=2,
+                                runner=times_out)
+        self.assertTrue(report["available"])
+        self.assertTrue(report["timed_out"])
+        self.assertIsNone(report["returncode"])
 
 
 if __name__ == "__main__":

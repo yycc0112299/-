@@ -39,16 +39,33 @@ def dpu_device_tree_nodes(root: Path = Path("/proc/device-tree")) -> list[str]:
     return sorted(nodes)
 
 
-def command_result(command: list[str]) -> dict[str, object]:
+def command_result(command: list[str], *, timeout_seconds: float = 10,
+                   runner=subprocess.run) -> dict[str, object]:
+    """Run a probe with a bounded wait so a broken driver cannot stall the gate."""
     executable = shutil.which(command[0])
     if executable is None:
         return {"available": False, "command": command}
-    completed = subprocess.run(command, text=True, stdout=subprocess.PIPE,
-                               stderr=subprocess.STDOUT, check=False)
+    try:
+        completed = runner(command, text=True, stdout=subprocess.PIPE,
+                           stderr=subprocess.STDOUT, check=False,
+                           timeout=timeout_seconds)
+    except subprocess.TimeoutExpired as error:
+        output = error.output or ""
+        if isinstance(output, bytes):
+            output = output.decode(errors="replace")
+        return {
+            "available": True,
+            "command": command,
+            "returncode": None,
+            "timed_out": True,
+            "timeout_seconds": timeout_seconds,
+            "output": str(output)[-2000:],
+        }
     return {
         "available": True,
         "command": command,
         "returncode": completed.returncode,
+        "timed_out": False,
         "output": completed.stdout[-2000:],
     }
 
@@ -116,7 +133,7 @@ def main() -> int:
     device_nodes = dpu_device_tree_nodes()
     device_files = sorted(str(path) for path in Path("/dev").glob("dpu*"))
     python_runtime = python_runtime_results()
-    xdputil = command_result(["xdputil", "query"])
+    xdputil = command_result(["xdputil", "query"], timeout_seconds=10)
     cameras = sorted(str(path) for path in Path("/dev").glob("video*"))
     model_ok = arguments.xmodel is None or valid_xmodel(arguments.xmodel)
     report = {

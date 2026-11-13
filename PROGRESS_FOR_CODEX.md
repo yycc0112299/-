@@ -1111,3 +1111,7 @@
 - Added `fpga/PYNQ_ZU_DPU_USB_CAMERA_INTERFACE.md`: the current UVC camera's D+/D-/VBUS use board-routed PS MIO/USB0-USB1, not PL top-level pins. The interface map traces PS USB → Linux DWC3/UVC/V4L2 → DDR → VART/GraphRunner → DPU AXI-Lite/HP ports/IRQ, and states exactly when a future MIPI camera would require a distinct PL IP/XDC design.
 - Updated `fpga/README.md` to remove the stale claim that the DPU SD image lacks `/dev/dpu`/`xdputil`; it now describes the real boot evidence and the remaining corrected-image runtime gate. FPGA static contract suite passes 17/17. This is design/documentation evidence only, not UVC capture or DPU inference evidence.
 
+### 2026-11-13：DPU runtime gate 對 `xdputil` 加入 timeout
+
+- The first board probe showed `xdputil query` can fail to return. `verify_dpu_runtime.py` now bounds command probes and specifically gives `xdputil query` ten seconds; a timeout returns structured `timed_out: true` data and makes the runtime gate fail rather than holding the UART workflow indefinitely. Test-first timeout coverage passes; focused gate tests are 5/5 and Linux suite is 28/28 PASS.
+

@@ -925,3 +925,7 @@
 - 現在的 USB 鏡頭是接 Zynq 的 PS USB/MIO，不是接 FPGA 的 MIPI 或平行腳位；Vivado 需要設定 PS USB 與 DPU 的 DDR/AXI/中斷路徑，Linux 負責 UVC 相機。
 - 已新增一份接線與責任地圖，清楚分開 Vivado、Vitis、Linux、DPU 與 Python 的工作。日後若換 MIPI 鏡頭，才需要另一套 PL IP 與 XDC 腳位設計。
 
+## 2026-11-13：避免板端檢查卡住
+
+- DPU 檢查中的 `xdputil query` 現在最多等十秒；若 DPU driver 沒有回應，會清楚回報失敗而不是讓 UART 無限卡住。
+

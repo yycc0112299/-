@@ -44,7 +44,7 @@ python3 verify_dpu_runtime.py --xmodel /opt/models/yolov8n_b512.xmodel --require
 
 It is read-only: it searches the live device tree for the exact DPU compatible
 string, checks `/dev/dpu*`, CMA, Python NumPy/OpenCV/`vart`/`xir`/GraphRunner,
-`xdputil query`, optional model file and UVC camera nodes.  It prints JSON followed by
+`xdputil query` (with a 10-second timeout), optional model file and UVC camera nodes.  It prints JSON followed by
 `PYNQ_ZU_DPU_LINUX_RUNTIME_PASS` only when each requested prerequisite exists.
 Passing this gate still does not replace an end-to-end camera inference test;
 the next test must run VART on a frame and validate a person-detection packet.

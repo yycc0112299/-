@@ -1011,6 +1011,13 @@
 - 驗證範圍／未完成：documentation and static hardware-contract evidence only. The board's corrected image has not yet been written/booted; no UVC frame, DPU inference, person tracking or second-board Wi-Fi result is claimed.
 - Git／同步：documentation and progress records are committed and pushed to `main` in this change.
 
+## 2026-11-13 — Bounded the board-side DPU query
+
+- 需求／決策：prevent the next target acceptance run from hanging at the previously observed `xdputil query` step.
+- 實際完成：`command_result` now supports bounded probes; `xdputil query` uses ten seconds and returns structured timeout evidence instead of waiting forever. Test-first timeout contract passes; focused tests are 5/5 and the Linux suite is 28/28.
+- 驗證範圍／未完成：host test only. The timeout behavior must still be observed on the corrected SD image; no DPU query success, camera frame or inference result is claimed.
+- Git／同步：source, test, README and progress records are committed and pushed to `main` in this change.
+
 ## 2026-11-13 — Replaced unsupported removable-disk offlining with safe volume locking
 
 - 需求／決策：address the actual elevated SD-writer errors without widening the destructive target scope.

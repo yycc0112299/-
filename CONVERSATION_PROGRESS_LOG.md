@@ -891,3 +891,10 @@
 - 驗證範圍／未完成：host-install only. No PetaLinux project/XSA import, DPU recipe staging, image build, SD write, target boot, DPU driver/VART/GraphRunner, camera or YOLO inference has been claimed. AMD installer, hashes, logs and WSL tool files are intentionally not tracked.
 - Git／同步：本筆與三份 progress documents will be committed and pushed to `main`; no account, address, credential, network identifier, installer or generated image is included.
 
+## 2026-11-13 — Verified JTAG scan chain and programmed the DPU B512 bitstream
+
+- 需求／決策：使用者將 PYNQ-ZU 切至 JTAG boot，繼續 Vivado/Vitis hardware bring-up；programming is permitted only after a real target scan.
+- 實際完成：Vivado 2022.1 Hardware Manager found the FTDI target, `xczu5_0`, and `arm_dap_1`. It programmed the existing DPU B512 bitstream and reported `End of startup status: HIGH`. The bitstream contains no supported debug core, so no debug waveform was expected or claimed.
+- 驗證範圍／未完成：this proves volatile FPGA configuration download only. It did not write SD/QSPI nor prove PS software, DPU device node/driver, VART/XIR/GraphRunner, YOLOv8, UVC cameras, tracking or Wi-Fi. The USB-video ELF is intentionally not run because it does not match this DPU address map.
+- Git／同步：this hardware verification and progress docs will be committed/pushed; external bitstream, XSA, tool logs and hardware identifiers are excluded.
+

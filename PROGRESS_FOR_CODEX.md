@@ -992,3 +992,10 @@
 - 實測 `source /home/petalinux/xilinx/petalinux/2022.1/settings.sh` 後 `petalinux-create --help` 可正常執行；安裝目錄約 12 GB。installer 對目前 Ubuntu 顯示 unsupported-OS warning，並顯示 no-TFTP warning；兩者未阻止 host tools 安裝或 command-load proof。
 - 驗證界線：尚未以 DPU B512 XSA 建 project、尚未套用 tracked DPU 4.0 staging helper、build image/boot files、寫 SD、開機或 target DPU/GraphRunner/YOLOv8 驗證。下一步必須在 external PetaLinux project import matching XSA，才可把這次 host-install claim 擴展為 image proof。
 
+### 2026-11-13：PYNQ-ZU JTAG scan-chain 與 DPU B512 暫態下載 PASS
+
+- 使用者將板子切至 JTAG boot 後，Vivado 2022.1 Hardware Manager read-only scan 成功列出一個 target `localhost:3121/xilinx_tcf/Xilinx/1234-tulA`、`xczu5_0` FPGA device 與 `arm_dap_1`。此前 XSCT blank output 不是可靠的 target scan evidence；Hardware Manager query 是本次 authoritative evidence。
+- 已以 Vivado `program_hw_devices` 下載 external `C:\pynq_zu_dpu_2022_20261113\project\pynq_zu_dpu.runs\impl_1\pynq_zu_dpu_wrapper.bit`（7,797,815 bytes）。Hardware Manager reports `End of startup status: HIGH` and shows the programmed file path. The design has no supported debug cores, which is expected; therefore no ILA waveform claim is made.
+- 此操作只經 JTAG 修改 volatile PL configuration；沒有寫入 SD、QSPI 或 permanent boot image。後續 JTAG session 的 `PROGRAM.STATE` property query returned an unsupported-property error after programming, but it does not invalidate the preceding successful `program_hw_devices`/startup-high result.
+- 驗證界線：這證明 DPU hardware bitstream loads into the real PYNQ-ZU FPGA. It does not prove PS software boot, `/dev/dpu`, DPU driver, VART/XIR/GraphRunner, compiled YOLOv8 execution, camera streaming, tracker output or Wi-Fi. The existing USB-video standalone ELF targets a different bitstream/address map and must not be run against this DPU bitstream.
+

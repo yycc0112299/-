@@ -818,3 +818,9 @@
 - 2024.1 安裝保留不動；新工具放在獨立的 2022.1 資料夾。
 - 下一步是以 DPU 的 XSA 建立 Linux 專案、產生 SD image；尚未換 SD 卡或在板子上跑 DPU/YOLOv8。
 
+## 2026-11-13：DPU 硬體已真正透過 JTAG 載入板子
+
+- PYNQ-ZU 切到 JTAG 後，Vivado 已經看得到 FPGA 與 ARM debug target。
+- DPU B512 bitstream 已載入 FPGA，Vivado 回報啟動成功。
+- 這是暫時配置，關機或切回 SD 就會消失；尚未證明 Linux、相機或 YOLOv8 推論，仍需建立相容 SD image。
+

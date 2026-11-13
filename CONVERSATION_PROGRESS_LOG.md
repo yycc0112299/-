@@ -1093,5 +1093,5 @@
 - 需求／決策：strengthen the pre-SD evidence beyond archive listing by executing the image's own AArch64 Python and deployed modules without requiring the physical PYNQ-ZU.
 - 實際完成：extracted the final rootfs into an isolated WSL temporary directory and ran its `/usr/bin/python3` through the PetaLinux QEMU user emulator. NumPy 1.21.2, OpenCV 4.5.2, VART, XIR and all deployed tracking/peer/fusion/acceptance modules imported successfully. The temporary extraction was removed after the probe.
 - 驗證範圍／未完成：QEMU imports are not `/dev/dpu`, real GraphRunner execution, UVC capture, SD boot/UART, Wi-Fi or second-board evidence. No physical media or board was modified.
-- Git／同步：pending documentation-only commit and push.
+- Git／同步：committed and pushed to `main` as `4f5dac9` (`Verify final rootfs imports under QEMU`).
 

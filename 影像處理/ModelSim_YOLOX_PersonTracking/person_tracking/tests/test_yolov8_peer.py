@@ -1,9 +1,10 @@
 """Contract between the YOLOv8 camera loop and the two-board TCP schema."""
 
-from pathlib import Path
+import json
 import sys
 import tempfile
 import unittest
+from pathlib import Path
 
 import numpy as np
 
@@ -13,7 +14,12 @@ sys.path.insert(0, str(ROOT))
 
 import peer_protocol
 from appearance_features import appearance
-from pynq_yolov8_peer import build_packet, configure_dpu_backend, send_packet_with_retry
+from pynq_yolov8_peer import (
+    build_packet,
+    configure_dpu_backend,
+    send_packet_with_retry,
+    write_local_packet,
+)
 
 
 class YoloV8PeerTests(unittest.TestCase):
@@ -61,6 +67,13 @@ class YoloV8PeerTests(unittest.TestCase):
     def test_build_packet_keeps_empty_detection_frames(self) -> None:
         packet = build_packet("pynq-b", 2, 456, np.zeros((2, 3, 3), dtype=np.uint8), [])
         self.assertEqual(peer_protocol.validate_packet(packet)["detections"], [])
+
+    def test_local_metadata_output_is_valid_json_not_a_frame(self) -> None:
+        packet = build_packet("pynq-a", 2, 456, np.zeros((2, 3, 3), dtype=np.uint8), [])
+        with tempfile.TemporaryDirectory() as temporary:
+            output = Path(temporary) / "local_latest.json"
+            write_local_packet(packet, output)
+            self.assertEqual(json.loads(output.read_text(encoding="utf-8"))["frame_id"], 2)
 
     def test_retries_the_same_packet_after_transient_peer_disconnect(self) -> None:
         packet = build_packet("pynq-a", 9, 999, np.zeros((2, 3, 3), dtype=np.uint8), [])

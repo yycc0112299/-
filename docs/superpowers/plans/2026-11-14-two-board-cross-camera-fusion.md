@@ -42,11 +42,11 @@
   no status normalizes to `tentative` so it cannot be matched by assumption.
 - Produces `appearance_features.appearance(frame, box) -> numpy.ndarray`.
 
-- [ ] **Step 1: Write failing packet and sender tests** for valid 2×15 appearance round trip, malformed appearance rejection, and sender packet feature serialization.
-- [ ] **Step 2: Run the focused tests** and confirm they fail because the field/helper is absent.
-- [ ] **Step 3: Implement only validation, feature extraction and packet serialization** without changing local tracker IDs.
-- [ ] **Step 4: Run focused and full person-tracking tests** and confirm pass.
-- [ ] **Step 5: Commit task changes.**
+- [x] **Step 1: Write failing packet and sender tests** for valid 2×15 appearance round trip, malformed appearance rejection, and sender packet feature serialization.
+- [x] **Step 2: Run the focused tests** and confirm they fail because the field/helper is absent.
+- [x] **Step 3: Implement only validation, feature extraction and packet serialization** without changing local tracker IDs.
+- [x] **Step 4: Run focused and full person-tracking tests** and confirm pass.
+- [x] **Step 5: Commit task changes.**
 
 ### Task 2: Cross-camera fusion service
 
@@ -58,10 +58,10 @@
 - Consumes normalized peer packets and `CrossCameraMatcher`.
 - Produces `CrossCameraFusion.update_local(packet)` / `.update_remote(packet)` result dictionaries with candidate labels only.
 
-- [ ] **Step 1: Write failing tests** for repeated unambiguous matches, missing appearance, tentative tracks, and a broken evidence streak.
-- [ ] **Step 2: Run focused test** and confirm import failure.
-- [ ] **Step 3: Implement the bounded latest-observation service and CLI JSON receiver mode.**
-- [ ] **Step 4: Run focused and full person-tracking tests** and confirm pass.
+- [x] **Step 1: Write failing tests** for repeated unambiguous matches, missing appearance, tentative tracks, and a broken evidence streak.
+- [x] **Step 2: Run focused test** and confirm import failure.
+- [x] **Step 3: Implement the bounded latest-observation service and CLI JSON receiver mode.**
+- [x] **Step 4: Run focused and full person-tracking tests** and confirm pass.
 - [ ] **Step 5: Commit task changes.**
 
 ### Task 3: Stage and document the future DPU fusion path

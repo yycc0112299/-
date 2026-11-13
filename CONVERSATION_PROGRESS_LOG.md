@@ -1060,3 +1060,10 @@
 - 驗證範圍／未完成：host-only unit tests. The fusion receiver, staging/bundle update, rewritten SD boot, camera/DPU inference and physical two-board Wi-Fi are still pending. No generated image, model binary, credential or `petalinux_installation_log` is added to Git.
 - Git／同步：pending the commit and push that includes this source, tests and progress records.
 
+## 2026-11-14 — Added conservative two-board fusion service
+
+- 需求／決策：make the prepared metadata usable without claiming identity or allowing a repeated stale remote frame to promote a match.
+- 實際完成：added `pynq_cross_camera_fusion.py` with persistent TCP receive mode and candidate-only JSON output. The DPU sender now optionally publishes atomically validated local metadata. Fusion progresses evidence only when a new remote packet arrives; local refreshes, missing features, tentative tracks and empty remote evidence cannot manufacture confirmation.
+- 驗證範圍／未完成：focused host tests pass (fusion/sender 12/12); no PetaLinux staging, SD rewrite, physical board, UVC/DPU result or Wi-Fi transfer has occurred.
+- Git／同步：pending the commit and push that includes this source, tests and progress records.
+

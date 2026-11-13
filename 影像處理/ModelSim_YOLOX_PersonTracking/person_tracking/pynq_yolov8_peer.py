@@ -8,6 +8,7 @@ project's default YOLOv8 backend unless ``PERSON_DETECTOR`` is explicitly set.
 from __future__ import annotations
 
 import argparse
+import json
 import os
 import time
 from pathlib import Path
@@ -55,6 +56,16 @@ def build_packet(board_id, frame_id, capture_monotonic_ns, frame, tracked):
             detection["appearance"] = np.asarray(item["appearance"], dtype=float).tolist()
         packet["detections"].append(detection)
     return packet
+
+
+def write_local_packet(packet, output_path: Path) -> None:
+    """Atomically publish metadata for the local fusion service, never a frame."""
+    output_path = Path(output_path)
+    normalized = peer_protocol.validate_packet(packet)
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    temporary = output_path.with_name(f".{output_path.name}.tmp")
+    temporary.write_text(json.dumps(normalized, separators=(",", ":")) + "\n", encoding="utf-8")
+    temporary.replace(output_path)
 
 
 def open_camera(index, width, height, fps):
@@ -114,6 +125,8 @@ def main() -> None:
                         help="seconds between retry attempts after a TCP failure")
     parser.add_argument("--dpu-xmodel", type=Path,
                         help="run the original GraphRunner/DPU YOLOv8 model from this .xmodel")
+    parser.add_argument("--local-packet-output", type=Path,
+                        help="atomically write this board's latest metadata JSON for local fusion")
     parser.add_argument("--frames", type=int, default=0,
                         help="0 streams forever; a positive count sends that many frames")
     args = parser.parse_args()
@@ -137,6 +150,8 @@ def main() -> None:
             for item in tracked:
                 item["appearance"] = appearance(frame, item["box"])
             packet = build_packet(args.board_id, sent, capture_monotonic_ns, frame, tracked)
+            if args.local_packet_output:
+                write_local_packet(packet, args.local_packet_output)
             used_attempts = send_packet_with_retry(
                 args.peer_host, args.port, packet, attempts=args.send_attempts,
                 retry_delay=args.retry_delay,

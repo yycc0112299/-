@@ -1132,3 +1132,9 @@
 - `peer_protocol.py` accepts that optional descriptor only when its shape, finite/non-negative bins and per-region normalization are valid. It also carries `tracking_status`. Legacy senders remain decodable, but normalize to `tentative`; only explicitly `confirmed` local tracking evidence may be considered by the later fusion service.
 - Test-first evidence: feature/protocol/sender focused tests are 13/13 PASS and existing `test_cross_camera.py` is 6/6 PASS. This is host Python evidence only; no physical board, Wi-Fi link, camera frame or DPU output is claimed.
 
+### 2026-11-14：跨鏡頭候選服務已完成（尚未包入 rootfs）
+
+- Added `pynq_cross_camera_fusion.py`. It holds the latest local/remote metadata and reuses `CrossCameraMatcher`; it emits only local/remote track pairs, similarity score, evidence count and `candidate`/`confirmed_candidate` labels. It never changes a local tracker ID or emits an identity assertion.
+- `serve` mode keeps matcher state while it receives the existing framed TCP protocol. The DPU peer sender can atomically publish its local validated metadata with `--local-packet-output`; the fusion receiver reads that compact JSON, receives the remote packet on the selected port, and atomically writes candidate JSON. A local refresh alone cannot reuse a stale remote frame to inflate the evidence streak.
+- Test-first evidence: new fusion tests cover repeated evidence, no feature/tentative exclusion, missing remote evidence reset, wrong board IDs and stale-frame protection; focused fusion/sender tests are 12/12 PASS. This has not been staged into PetaLinux, placed on a board, or run over Wi-Fi.
+

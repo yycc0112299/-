@@ -1074,3 +1074,10 @@
 - 驗證範圍／未完成：no PetaLinux rebuild, no new WIC, no SD write, no board deployment, and no physical Wi-Fi/UVC/DPU inference. The existing WIC remains the corrected single-board runtime artifact but lacks the new fusion source set.
 - Git／同步：committed and pushed to `main` as `562c983` (`Stage two-board fusion runtime`).
 
+## 2026-11-14 — Rebuilt the PetaLinux image with fusion runtime
+
+- 需求／決策：turn the staged two-board runtime into an actual future SD artifact without requiring access to the physical card.
+- 實際完成：fixed a real incremental-staging SameFileError when the exact xmodel is already in its recipe destination; regression plus related Linux tests pass 18/18. Restaged the external 2022.1 project, completed `petalinux-build` (6,385 tasks, all succeeded), regenerated BOOT.BIN/WIC, and ran the rootfs runtime gate against the real archive. Exported `pynq_zu_dpu_single_camera_tracker_fusion_2022_1.wic`, 6,442,455,040 bytes, SHA-256 `b7e42696ee3d6deedb7b53e7bc990d2cc1a04b368960373670e9e0d4882028c5`; guarded writer defaults were updated to this exact artifact.
+- 驗證範圍／未完成：build/archive/hash evidence only. No SD write, board boot, UVC frame, target Python/DPU inference, second board or Wi-Fi packet has occurred. Generated WIC, external build project and `petalinux_installation_log` remain outside Git.
+- Git／同步：pending the commit and push that includes helper/test/documentation changes.
+

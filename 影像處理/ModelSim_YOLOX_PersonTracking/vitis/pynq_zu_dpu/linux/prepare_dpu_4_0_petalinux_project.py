@@ -150,7 +150,12 @@ def _stage_xmodel(meta_user: Path, xmodel: Path) -> dict[str, object]:
     package_dir = meta_user / "recipes-apps" / PROJECT_XMODEL_PACKAGE
     files_dir = package_dir / "files"
     files_dir.mkdir(parents=True, exist_ok=True)
-    shutil.copyfile(xmodel, files_dir / TARGET_XMODEL_NAME)
+    destination = files_dir / TARGET_XMODEL_NAME
+    # On an incremental staging run the only verified source may already be
+    # the recipe payload itself.  Copying it onto itself raises SameFileError
+    # and prevents a harmless runtime-source update from being rebuilt.
+    if xmodel != destination.resolve():
+        shutil.copyfile(xmodel, destination)
     (package_dir / f"{PROJECT_XMODEL_PACKAGE}.bb").write_text(
         "SUMMARY = \"Compiled original YOLOv8n model for the PYNQ-ZU DPU B512\"\n"
         "LICENSE = \"CLOSED\"\n"

@@ -163,6 +163,24 @@ class PrepareDpu40PetaLinuxProjectTests(unittest.TestCase):
             self.assertIn("pynq-yolov8-model", image_append.read_text(encoding="utf-8"))
             self.assertEqual(manifest["xmodel"]["sha256"], module.hash_file(xmodel))
 
+    def test_restage_accepts_a_model_already_at_its_recipe_destination(self) -> None:
+        """Incremental image builds must not fail merely because the model is staged."""
+        module = load_module()
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            official = self.create_official_reference(root / "official")
+            project = root / "project"
+            (project / "project-spec" / "meta-user" / "conf").mkdir(parents=True)
+            source = root / "yolov8n_b512.xmodel"
+            source.write_bytes(b"compiled-dpu-model")
+            module.stage_reference(project, official, xmodel=source)
+            staged = (project / "project-spec" / "meta-user" / "recipes-apps" /
+                      "pynq-yolov8-model" / "files" / "yolov8n_b512.xmodel")
+
+            manifest = module.stage_reference(project, official, xmodel=staged)
+
+            self.assertEqual(manifest["xmodel"]["sha256"], module.hash_file(staged))
+
     def test_rejects_an_empty_or_wrong_extension_xmodel(self) -> None:
         module = load_module()
         with tempfile.TemporaryDirectory() as temporary:

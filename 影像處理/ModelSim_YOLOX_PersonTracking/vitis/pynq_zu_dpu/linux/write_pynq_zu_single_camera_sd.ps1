@@ -18,7 +18,7 @@ param(
     [int]$DiskNumber,
 
     [Parameter()]
-    [string]$ImagePath = 'C:\pynq_zu_dpu_2022_20261113\sd_image_20261113\pynq_zu_dpu_single_camera_tracker_python_modules_2022_1.wic',
+    [string]$ImagePath = 'C:\pynq_zu_dpu_2022_20261113\sd_image_20261113\pynq_zu_dpu_single_camera_tracker_fusion_2022_1.wic',
 
     [Parameter(Mandatory = $true)]
     [switch]$IUnderstandThisErasesDisk,
@@ -32,7 +32,7 @@ $ErrorActionPreference = 'Stop'
 
 try {
 
-    $expectedSha256 = '1c1604a7d60febe5e028e4ee64513be971a80f1f061a82caa1c25f480b6255ec'
+    $expectedSha256 = 'b7e42696ee3d6deedb7b53e7bc990d2cc1a04b368960373670e9e0d4882028c5'
     $approvedBusTypes = 'USB', 'SD'
 
 function Test-Administrator {

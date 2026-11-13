@@ -1144,3 +1144,10 @@
 - `prepare_pynq_dual_bundle.py --dpu-runtime` includes the appearance helper and fusion service while retaining the guard that excludes CPU `yolov8n.onnx`. `person_tracking/README.md` documents one command pair per board: fusion receiver on TCP 8791 plus DPU sender that atomically publishes its local metadata.
 - Verification boundary: tracking tests 45/45 plus legacy matcher 6/6, Linux tests 30/30, live-site tests 6/6 and FPGA contracts 17/17 PASS on the host. The existing WIC was deliberately not rebuilt, so it does not yet include these newest two-board files; no board, Wi-Fi or camera/DPU execution is claimed.
 
+### 2026-11-14：fusion runtime 已重建進新的 PetaLinux 2022.1 WIC
+
+- External WSL project `/home/petalinux/work/pynq_zu_dpu_2022_1` was restaged from the current repository and rebuilt. The first incremental staging attempt exposed a real helper bug: passing the already-staged xmodel tried to copy a file onto itself. A regression test now covers that path; `_stage_xmodel` leaves the verified destination in place, allowing repeatable incremental builds. Focused staging/rootfs/writer tests are 18/18 PASS.
+- Actual `petalinux-build` completed 6,385 tasks with all succeeded. `petalinux-package --boot --fpga --u-boot --force` regenerated `BOOT.BIN`; `petalinux-package --wic --bootfiles "BOOT.BIN,image.ub,boot.scr"` regenerated the WIC. The rootfs archive contains the deployed appearance helper, matcher, peer protocol, fusion service, DPU peer sender and Wi-Fi preflight. The static rootfs gate PASSed against the actual archive, including Python/DPU bindings.
+- Exported artifact: `C:\pynq_zu_dpu_2022_20261113\sd_image_20261113\pynq_zu_dpu_single_camera_tracker_fusion_2022_1.wic`; size `6,442,455,040` bytes; SHA-256 `b7e42696ee3d6deedb7b53e7bc990d2cc1a04b368960373670e9e0d4882028c5`. `write_pynq_zu_single_camera_sd.ps1` now defaults to, and hash-gates, exactly this file.
+- Verification boundary: archive/package evidence only. No SD write, target boot, camera capture, DPU inference or Wi-Fi exchange occurred in this change.
+

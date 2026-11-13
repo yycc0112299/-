@@ -146,7 +146,7 @@ python3 verify_pynq_zu_rootfs_runtime.py \
   --runtime-source /path/to/ModelSim_YOLOX_PersonTracking/person_tracking
 ```
 
-The tool parses exactly the four Python files installed by the target runtime
+The tool parses the exact Python runtime source set installed by the target
 recipe, checks their standard-library imports and required DPU bindings against
 the archive, and emits `PYNQ_ZU_ROOTFS_RUNTIME_PASS` only when they exist. It
 does not execute ARM code, validate `/dev/dpu`, test a camera, or replace the
@@ -210,11 +210,12 @@ boot-image test, or board-side inference result.
 ## Controlled Windows SD writer
 
 The current first-stage image is the externally generated
-`C:\pynq_zu_dpu_2022_20261113\sd_image_20261113\pynq_zu_dpu_single_camera_tracker_python_modules_2022_1.wic`.
+`C:\pynq_zu_dpu_2022_20261113\sd_image_20261113\pynq_zu_dpu_single_camera_tracker_fusion_2022_1.wic`.
 Its required SHA-256 is
-`1c1604a7d60febe5e028e4ee64513be971a80f1f061a82caa1c25f480b6255ec`.
-It supersedes every earlier exported WIC because it contains both the compiled
-model and the target-side single-camera tracker.
+`b7e42696ee3d6deedb7b53e7bc990d2cc1a04b368960373670e9e0d4882028c5`.
+It supersedes every earlier exported WIC because it contains the compiled
+model, target-side single-camera tracker, and the future two-board metadata
+and conservative cross-camera-candidate runtime.
 
 `write_pynq_zu_single_camera_sd.ps1` is deliberately unable to guess a
 destination. It requires an explicit Windows disk number and an erase

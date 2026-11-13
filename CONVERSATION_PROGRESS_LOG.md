@@ -1058,19 +1058,19 @@
 - 需求／決策：while the SD card is unavailable, prepare the cross-camera input without transporting video or treating appearance similarity as identity. Legacy packets must remain valid without being trusted as confirmed tracking evidence.
 - 實際完成：added `appearance_features.py`; the DPU peer sender serializes its 2×15 descriptor and `tracking_status`; protocol validation rejects malformed/non-finite appearance data and normalizes missing legacy status to `tentative`. Focused protocol/sender tests pass 13/13; existing matcher tests pass 6/6.
 - 驗證範圍／未完成：host-only unit tests. The fusion receiver, staging/bundle update, rewritten SD boot, camera/DPU inference and physical two-board Wi-Fi are still pending. No generated image, model binary, credential or `petalinux_installation_log` is added to Git.
-- Git／同步：pending the commit and push that includes this source, tests and progress records.
+- Git／同步：committed and pushed to `main` as `918f667` (`Add safe cross-camera appearance metadata`).
 
 ## 2026-11-14 — Added conservative two-board fusion service
 
 - 需求／決策：make the prepared metadata usable without claiming identity or allowing a repeated stale remote frame to promote a match.
 - 實際完成：added `pynq_cross_camera_fusion.py` with persistent TCP receive mode and candidate-only JSON output. The DPU sender now optionally publishes atomically validated local metadata. Fusion progresses evidence only when a new remote packet arrives; local refreshes, missing features, tentative tracks and empty remote evidence cannot manufacture confirmation.
 - 驗證範圍／未完成：focused host tests pass (fusion/sender 12/12); no PetaLinux staging, SD rewrite, physical board, UVC/DPU result or Wi-Fi transfer has occurred.
-- Git／同步：pending the commit and push that includes this source, tests and progress records.
+- Git／同步：committed and pushed to `main` as `01be58b` (`Add conservative cross-camera fusion service`).
 
 ## 2026-11-14 — Staged the future fusion path without rebuilding the SD image
 
 - 需求／決策：complete the remaining no-SD packaging work while preserving the known-good corrected WIC and its honest verification boundary.
 - 實際完成：the next PetaLinux runtime recipe and rootfs import gate now include every fusion dependency; the DPU-only two-board bundle includes the fusion helper/service and still excludes CPU ONNX. README commands use a persistent fusion listener at TCP 8791 and local metadata files, without hard-coded board IPs or camera indices. Host tests: tracking 45/45 plus matcher 6/6, Linux 30/30, live-site 6/6, FPGA contracts 17/17.
 - 驗證範圍／未完成：no PetaLinux rebuild, no new WIC, no SD write, no board deployment, and no physical Wi-Fi/UVC/DPU inference. The existing WIC remains the corrected single-board runtime artifact but lacks the new fusion source set.
-- Git／同步：pending the commit and push that includes this source, tests and progress records.
+- Git／同步：committed and pushed to `main` as `562c983` (`Stage two-board fusion runtime`).
 

@@ -76,11 +76,19 @@ DPU/VART inference and does not replace the required B512 `.xmodel` flow.
 
 ## Future B512 DPU / VART boundary
 
-`assets/yolov8_vart.py` is the Linux-side VART boundary for the future
-compiled B512 `.xmodel`. It discovers exactly one DPU subgraph, letterboxes a
-BGR camera frame to the graph's actual NHWC input tensor, converts it to RGB
-INT8 using that tensor's `fix_point`, then returns named dequantized output
-tensors. The hardware-free test protects this input/output contract.
+`assets/yolov8_vart.py` is the Linux-side bridge between the existing,
+pretrained upstream YOLOv8n model and the Vivado DPU hardware. It does not
+rewrite YOLOv8 in Verilog and does not train a replacement model. Vivado owns
+the DPU IP/bitstream; Vitis AI GraphRunner owns the compiled model's ordered
+CPU and DPU subgraphs; this Python boundary supplies camera frames and decodes
+the model's real output tensors.
+
+The unchanged upstream SiLU YOLOv8n B512 xmodel contains more than one DPU
+subgraph, so it must use `GraphRunnerYoloV8`, not the legacy single-DPU
+`VartYoloV8` runner. GraphRunner writes the actual whole-graph TensorBuffer,
+syncs it for the accelerator, executes the graph, syncs outputs back, and then
+provides named dequantized tensors to the raw YOLOv8 DFL decoder. The
+hardware-free contract test protects that TensorBuffer bridge.
 
 It intentionally does **not** pretend every compiled YOLOv8 graph has the
 same output heads as the CPU ONNX model. Until an exact PYNQ-ZU B512 `.xmodel`
@@ -88,11 +96,14 @@ exists and its output decoder is validated with a known person frame,
 `VartYoloV8.infer()` raises an error rather than emitting guessed boxes. The
 integration point is now available through the explicit
 `PERSON_DETECTOR=yolov8_vart` backend. It requires
-`PYNQ_VART_XMODEL=/path/to/model.xmodel`. It keeps its decoder unregistered by
-default; set `PYNQ_VART_STANDARD_OUTPUT=1` only after inspecting that exact
-model and proving it has one raw standard YOLOv8 output. Otherwise it stops
-rather than guessing boxes, while the tracker and `pynq_yolov8_peer.py` retain
-the same person-packet schema.
+`PYNQ_VART_XMODEL=/path/to/model.xmodel`. For the project's original SiLU
+YOLOv8n B512 artifact, also set `PYNQ_VART_GRAPH_RUNNER=1`; this selects the
+raw three-head DFL decoder matched to the compiled graph. The old
+single-subgraph route keeps its decoder unregistered by default; set
+`PYNQ_VART_STANDARD_OUTPUT=1` only after inspecting that different exact model
+and proving it has one raw standard YOLOv8 output. Otherwise it stops rather
+than guessing boxes, while the tracker and `pynq_yolov8_peer.py` retain the
+same person-packet schema.
 
 ## Two-board detection packets
 

@@ -10,7 +10,12 @@ import numpy as np
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "assets"))
 
-from yolov8_vart import VartYoloV8, raw_yolov8_dfl_decoder, standard_yolov8_decoder
+from yolov8_vart import (
+    GraphRunnerYoloV8,
+    VartYoloV8,
+    raw_yolov8_dfl_decoder,
+    standard_yolov8_decoder,
+)
 
 
 class FakeTensor:
@@ -37,6 +42,49 @@ class FakeRunner:
 
     def wait(self, job_id):
         self.last_job_id = job_id
+        return 0
+
+
+class FakeBuffer:
+    """Small ndarray-backed stand-in for a Vitis AI TensorBuffer."""
+
+    def __init__(self, tensor, values=None):
+        self.tensor = tensor
+        self.values = np.zeros(tensor.dims, dtype=np.int8) if values is None else values.copy()
+        self.write_syncs = []
+        self.read_syncs = []
+
+    def get_tensor(self):
+        return self.tensor
+
+    def sync_for_write(self, offset, size):
+        self.write_syncs.append((offset, size))
+
+    def sync_for_read(self, offset, size):
+        self.read_syncs.append((offset, size))
+
+    def __array__(self, dtype=None):
+        return self.values.astype(dtype) if dtype else self.values
+
+
+class FakeGraphRunner:
+    def __init__(self, inputs, outputs):
+        self.inputs = inputs
+        self.outputs = outputs
+
+    def get_inputs(self):
+        return self.inputs
+
+    def get_outputs(self):
+        return self.outputs
+
+    def execute_async(self, inputs, outputs):
+        self.seen_inputs = inputs
+        self.seen_outputs = outputs
+        return 31
+
+    def wait(self, job_id):
+        self.job_id = job_id
         return 0
 
 
@@ -112,6 +160,28 @@ class VartYoloV8Tests(unittest.TestCase):
         )
         with self.assertRaisesRegex(RuntimeError, "model-specific VART decoder"):
             detector.infer(np.zeros((480, 640, 3), dtype=np.uint8))
+
+    def test_graph_runner_uses_tensor_buffers_and_synchronizes_them(self) -> None:
+        input_tensor = FakeTensor([1, 640, 640, 3], 7, "images")
+        output_tensor = FakeTensor([1, 144, 20, 20], 3, "head20")
+        input_buffer = FakeBuffer(input_tensor)
+        output_values = np.zeros((1, 144, 20, 20), dtype=np.int8)
+        output_values[0, 64, 0, 0] = 7
+        output_buffer = FakeBuffer(output_tensor, output_values)
+        runner = FakeGraphRunner([input_buffer], [output_buffer])
+        detector = GraphRunnerYoloV8.from_graph_runner(
+            runner, confidence_threshold=.30, nms_threshold=.45,
+        )
+
+        output = detector.infer_tensors(np.zeros((480, 640, 3), dtype=np.uint8))
+
+        self.assertEqual(runner.job_id, 31)
+        self.assertEqual(runner.seen_inputs, [input_buffer])
+        self.assertEqual(runner.seen_outputs, [output_buffer])
+        self.assertEqual(input_buffer.write_syncs, [(0, input_buffer.values.nbytes)])
+        self.assertEqual(output_buffer.read_syncs, [(0, output_buffer.values.nbytes)])
+        self.assertEqual(output["head20"].shape, (1, 144, 20, 20))
+        self.assertAlmostEqual(float(output["head20"][0, 64, 0, 0]), 7 / 8)
 
 
 if __name__ == "__main__":

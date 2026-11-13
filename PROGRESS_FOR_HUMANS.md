@@ -781,3 +781,9 @@
 - 板子可看到四個相機節點，但沒有 DPU device，VART、XIR 與 Python GraphRunner 也都不存在。
 - 新的部署檢查會把 GraphRunner 列為必要條件，避免把現在的 PYNQ 2024.1 SD 卡誤用於 DPU bitstream。
 
+## 2026-11-13：YOLOv8 到 DPU 的橋樑已補上
+
+- YOLOv8 仍然直接使用別人已訓練好的原始模型；沒有把它重寫成 Verilog，也沒有另訓練替代模型。
+- Vivado 的 DPU 硬體、Vitis AI 的整張模型執行圖、以及相機影格/人物框之間，現在有一個 GraphRunner 橋樑。它會把相機影格交給原始 YOLOv8 的 CPU+DPU 子圖共同執行，再把三個輸出頭交給現有的人物框解碼器。
+- 此橋樑目前已通過 10 個電腦端合約測試；尚未能說已上板成功，因為現在 SD 卡沒有 DPU/Vitis AI GraphRunner runtime。完成相容 Linux image 並換 SD 後，才可做真正的相機→DPU→YOLOv8 人物辨識驗證。
+

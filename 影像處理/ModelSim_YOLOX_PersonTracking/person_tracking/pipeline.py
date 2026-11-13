@@ -94,12 +94,20 @@ class Detector:
             if not model.is_file() or model.suffix!='.xmodel':
                 raise FileNotFoundError(f'Compiled DPU .xmodel is required: {model}')
             self.model_sha256=hashlib.sha256(model.read_bytes()).hexdigest()
-            from yolov8_vart import VartYoloV8, standard_yolov8_decoder
-            decoder=None
-            if os.environ.get('PYNQ_VART_STANDARD_OUTPUT','').strip()=='1':
-                decoder=standard_yolov8_decoder(confidence_threshold=.3,nms_threshold=.45)
-            self.model=VartYoloV8.from_xmodel(model,confidence_threshold=.3,
-                                               nms_threshold=.45,decoder=decoder)
+            from yolov8_vart import GraphRunnerYoloV8, VartYoloV8, raw_yolov8_dfl_decoder, standard_yolov8_decoder
+            if os.environ.get('PYNQ_VART_GRAPH_RUNNER','').strip()=='1':
+                # The unchanged upstream YOLOv8n B512 graph has CPU + DPU
+                # partitions, so GraphRunner is the bridge rather than a
+                # hand-written replacement model or a single DPU runner.
+                self.model=GraphRunnerYoloV8.from_xmodel(
+                    model,confidence_threshold=.3,nms_threshold=.45,
+                    decoder=raw_yolov8_dfl_decoder(confidence_threshold=.3,nms_threshold=.45))
+            else:
+                decoder=None
+                if os.environ.get('PYNQ_VART_STANDARD_OUTPUT','').strip()=='1':
+                    decoder=standard_yolov8_decoder(confidence_threshold=.3,nms_threshold=.45)
+                self.model=VartYoloV8.from_xmodel(model,confidence_threshold=.3,
+                                                   nms_threshold=.45,decoder=decoder)
             cv2.setNumThreads(4)
             return
         model=self.model_path_for_backend(self.backend)

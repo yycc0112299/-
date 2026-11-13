@@ -137,6 +137,136 @@ def _tensor_name(tensor: Any, index: int) -> str:
     return str(name or f"output_{index}")
 
 
+def _buffer_tensor(buffer: Any) -> Any:
+    """Return the XIR tensor owned by a Vitis AI TensorBuffer."""
+    try:
+        return buffer.get_tensor()
+    except AttributeError as error:
+        raise TypeError("GraphRunner buffer does not expose get_tensor()") from error
+
+
+def _sync_buffer(buffer: Any, direction: str, values: np.ndarray) -> None:
+    """Synchronize a TensorBuffer across CPU/DPU memory when the API exposes it.
+
+    GraphRunner's Python bindings normally provide ``sync_for_write/read``.
+    The fallback keeps the adapter usable on host-only/fake buffer bindings that
+    already use CPU memory and do not expose explicit synchronization methods.
+    """
+    method = getattr(buffer, f"sync_for_{direction}", None)
+    if method is None:
+        return
+    try:
+        method(0, int(values.nbytes))
+    except TypeError:
+        method()
+
+
+def _quantized_yolov8_input(input_shape: tuple[int, ...], input_fix_point: int,
+                            frame: np.ndarray) -> np.ndarray:
+    """Letterbox one BGR camera frame into the signed INT8 YOLOv8 input."""
+    if frame.ndim != 3 or frame.shape[2] != 3:
+        raise ValueError(f"expected BGR HxWx3 frame, received {frame.shape}")
+    _, target_height, target_width, _ = input_shape
+    source_height, source_width = frame.shape[:2]
+    scale = min(target_width / source_width, target_height / source_height)
+    resized = cv2.resize(frame, (round(source_width * scale), round(source_height * scale)),
+                         interpolation=cv2.INTER_LINEAR)
+    canvas = np.full((target_height, target_width, 3), 114, dtype=np.uint8)
+    offset_x = (target_width - resized.shape[1]) // 2
+    offset_y = (target_height - resized.shape[0]) // 2
+    canvas[offset_y:offset_y + resized.shape[0], offset_x:offset_x + resized.shape[1]] = resized
+    rgb = cv2.cvtColor(canvas, cv2.COLOR_BGR2RGB)
+    scale_factor = float(2 ** input_fix_point) / 255.0
+    values = np.rint(rgb.astype(np.float32) * scale_factor)
+    return np.clip(values, -128, 127).astype(np.int8)[None, ...]
+
+
+class GraphRunnerYoloV8:
+    """Bridge the original multi-subgraph YOLOv8 xmodel to Vitis AI GraphRunner.
+
+    Unlike ``VartYoloV8``, this owns whole-graph TensorBuffers.  Therefore it
+    is the required path for the unchanged upstream SiLU YOLOv8n graph, whose
+    CPU operators and B512 DPU subgraphs must run in one ordered graph.
+    """
+
+    def __init__(self, runner: Any, input_buffers: list[Any], output_buffers: list[Any], *,
+                 confidence_threshold: float = .30, nms_threshold: float = .45,
+                 decoder: Decoder | None = None) -> None:
+        if len(input_buffers) != 1:
+            raise ValueError(f"YOLOv8 GraphRunner requires one input buffer, got {len(input_buffers)}")
+        if not output_buffers:
+            raise ValueError("YOLOv8 GraphRunner has no output buffers")
+        self.runner = runner
+        self.input_buffers = list(input_buffers)
+        self.output_buffers = list(output_buffers)
+        self.input_tensor = _buffer_tensor(self.input_buffers[0])
+        self.output_tensors = [_buffer_tensor(buffer) for buffer in self.output_buffers]
+        self.input_shape = tuple(int(value) for value in self.input_tensor.dims)
+        if len(self.input_shape) != 4 or self.input_shape[0] != 1 or self.input_shape[-1] != 3:
+            raise ValueError("GraphRunner YOLOv8 input must be batch-one NHWC RGB")
+        self.input_fix_point = _tensor_fix_point(self.input_tensor)
+        self.output_names = [_tensor_name(tensor, index)
+                             for index, tensor in enumerate(self.output_tensors)]
+        if len(set(self.output_names)) != len(self.output_names):
+            raise ValueError("GraphRunner output tensor names must be unique")
+        self.confidence_threshold = confidence_threshold
+        self.nms_threshold = nms_threshold
+        self.decoder = decoder
+
+    @classmethod
+    def from_graph_runner(cls, runner: Any, *, confidence_threshold: float = .30,
+                          nms_threshold: float = .45,
+                          decoder: Decoder | None = None) -> "GraphRunnerYoloV8":
+        return cls(runner, list(runner.get_inputs()), list(runner.get_outputs()),
+                   confidence_threshold=confidence_threshold, nms_threshold=nms_threshold,
+                   decoder=decoder)
+
+    @classmethod
+    def from_xmodel(cls, xmodel: str | Path, *, confidence_threshold: float = .30,
+                    nms_threshold: float = .45, decoder: Decoder | None = None) -> "GraphRunnerYoloV8":
+        path = Path(xmodel)
+        if not path.is_file() or path.suffix != ".xmodel":
+            raise FileNotFoundError(f"compiled .xmodel is required: {path}")
+        try:
+            import vitis_ai_library
+            import xir
+        except ImportError as error:
+            raise RuntimeError("XIR and vitis_ai_library.GraphRunner are required for YOLOv8 DPU execution") from error
+        graph = xir.Graph.deserialize(str(path))
+        try:
+            runner = vitis_ai_library.GraphRunner.create_graph_runner(graph)
+        except AttributeError as error:
+            raise RuntimeError("vitis_ai_library.GraphRunner is required for this multi-subgraph YOLOv8 xmodel") from error
+        return cls.from_graph_runner(runner, confidence_threshold=confidence_threshold,
+                                     nms_threshold=nms_threshold, decoder=decoder)
+
+    def infer_tensors(self, frame: np.ndarray) -> dict[str, np.ndarray]:
+        input_data = _quantized_yolov8_input(self.input_shape, self.input_fix_point, frame)
+        input_view = np.asarray(self.input_buffers[0])
+        if input_view.shape != input_data.shape:
+            raise RuntimeError(f"GraphRunner input buffer shape {input_view.shape} does not match {input_data.shape}")
+        if not np.issubdtype(input_view.dtype, np.signedinteger):
+            raise RuntimeError(f"GraphRunner YOLOv8 input must be signed INT8, got {input_view.dtype}")
+        input_view[...] = input_data
+        _sync_buffer(self.input_buffers[0], "write", input_view)
+        job_id = self.runner.execute_async(self.input_buffers, self.output_buffers)
+        status = self.runner.wait(job_id)
+        if status not in (0, None):
+            raise RuntimeError(f"GraphRunner job {job_id} failed with status {status}")
+        values: dict[str, np.ndarray] = {}
+        for name, buffer, tensor in zip(self.output_names, self.output_buffers, self.output_tensors):
+            raw = np.asarray(buffer)
+            _sync_buffer(buffer, "read", raw)
+            values[name] = raw.astype(np.float32, copy=True) / float(2 ** _tensor_fix_point(tensor))
+        return values
+
+    def infer(self, frame: np.ndarray) -> list[dict[str, object]]:
+        if self.decoder is None:
+            raise RuntimeError("no model-specific GraphRunner decoder is registered")
+        height, width = frame.shape[:2]
+        return self.decoder(self.infer_tensors(frame), width, height)
+
+
 class VartYoloV8:
     """Run one compiled B512 DPU graph and expose its real output tensors.
 
@@ -206,21 +336,7 @@ class VartYoloV8:
                    decoder=decoder)
 
     def _quantized_input(self, frame: np.ndarray) -> np.ndarray:
-        if frame.ndim != 3 or frame.shape[2] != 3:
-            raise ValueError(f"expected BGR HxWx3 frame, received {frame.shape}")
-        _, target_height, target_width, _ = self.input_shape
-        source_height, source_width = frame.shape[:2]
-        scale = min(target_width / source_width, target_height / source_height)
-        resized = cv2.resize(frame, (round(source_width * scale), round(source_height * scale)),
-                             interpolation=cv2.INTER_LINEAR)
-        canvas = np.full((target_height, target_width, 3), 114, dtype=np.uint8)
-        offset_x = (target_width - resized.shape[1]) // 2
-        offset_y = (target_height - resized.shape[0]) // 2
-        canvas[offset_y:offset_y + resized.shape[0], offset_x:offset_x + resized.shape[1]] = resized
-        rgb = cv2.cvtColor(canvas, cv2.COLOR_BGR2RGB)
-        scale_factor = float(2 ** self.input_fix_point) / 255.0
-        values = np.rint(rgb.astype(np.float32) * scale_factor)
-        return np.clip(values, -128, 127).astype(np.int8)[None, ...]
+        return _quantized_yolov8_input(self.input_shape, self.input_fix_point, frame)
 
     def infer_tensors(self, frame: np.ndarray) -> dict[str, np.ndarray]:
         """Run VART and return outputs converted from their fixed-point form."""

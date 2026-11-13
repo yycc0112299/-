@@ -842,3 +842,10 @@
 - 實際完成：runtime gate now requires Python `vitis_ai_library.GraphRunner`, and Linux tests are 14/14 PASS. Read-only SSH inspection of the current PYNQ board found four UVC video nodes but no DPU node or VART/XIR/GraphRunner Python modules.
 - 驗證界線：this is negative runtime evidence for the present PYNQ 2024.1 SD image, not a PetaLinux 2022.1 target deployment. Changes remain local/unpushed pending the next larger batch.
 
+## 2026-11-13 — Implemented the upstream YOLOv8 GraphRunner-to-DPU bridge
+
+- 需求／決策：使用者澄清 DPU 應是接上既有 YOLOv8 的橋樑，而不是把 YOLOv8 重做為 Verilog 或換成自行訓練模型。維持 official pretrained Ultralytics YOLOv8n 與已產生的 B512 xmodel 為唯一部署基線。
+- 實際完成：新增 `GraphRunnerYoloV8`，以 Vitis AI Python GraphRunner 的 complete XIR graph/TensorBuffer API 執行 upstream SiLU YOLOv8 的 CPU+DPU partitions；實作 input/output synchronization、INT8 camera pre-process、fixed-point output conversion，並在 selected `yolov8_vart` backend 綁定 raw DFL decoder。更新 README 以區分 whole-graph GraphRunner 和 legacy single-DPU VART runner。新增 fake TensorBuffer test；bridge/unit suite 10/10 PASS。
+- 驗證範圍和未完成：僅 host-side contract tests；目前 PYNQ 2024.1 SD 沒有 DPU/VART/XIR/GraphRunner，未執行 target GraphRunner、真實人像辨識、兩鏡頭或 Wi-Fi。仍需 matching Linux image/SD 後做完整 camera→DPU→YOLOv8 verification。
+- Git／同步：本項 source、tests 和三份進度文件待本次完整 regression 後一併提交與推送至 `main`；外部 `.pt`/`.xmodel`/build logs 不納入 Git。
+

@@ -834,5 +834,6 @@
 
 - 含 DPU driver、VART、XIR、Vitis AI Library 的 PetaLinux 2022.1 映像已完整建置成功。
 - 已產生 `BOOT.BIN` 和約 6.1 GB 的 SD 映像；並確認其開機分割區真的有 `BOOT.BIN`、`image.ub`、`boot.scr`。
+- 映像內也有 Python 的 GraphRunner bridge；尚待上板實際 import。
 - 還沒有寫入實體 SD 卡，也還沒有讓板子用此映像開機。因此 DPU、YOLOv8、相機的實機成功尚未宣稱完成。
 

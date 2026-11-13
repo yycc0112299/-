@@ -909,6 +909,7 @@
 
 - 需求／決策：完成不需使用者實體操作的 DPU Linux artifact，SD 卡寫入與 SD boot 仍保留為人工確認步驟。
 - 實際完成：PetaLinux 2022.1 runtime build completed 6,355 tasks with all succeeded. Rootfs inspection confirms VART, XIR, `xdputil` and Vitis AI Library. Device tree contains DPU 4.0 and the actual kernel build config contains built-in `CONFIG_XILINX_DPU=y`. `BOOT.BIN` and `petalinux-sdimage.wic` were generated externally; the 6.1 GiB WIC image was read-only checked for a FAT32 boot partition, ext4 rootfs partition, and the required boot files (`BOOT.BIN`, `image.ub`, `boot.scr`).
+- 補充驗證：rootfs contains ARM64 Python 3.9 `vitis_ai_library.so`, `vart.so`, and `xir.so`; the GraphRunner binding binary contains `GraphRunner` and `create_graph_runner` symbols. This is still image-content evidence, not a board-side import.
 - 驗證範圍／未完成：this proves artifact composition, not physical SD writing, target boot, `/dev/dpu`, VART/XIR/GraphRunner target imports, camera-to-YOLOv8 inference or two-board Wi-Fi. The existing PYNQ 2024.1 card remains unchanged. External WIC/rootfs/build logs are intentionally not committed.
 - Git／同步：本次三份 progress documents will be committed and pushed to `main`; only the local `petalinux_installation_log` remains untracked because it is a temporary installation log.
 

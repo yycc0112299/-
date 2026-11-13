@@ -22,6 +22,7 @@ ROOTFS_PACKAGES = (
     "CONFIG_target-factory",
     "CONFIG_vitis-ai-library",
 )
+RUNTIME_PACKAGE_NAMES = tuple(package.removeprefix("CONFIG_") for package in ROOTFS_PACKAGES)
 
 
 def _require_file(path: Path, description: str) -> None:
@@ -60,10 +61,30 @@ def _validate_reference(meta_user: Path) -> None:
 def _append_rootfs_packages(rootfs_config: Path) -> None:
     current = rootfs_config.read_text(encoding="utf-8") if rootfs_config.exists() else ""
     lines = current.splitlines()
+    normalized = []
+    for line in lines:
+        if line.endswith("=y") and line[:-2] in ROOTFS_PACKAGES:
+            line = line[:-2]
+        if line not in normalized:
+            normalized.append(line)
+    lines = normalized
     existing = set(lines)
-    lines.extend(package for package in ROOTFS_PACKAGES if package not in existing)
+    for package in ROOTFS_PACKAGES:
+        if package not in existing:
+            lines.append(package)
+            existing.add(package)
     rootfs_config.parent.mkdir(parents=True, exist_ok=True)
     rootfs_config.write_text("\n".join(lines).rstrip() + "\n", encoding="utf-8")
+
+
+def _install_runtime_packages(meta_user: Path) -> None:
+    """Make silent PetaLinux image builds include the staged Vitis AI packages."""
+    image_dir = meta_user / "recipes-core" / "images"
+    image_dir.mkdir(parents=True, exist_ok=True)
+    packages = " ".join(RUNTIME_PACKAGE_NAMES)
+    (image_dir / "petalinux-image-minimal.bbappend").write_text(
+        f'IMAGE_INSTALL:append = " {packages}"\n', encoding="utf-8"
+    )
 
 
 def _enable_vitis_ai_library_python(meta_user: Path) -> None:
@@ -92,6 +113,7 @@ def stage_reference(project: Path, official_meta_user: Path) -> dict[str, object
         )
     _enable_vitis_ai_library_python(target_meta_user)
     _append_rootfs_packages(target_meta_user / "conf" / "user-rootfsconfig")
+    _install_runtime_packages(target_meta_user)
 
     manifest: dict[str, object] = {
         "dpu_ip_version": "4.0",

@@ -824,3 +824,9 @@
 - DPU B512 bitstream 已載入 FPGA，Vivado 回報啟動成功。
 - 這是暫時配置，關機或切回 SD 就會消失；尚未證明 Linux、相機或 YOLOv8 推論，仍需建立相容 SD image。
 
+## 2026-11-13：Vitis 交接完成，正在重建含 DPU runtime 的 Linux image
+
+- Vivado 2022.1 產生的 DPU 硬體檔已成功交給 Vitis 2022.1，platform 檔已實際產生。
+- PetaLinux 已成功建過一次最小 Linux image，也確認 device tree 內有 DPU；但第一次 image 尚未含 VART/XIR 等 YOLOv8 所需 runtime。
+- 已修正 image 套件納入方式，新的重建正在背景進行。完成後仍要由使用者實體確認 SD 卡、切回 SD 開機，才能驗證真正的相機→DPU→YOLOv8。
+

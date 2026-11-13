@@ -898,3 +898,10 @@
 - 驗證範圍／未完成：this proves volatile FPGA configuration download only. It did not write SD/QSPI nor prove PS software, DPU device node/driver, VART/XIR/GraphRunner, YOLOv8, UVC cameras, tracking or Wi-Fi. The USB-video ELF is intentionally not run because it does not match this DPU address map.
 - Git／同步：this hardware verification and progress docs will be committed/pushed; external bitstream, XSA, tool logs and hardware identifiers are excluded.
 
+## 2026-11-13 — Built the Vitis 2022.1 platform and corrected the PetaLinux DPU-runtime image composition
+
+- 需求／決策：在使用者不在電腦前時持續可自動執行的工作；保留需要使用者實體確認的 SD 寫入、SD boot 與後續 Wi-Fi/第二板測試為待辦。
+- 實際完成：實跑 Vitis 2022.1 XSCT，從同一份 DPU B512 XSA 產生 external XPFM platform。External PetaLinux project 的 first minimal build completed 4,345 tasks，device tree 也確認含 exact DPU 4.0 node。發現 first image 不會因 `user-rootfsconfig` 的 package declaration 自動帶入 VART/XIR；新增 tested staging logic，以 image bbappend 的 `IMAGE_INSTALL:append` 強制帶入 VART、XIR、unilog、target-factory、vitis-ai-library，並將過去錯誤的 `=y` declaration 正規化。rootfs silentconfig 與 staging tests 3/3 PASS。
+- 驗證範圍和未完成：新的 runtime image rebuild 已在 external WSL background job 啟動，尚未完成時不宣稱 VART/GraphRunner package 或 board import 成功。尚未寫入 SD、切 SD boot、boot target、run `/dev/dpu`、camera→YOLOv8，亦未設定 Wi-Fi credentials 或測第二板。
+- Git／同步：程式、tests 和三份進度文件將在 runtime rebuild 結束並完成 regression 後一併提交並推送 `main`。`petalinux_installation_log` 是本機暫存安裝記錄，刻意不納入 Git；外部 XSA/XPFM/image/bitstream/logs 也不追蹤。
+

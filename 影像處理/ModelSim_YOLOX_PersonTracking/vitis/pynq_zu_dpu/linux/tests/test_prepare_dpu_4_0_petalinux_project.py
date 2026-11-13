@@ -51,7 +51,7 @@ class PrepareDpu40PetaLinuxProjectTests(unittest.TestCase):
             project = root / "project"
             rootfs = project / "project-spec" / "meta-user" / "conf" / "user-rootfsconfig"
             rootfs.parent.mkdir(parents=True)
-            rootfs.write_text("CONFIG_existing_package\n", encoding="utf-8")
+            rootfs.write_text("CONFIG_existing_package\nCONFIG_vart=y\n", encoding="utf-8")
 
             manifest = module.stage_reference(project, official)
 
@@ -78,6 +78,16 @@ class PrepareDpu40PetaLinuxProjectTests(unittest.TestCase):
             self.assertIn("CONFIG_existing_package", rootfs_text)
             self.assertIn("CONFIG_vart", rootfs_text)
             self.assertIn("CONFIG_xir", rootfs_text)
+            self.assertNotIn("CONFIG_vart=y", rootfs_text)
+            image_append = (
+                target_meta_user / "recipes-core" / "images" /
+                "petalinux-image-minimal.bbappend"
+            )
+            self.assertTrue(image_append.is_file())
+            self.assertEqual(
+                image_append.read_text(encoding="utf-8"),
+                'IMAGE_INSTALL:append = " vart xir unilog target-factory vitis-ai-library"\n',
+            )
             self.assertEqual(manifest["dpu_ip_version"], "4.0")
 
     def test_rejects_reference_without_exact_dpu_driver_contract(self) -> None:

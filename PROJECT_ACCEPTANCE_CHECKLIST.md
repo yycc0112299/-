@@ -19,6 +19,7 @@
 | 兩板程式 | TCP metadata protocol／Wi-Fi preflight／重試 | PASS（主機測試） | 封包、預檢與重試測試通過；未宣稱實體 Wi-Fi 已完成。 |
 | 兩板程式 | DPU-only deployment bundle | PASS（主機測試） | bundle 內含 DPU sender、GraphRunner、Wi-Fi/TCP，且不含 CPU ONNX。 |
 | 跨鏡頭程式 | 外觀特徵封包與保守候選關聯 | PASS（主機／封裝測試） | 2×15 特徵、confirmed gate、TCP 接收、候選服務、rootfs staging／DPU bundle tests 都通過；待新 WIC／實機。 |
+| 兩板模擬 | 兩個獨立 fusion process 的雙向 TCP 候選關聯 | PASS（loopback） | `simulate_two_pynq_cross_camera.py` 會啟動兩個 listener、雙向送出多次 confirmed metadata，兩端皆產生 `confirmed_candidate`；非 Wi-Fi、相機、DPU 或身份辨識證明。 |
 | 兩板實機 | 各一支鏡頭、Wi-Fi 雙向資料交換 | BLOCKED | 需要第二塊板、各自鏡頭、授權 Wi-Fi 與實際 IP。 |
 | 兩板實機 | 跨鏡頭人物候選追蹤 | BLOCKED | 前一列完成後，用跨鏡頭候選服務驗收；不會把衣物外觀候選稱為身份辨識。 |
 

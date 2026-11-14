@@ -1095,3 +1095,10 @@
 - 驗證範圍／未完成：QEMU imports are not `/dev/dpu`, real GraphRunner execution, UVC capture, SD boot/UART, Wi-Fi or second-board evidence. No physical media or board was modified.
 - Git／同步：committed and pushed to `main` as `4f5dac9` (`Verify final rootfs imports under QEMU`).
 
+## 2026-11-14 — Rehearsed the future second-board metadata plane on one host
+
+- 需求／決策：while the SD card and physical second PYNQ remain unavailable, simulate the future second board using isolated processes instead of claiming that one board can be physical evidence for two.
+- 實際完成：added `simulate_two_pynq_cross_camera.py`, which launches two independent production fusion listeners with distinct board IDs/ports/local files, exchanges confirmed metadata through actual TCP loopback, and requires both candidate outputs to become `confirmed_candidate`. Added a test-first end-to-end regression; it failed before the runner existed and now passes. Repeated execution exposed a real Windows atomic JSON replacement/read race; the consumer now retries that transient lock and waits for every expected remote-hit count, with ten consecutive runs passing. Also added the non-destructive UART boot-evidence helper for the next SD session.
+- 驗證範圍／未完成：this proves host process separation, production packet framing and conservative candidate confirmation only. It does not prove SD boot, PYNQ DPU/camera execution, Wi-Fi association, two physical boards, or cross-camera identity.
+- Git／同步：this change is committed and pushed to `main`; no generated simulation output, WIC/model asset or `petalinux_installation_log` is included.
+

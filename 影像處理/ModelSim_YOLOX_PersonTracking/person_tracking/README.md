@@ -152,6 +152,24 @@ that its peer TCP port is reachable. The currently tested PYNQ has `wlan0` but
 it is down and unconfigured, so this check correctly fails until an authorized
 Wi-Fi network/topology is configured.
 
+### Host-only two-board rehearsal
+
+Before a second board or an authorized Wi-Fi network is available, the exact
+fusion listener and TCP framing can be rehearsed as two independent local
+processes. This produces synthetic **confirmed** metadata only; it does not
+open a camera, invoke the DPU, join Wi-Fi, or identify a real person.
+
+```sh
+python3 person_tracking/simulate_two_pynq_cross_camera.py \
+  --output-dir /tmp/pynq-two-board-loopback --min-hits 3
+```
+
+`TWO_PYNQ_LOOPBACK_SIMULATION_PASS` means that each simulated board received
+the peer's TCP packets and emitted a `confirmed_candidate` after the required
+number of independent remote arrivals. The directory retains each board's
+local packet, candidate JSON and service log for inspection. It is a
+pre-deployment regression, not proof of physical Wi-Fi or two-board hardware.
+
 ### Full-duplex two-board startup
 
 For the intended one-camera-per-board deployment, each board runs both a

@@ -1116,3 +1116,10 @@
 - 驗證範圍／未完成：no target login or command was attempted because the preceding COM5 probe has no login prompt. This does not prove SD boot, DPU, camera, YOLOv8, Wi-Fi or a second board.
 - Git／同步：this harness, tests and progress record are committed and pushed to `main`; no password, UART capture, WIC/model asset or `petalinux_installation_log` is included.
 
+## 2026-11-14 — Isolated current SD/UART no-output to a pre-runtime hardware state
+
+- 需求／決策：distinguish a missing host cable/incorrect software workflow from the physical state that must exist before SD Linux/DPU acceptance can begin.
+- 實際完成：ran the existing read-only Vivado 2022.1 JTAG scan. It discovers the FTDI target, `xczu5_0` and ARM DAP; boot-mode bits read `0011`. Vivado reports PL Power Status OFF, cannot connect the PL TAP, with PL configuration/EOS/DONE all zero. It sent no program/reset/cfgmem/PS action.
+- 驗證範圍／未完成：this localizes the current observation to a board state prior to usable PL/Linux runtime but does not identify whether power, reset, SD media or early boot is the physical root cause. No SD boot, UART login, DPU, UVC, YOLOv8 or Wi-Fi claim is made.
+- Git／同步：this hardware-evidence record is committed and pushed to `main`; no board log, secret, WIC/model asset or `petalinux_installation_log` is included.
+

@@ -1181,3 +1181,9 @@
 - It sends the installed target `verify_dpu_runtime.py --xmodel /opt/models/yolov8n_b512.xmodel --require-camera` first and checks both the runtime PASS marker and shell return code. Only `--run-camera`, and only after that gate, sends the target three-frame original GraphRunner YOLOv8 invocation. Login/runtime/camera failure returns a distinct host exit status and cannot silently advance to the next stage.
 - Test-first evidence: the harness contract test first failed while the tool was absent; it now passes with the Linux helper suite 36/36 and `compileall`. This is host-side state-machine evidence only; `COM5` still has no observed login prompt, so it has not sent credentials or commands to the board.
 
+### 2026-11-14：read-only JTAG scan 縮小目前 SD/UART 無輸出的硬體範圍
+
+- Ran the already test-protected `fpga/scan_pynq_zu_jtag.tcl` under Vivado 2022.1. It only opens/scans/closes Hardware Manager; it contains no programming, reset, cfgmem or PS action. The FTDI target `localhost:3121/xilinx_tcf/Xilinx/1234-tulA` exposes `xczu5_0` and `arm_dap_1`, so host cable/target discovery is present.
+- Authoritative scan state is materially different from the earlier JTAG-programmed state: Vivado reports `xczu5_0 PL Power Status OFF, cannot connect PL TAP`; `REGISTER.JTAG_STATUS.BIT14_BOOT_MODE` is `0011`, while PL power status is `0`, and `REGISTER.CONFIG_STATUS`/EOS/DONE are all zero. This is consistent with the simultaneous COM5 zero-byte observation and rules out treating the board as a working SD Linux/DPU runtime.
+- Verification boundary: this does not prove the root cause (power/reset/boot-media/early boot remain separate physical hypotheses), and did not change any board state. The next physical evidence must be a power/reset cycle yielding a UART boot log or a successful target Linux connection; do not program the PL while the scan reports it powered off.
+

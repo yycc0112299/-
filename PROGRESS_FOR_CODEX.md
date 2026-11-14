@@ -1170,3 +1170,8 @@
 - Full host regression after the race fix: tracking 46/46, Linux/PetaLinux helpers 34/34, Vitis platform 1/1, live-site/bundle 6/6 and FPGA contracts 17/17 PASS; both new scripts compile and the controlled SD writer parses in Windows PowerShell.
 - Verification boundary: loopback proves the future second-board metadata path's process separation, TCP framing and conservative confirmation on the host. It does not prove a PYNQ SD boot, DPU/camera inference, `wlan0`, authorized Wi-Fi, a physical second board, or cross-camera identity.
 
+### 2026-11-14：目前 SD switch 狀態的 UART 採證仍未取得開機資料
+
+- Windows still exposes the PYNQ FTDI UART as `COM5`. Ran the new `probe_pynq_zu_serial_boot.py --port COM5 --baud 115200 --timeout 8 --wake`; the explicit, non-authenticating single carriage return received `UART_NO_OUTPUT` with zero bytes.
+- This is not evidence that SD boot succeeded or failed at a specific boot stage: it only proves that no serial response was observable through this port/configuration during that bounded probe. The final acceptance WIC has not been proven written to the card, and target-side DPU/UVC/YOLOv8 gates remain blocked.
+

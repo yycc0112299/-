@@ -1102,3 +1102,10 @@
 - 驗證範圍／未完成：this proves host process separation, production packet framing and conservative candidate confirmation only. It does not prove SD boot, PYNQ DPU/camera execution, Wi-Fi association, two physical boards, or cross-camera identity.
 - Git／同步：功能、測試、文件已作為 `ad3b8db`（`Simulate two-board cross-camera exchange`）提交並推送至 `main`；no generated simulation output, WIC/model asset or `petalinux_installation_log` is included.
 
+## 2026-11-14 — Captured current SD-mode UART evidence without board mutation
+
+- 需求／決策：the board was reported switched to SD mode, so establish an observable boot fact before treating it as ready for DPU/camera testing.
+- 實際完成：Windows reports the existing FTDI UART as `COM5`. Ran the new receive-only boot probe at 115200 baud for eight seconds with its explicit one-carriage-return wake option; it returned `UART_NO_OUTPUT` and zero bytes. No credential, Linux command, reset, SD write or board configuration action was sent.
+- 驗證範圍／未完成：the result does not localize a boot failure; it only shows no response on the selected serial path during this bounded observation. Final-WIC write/boot, target DPU, UVC, YOLOv8 and physical Wi-Fi remain unproven.
+- Git／同步：this hardware-evidence record is committed and pushed to `main`; no serial capture, credential, WIC/model asset or `petalinux_installation_log` is included.
+

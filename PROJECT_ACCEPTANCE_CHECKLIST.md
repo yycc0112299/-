@@ -13,6 +13,7 @@
 | SD | 修正版映像寫入 SD | BLOCKED | 仍需把 SD 卡插回這台電腦；寫入工具已鎖定 final acceptance WIC 與 SHA-256。 |
 | 單板 Linux | SD 開機與 UART 登入 | PASS（舊映像）／BLOCKED（現況） | 舊映像曾到 `pynqzudpu20221` UART login；2026-11-14 現況 COM5/115200 在送 Enter 後 8 秒仍為 0 bytes，尚不能證明目前 SD boot 或修正版映像。 |
 | 單板 Linux | final rootfs AArch64 Python imports | PASS（QEMU） | QEMU 實跑 final rootfs：NumPy、OpenCV、VART、XIR 與部署程式 imports PASS；不含 `/dev/dpu`／相機證明。 |
+| 單板 bring-up | UART 的有序 runtime／相機 acceptance harness | PASS（主機測試） | `run_pynq_zu_sd_acceptance.py` 強制先通過 DPU/Linux gate 才可選擇三影格相機 gate；密碼只讀取當次環境變數並從可選 transcript 遮蔽。尚未對板執行。 |
 | 單板 DPU | NumPy/OpenCV/VART/XIR/GraphRunner 實際 import | BLOCKED | 修正版 SD 開機後跑 `verify_dpu_runtime.py`；舊映像因缺 Python `json` 未通過。 |
 | 單板鏡頭 | UVC/V4L2 讀取一支 USB 鏡頭 | BLOCKED | 修正版 SD 開機且接上鏡頭後確認 `/dev/video*`、讀取影格。 |
 | 單板 YOLOv8 | GraphRunner → DPU → YOLOv8 人物偵測＋Tracker | BLOCKED | 修正版 SD 開機後執行 `pynq_yolov8_dpu_inference.py --frames 3`。 |

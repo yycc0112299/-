@@ -257,3 +257,30 @@ Before running it, close every `D:`/PYNQ File Explorer window and choose
 **Do not scan and continue** for any Windows repair prompt. If the lock fails,
 the tool stops before opening `PhysicalDriveN` for writing; do not bypass that
 failure or use `diskpart` to guess at another disk.
+
+## Ordered SD boot acceptance through UART
+
+Once the card containing the final WIC has booted far enough to display a
+Linux `login:` prompt, use `run_pynq_zu_sd_acceptance.py` from the Windows
+host. It first runs the installed `verify_dpu_runtime.py` gate with the
+compiled model and a required V4L2 node. Only after that command returns its
+PASS marker can the optional `--run-camera` path submit three UVC frames to the
+original YOLOv8 GraphRunner model.
+
+The target password is deliberately supplied only in an environment variable
+for this invocation; do not place it in a command line, a repository file, or
+a transcript. Replace only the target account placeholder:
+
+```powershell
+$env:PYNQ_ZU_UART_PASSWORD = '<enter only in this local PowerShell session>'
+python .\run_pynq_zu_sd_acceptance.py `
+  --port COM5 --username <target-linux-user> `
+  --password-env PYNQ_ZU_UART_PASSWORD --run-camera `
+  --output .\pynq-zu-uart-acceptance-redacted.log
+Remove-Item Env:PYNQ_ZU_UART_PASSWORD
+```
+
+The optional output contains a redacted serial transcript. A login failure or
+runtime-gate failure stops before camera inference. This host helper cannot
+turn an absent UART response into a successful boot and is not a substitute
+for the controlled SD writer.

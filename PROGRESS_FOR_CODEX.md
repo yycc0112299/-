@@ -1175,3 +1175,9 @@
 - Windows still exposes the PYNQ FTDI UART as `COM5`. Ran the new `probe_pynq_zu_serial_boot.py --port COM5 --baud 115200 --timeout 8 --wake`; the explicit, non-authenticating single carriage return received `UART_NO_OUTPUT` with zero bytes.
 - This is not evidence that SD boot succeeded or failed at a specific boot stage: it only proves that no serial response was observable through this port/configuration during that bounded probe. The final acceptance WIC has not been proven written to the card, and target-side DPU/UVC/YOLOv8 gates remain blocked.
 
+### 2026-11-14：SD 開機後的 UART 有序驗收已自動化（未對板執行）
+
+- Added `linux/run_pynq_zu_sd_acceptance.py`, a Windows-host UART state machine for the next successful `login:` prompt. It requires explicit port, username and password-environment-variable name; no password is accepted on its command line or stored in source. Its optional transcript applies literal password redaction before writing.
+- It sends the installed target `verify_dpu_runtime.py --xmodel /opt/models/yolov8n_b512.xmodel --require-camera` first and checks both the runtime PASS marker and shell return code. Only `--run-camera`, and only after that gate, sends the target three-frame original GraphRunner YOLOv8 invocation. Login/runtime/camera failure returns a distinct host exit status and cannot silently advance to the next stage.
+- Test-first evidence: the harness contract test first failed while the tool was absent; it now passes with the Linux helper suite 36/36 and `compileall`. This is host-side state-machine evidence only; `COM5` still has no observed login prompt, so it has not sent credentials or commands to the board.
+

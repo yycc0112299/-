@@ -1109,3 +1109,10 @@
 - 驗證範圍／未完成：the result does not localize a boot failure; it only shows no response on the selected serial path during this bounded observation. Final-WIC write/boot, target DPU, UVC, YOLOv8 and physical Wi-Fi remain unproven.
 - Git／同步：this hardware-evidence record is committed and pushed to `main`; no serial capture, credential, WIC/model asset or `petalinux_installation_log` is included.
 
+## 2026-11-14 — Automated the next authenticated UART acceptance order
+
+- 需求／決策：prepare the exact one-board DPU/camera validation for the first future login prompt, without storing or transmitting a password in repository artifacts.
+- 實際完成：added host-side `run_pynq_zu_sd_acceptance.py`. It requires explicit serial port, target username and the *name* of a one-time password environment variable. It redacts that password from any optional transcript, runs the target DPU/Linux runtime gate first, and only runs three YOLOv8/GraphRunner camera frames when the runtime pass marker and return code both succeed. Test-first contract and the Linux helper suite pass.
+- 驗證範圍／未完成：no target login or command was attempted because the preceding COM5 probe has no login prompt. This does not prove SD boot, DPU, camera, YOLOv8, Wi-Fi or a second board.
+- Git／同步：this harness, tests and progress record are committed and pushed to `main`; no password, UART capture, WIC/model asset or `petalinux_installation_log` is included.
+

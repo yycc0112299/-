@@ -11,7 +11,7 @@
 | PetaLinux | 2022.1 DPU Linux、VART/XIR、模型與 UVC | READY | final WIC 含 DPU runtime、模型、追蹤程式、Python modules、fusion runtime 與 board acceptance gate；rootfs pre-flash gate PASS。 |
 | 下一版 PetaLinux | 兩板 fusion runtime source staging | PASS（映像內容） | final 6,385-task rebuild PASS；WIC 已匯出並以 SHA-256 核對，尚未寫入 SD。 |
 | SD | 修正版映像寫入 SD | BLOCKED | 仍需把 SD 卡插回這台電腦；寫入工具已鎖定 final acceptance WIC 與 SHA-256。 |
-| 單板 Linux | SD 開機與 UART 登入 | PASS（舊映像）／BLOCKED（現況） | 舊映像曾到 `pynqzudpu20221` UART login；2026-11-14 現況 COM5/115200 在送 Enter 後 8 秒仍為 0 bytes。read-only Vivado scan sees `xczu5_0`/ARM DAP and SD-mode bits `0011`, but reports PL Power Status OFF and no PL configuration/EOS, so尚不能證明目前 SD boot 或修正版映像。 |
+| 單板 Linux | SD 開機與 UART 登入 | PASS（舊映像）／BLOCKED（現況） | 舊映像曾到 `pynqzudpu20221` UART login；2026-11-14 連續兩次 COM5/115200 probe（8 秒、5 秒；均送 Enter）仍為 0 bytes。兩次 read-only Vivado scan 均見 `xczu5_0`/ARM DAP 和 boot bits `0011`，但均報 PL Power Status OFF、無 PL configuration/EOS；需實體重新上電/Reset 或重寫 SD 後才能再驗。 |
 | 單板 Linux | final rootfs AArch64 Python imports | PASS（QEMU） | QEMU 實跑 final rootfs：NumPy、OpenCV、VART、XIR 與部署程式 imports PASS；不含 `/dev/dpu`／相機證明。 |
 | 單板 bring-up | UART 的有序 runtime／相機 acceptance harness | PASS（主機測試） | `run_pynq_zu_sd_acceptance.py` 強制先通過 DPU/Linux gate 才可選擇三影格相機 gate；密碼只讀取當次環境變數並從可選 transcript 遮蔽。尚未對板執行。 |
 | 單板 DPU | NumPy/OpenCV/VART/XIR/GraphRunner 實際 import | BLOCKED | 修正版 SD 開機後跑 `verify_dpu_runtime.py`；舊映像因缺 Python `json` 未通過。 |

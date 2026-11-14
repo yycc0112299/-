@@ -1123,3 +1123,10 @@
 - 驗證範圍／未完成：this localizes the current observation to a board state prior to usable PL/Linux runtime but does not identify whether power, reset, SD media or early boot is the physical root cause. No SD boot, UART login, DPU, UVC, YOLOv8 or Wi-Fi claim is made.
 - Git／同步：this hardware-evidence record is committed and pushed to `main`; no board log, secret, WIC/model asset or `petalinux_installation_log` is included.
 
+## 2026-11-14 — Revalidated unchanged SD-mode pre-runtime hardware blocker
+
+- 需求／決策：perform one final non-mutating recheck before concluding that remaining progress requires a physical board-state change rather than more host code.
+- 實際完成：the COM5 115200/5-second wake probe again returned zero bytes. The read-only Vivado scan again discovered `xczu5_0`/ARM DAP and boot bits `0011`, and again reported PL Power Status OFF. No program, reset, SD write, target command, credential or network action occurred.
+- 驗證範圍／未完成：this repeats the same pre-runtime observation and cannot identify the physical cause. It establishes that a real power/reset/boot-media change is required before SD Linux, DPU, UVC, YOLOv8 or Wi-Fi acceptance can continue.
+- Git／同步：this evidence record is committed and pushed to `main`; no serial capture, secret, WIC/model asset or `petalinux_installation_log` is included.
+

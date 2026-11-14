@@ -1187,3 +1187,8 @@
 - Authoritative scan state is materially different from the earlier JTAG-programmed state: Vivado reports `xczu5_0 PL Power Status OFF, cannot connect PL TAP`; `REGISTER.JTAG_STATUS.BIT14_BOOT_MODE` is `0011`, while PL power status is `0`, and `REGISTER.CONFIG_STATUS`/EOS/DONE are all zero. This is consistent with the simultaneous COM5 zero-byte observation and rules out treating the board as a working SD Linux/DPU runtime.
 - Verification boundary: this does not prove the root cause (power/reset/boot-media/early boot remain separate physical hypotheses), and did not change any board state. The next physical evidence must be a power/reset cycle yielding a UART boot log or a successful target Linux connection; do not program the PL while the scan reports it powered off.
 
+### 2026-11-14：同一 SD boot 前硬體狀態已重複驗證，專題等待實體變更
+
+- A final read-only resample used `probe_pynq_zu_serial_boot.py --port COM5 --baud 115200 --timeout 5 --wake` and the same non-mutating Vivado scan. COM5 again returned `UART_NO_OUTPUT`/0 bytes. Vivado again saw the FTDI target, `xczu5_0`, ARM DAP and boot bits `0011`, but again emitted `PL Power Status OFF`.
+- This is the third consecutive turn in which the same physical prerequisite prevented progress: after the earlier 8-second UART probe, the first Vivado diagnosis, and this repeat. No additional source build/test can turn this chip state into SD Linux. Further work requires a real board power/reset/boot-media change; when it appears, rerun the existing UART probe/harness before any programming action.
+
